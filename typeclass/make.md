@@ -17,10 +17,10 @@
 
 ## 1 Introduction
 
-  Strachey chose the adjectives ad-hoc and parametric to distinguish two varieties of polymorphism [Str67].
+  Strachey chose the adjectives ad-hoc and parametric to distinguish two varieties of polymorphism <a name="r_Str67"></a>[\[Str67\]](#Str67).
   Ad-hoc polymorphism occurs when a function is defined Over several different types, acting in a different way for each type.
   A typical example is overloaded multiplication:
-  the same symbol may be used to denote multiplication of integers (as in 3\*3) and multiplication of floating point values (as in 3.14\*3.14).
+  the same symbol may be used to denote multiplication of integers (as in 3\*3) and multiplication of floating point values (as in `3.14 * 3.14`).
   Parametric polymorphism occurs when a function is defined Over a range of types, acting in the same way for each type.
   A typical example is the length function, which acts in the same way on a list of integers and a list of floating point numbers.
 
