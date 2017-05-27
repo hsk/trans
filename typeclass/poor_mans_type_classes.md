@@ -1,12 +1,15 @@
 # Poor Man's Type Classes
 
 Martin Odersky
+
 EPFL
 
 IFIP WG2.8 working group meeting
 Boston, July 2006.
 
 1/15
+
+----
 
 ## Goals
 
@@ -24,6 +27,8 @@ _Idea_: Concentrate on the delta between OO classes and type
 classes: implicits
 
 2/15
+
+----
 
 ## Life without Type Classes
 
@@ -49,6 +54,8 @@ Two implementations of monoids:
 
 3/15
 
+----
+
 A sum method which works over arbitrary monoids:
 
     def sum[a](xs: List[a])(m: Monoid[a]): a =
@@ -62,6 +69,8 @@ One invokes this sum method by code such as:
 
 4/15
 
+----
+
 ## Implicit Parameters: The Basics
 
 The following slight rewrite of sum introduces m as an implicit parameter.
@@ -74,6 +83,8 @@ The following slight rewrite of sum introduces m as an implicit parameter.
 - However, there may only be one implicit parameter list, and it must come last.
 
 5/15
+
+----
 
 implicit can also be used as a modifier for definitions:
 
@@ -96,6 +107,8 @@ This expands to:
 
 6/15
 
+----
+
 ## Inferring Implicit Arguments
 
 If an argument for an implicit parameter of type T is missing, it is inferred.
@@ -110,9 +123,9 @@ An argument value is eligible to be passed, if
 
 If several arguments are eligible, choose most specific one.
 
-eligible 適格 several いくつかの
-
 7/15
+
+----
 
 ## Locality
 
@@ -129,11 +142,9 @@ Rules to keep coherence:
 - Only methods can contain implicit parameters.
 - Implicit parameters are instantiated where a method value is eliminated (either applied or converted to a function).
 
-consequence 結果 帰着 因果関係 余波
-partially 部分的に
-coherence 一貫 脈絡 辻褄 筋が通っていること つじつまがあっていること
-
 8/15
+
+----
 
 ## Conditional Implicits
 
@@ -160,6 +171,8 @@ Then:
 
 9/15
 
+----
+
 ## External Extensibility
 
 Often, we like to add some new functionality to a pre-existing type.
@@ -177,6 +190,8 @@ Want to make lists ordered if their elements are.
 Common solution: "open classes".
 
 10/15
+
+----
 
 ## Implicit Conversions
 
@@ -201,9 +216,11 @@ Example:
 
 11/15
 
+----
+
 ## Translation
 
-    def sort[a](xs: Array[a])(implicit c: a) Orderd[a]): Array[a] =
+    def sort[a](xs: Array[a])(implicit c: a => Orderd[a]): Array[a] =
       if (xs.length <= 1) xs
       else {
         val pivot = xs(xs.length / 2)
@@ -217,6 +234,8 @@ Example:
 
 
 12/15
+
+----
 
 ## Applications of Implicit Conversions
 
@@ -235,9 +254,11 @@ An implicit conversion is applied to a term e if,
     val x = Bi}Int(10);
     1 + x
     ==>
-    Bi}Int(1) + x
+    BigInt(1) + x
 
 13/15
+
+----
 
 ## Summary
 
@@ -253,6 +274,8 @@ Scala implements the following analogies:
 
 
 14/15
+
+----
 
 ## Conclusion
 
