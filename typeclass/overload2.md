@@ -1,4 +1,4 @@
-# オーバーロードの第2の見方 - A Second Look at Overloading <a name="r*"></a>[*](#*)
+# A Second Look at Overloading
 
   Martin Odersky
 
@@ -17,65 +17,61 @@
   Universitat Karlsruhe
   (wehr@ira.uka.de)
 
-## 要約
+## Abstract
 
-  我々は、オーバーロードと多相レコードをサポートする Hindley/Milner システムの最小限の拡張を研究します。
-  型システムは、標準の型なしの構成的セマンティクスに関しては健全であることを示します。
-  また、このシステムのすべての型付け可能な項には主要型があり、その型を再構築するアルゴリズムが示されています。
+  We study a minimal extension of the Hindley/Milner system that supports overloading and polymorphic records.
+  We show that the type system is sound with respect to a standard untyped compositional semantics.
+  We also show that every typable term in this system has a principal type and give an algorithm to reconstruct that type.
 
-## 1 はじめに
+## 1 Introduction
 
-  算術、等価、文字列としての値を示す:3つの演算は、言語デザイナーの悪夢を与えることを保証します。
-  通常、何らかの形でオーバーロードされますが、どの形式が最良なのでしょうか？
+  Arithmetic, equality, showing a value as a string: three operations guaranteed to give a language designer nightmares.
+  Usually they are dealt with by some form of overloading; but which form is best?
 
-  成功した Hindley/Milner 型システムに基づいて言語に注意を限定したとしても、さまざまなオーバーロードの処理があります。
-  同じ言語では、異なる演算子を別々に扱うことがあります。異なる言語は同じ演算子を異なる方法で扱うことがあります。同じ言語が時間の経過とともに同じ演算子を異なる方法で扱うことがあります。
-  たとえば、 Miranda の算術演算は、単一の数値型でのみ定義されます。等価は、抽象バリアを破る抽象型を含む、すべての型で定義された多相関数です。ユーザが新しい型についてshow関数を定義することができます。
-  SML の最初のバージョンでは、平等はすべての単相型で単純にオーバーロードされました。
-  2番目のバージョンでは特殊な等価型変数が導入されました。
+  Even if we limit our attention to languages based on the highly successful Hindley/Milner type system, we find many differing treatments of overloading.
+  The same language may treat different operators differently; different languages may treat the same operator differently; and the same language may treat the same operator differently over time.
+  For instance, in Miranda arithmetic is defined only on a single numeric type; equality is a polymorphic function defined at all types, including abstract types where it breaks the abstraction barrier; and the show function may be defined by the user for new types.
+  In the first version of SML equality was simply overloaded at all monomorphic types; while the second version introduced special equality type variables.
 
-  オーバーロード [<a name="rWB89"></a>[WB89](#WB89)] のための統一されたフレームワークを提供するために、 Haskell に型クラスが導入されました。
-  それは Kaes [<a name="rKae88"></a>[Kae88](#Kae88)] によって独自に記述されていたので、その時はまさにピッタリのアイデアであったに違いありません。
-  それ以来、型クラスはかなりの注目を集めており、多くの洗練されたバリエーションがあります [<a name="rNS91"></a>[NS91](#NS91),<a name="rNP93"></a>[NP93](#NP93),<a name="rHHPW94"></a>[HHPW94](#HHPW94),<a name="rAug93"></a>[Aug93](#Aug93),<a name="rPJ93"></a>[PJ93](#PJ93),<a name="rJon92b"></a>[Jon92b](#Jon92b),<a name="rCHO92"></a>[CHO92](#CHO92),<a name="rJon93"></a>[Jon93](#Jon93)]。
-  彼らはまた、いくつかの問題も指摘されています [<a name="rApp93"></a>[App93](#App93)]。
+  Type classes were introduced into Haskell in order to provide a uniform framework for overloading [WB89].
+  It must have been an idea whose time had come, as it was independently described by Kaes [Kae88].
+  Since then type classes have attracted considerable attention, with many refinements and variants being described [NS91, NP93, HHPW94, Aug93, PJ93, Jon92b, CHO92, Jon93].
+  They have also attracted some criticism [App93].
 
-  我々の見解では、型クラスの最も深刻な問題の1つは、プログラムにその型に依存しない意味を割り当てることができないということです。
+  In our view, one of the most serious criticisms of type classes is that a program cannot be assigned a meaning independent of its types.
 
-  ---
-
-  <a name="*"></a>[*](#r*) 1995年6月、カリフォルニア州サンディエゴの機能プログラミングとコンピュータアーキテクチャに関する第7回国際会議に出席します。
-
-  <a name="d"></a>[†](#rd)
-  Institut fur Programmstrukturen、76128カールスルーエ、ドイツ。
-
-  <a name="dd"></a>[‡](#rdd)
-  スコットランドグラスゴーG12 8QQコンピューティングサイエンス学科。
 
   ---
 
-  その結果、 Hindley/Milner 型システムの最も有名な性質のうちの2つは、型クラスの存在下では満足できません:意味的な健全性の結果はなく、主要な型の結果は弱い形でしか保持されません。
+  In Proc. FPCA'95 Conf. on Functional Programming Languages and Computer Architecture
 
-  意味的健全性の結果は、プログラムの型付き静的セマンティクスと型なしの動的セマンティクスとの間の対応を示します。
-  Milner のキャッチフレーズ 'well typed programs cannot go wrong - 正しく型付けされたプログラムは間違わない' にまとめられています。
-  型指定されていない動的セマンティクスが存在しないので、型クラスに対してそのような結果を定式化することすらできません。
+ Institut fur Programmstrukturen, Universitat Karlsruhe, 76128 Karlsruhe, Germany; e-mail:odersky,wehr@ira.uka.de y
 
-  主要型の結果は、すべての型付け可能なプログラムが単一の最も一般的な型であることを示しています。
-  これは型クラスにも当てはまります。
-  しかし、この結果の有用性の多くは、 Hindley/Milner システムの別の特性から生じます。
-  型付け可能なすべてのプログラムは、すべての型宣言がそれから削除された場合でも型付け可能なままなので、型宣言は必要ありません。
-  これは型クラスでは失敗します。プログラムによってはあいまいさがあり、曖昧さ回避のための型宣言が必要です。
-  別の言い方をすると、 Hindley/Milner の下では、プログラムは意味が決定できない場合、型を決めることができません。
-  型クラスの下では、プログラムの意味が多すぎるため、プログラムは型付けできない可能性があります。
+Department of Computing Science, University of Glasgow, Glasgow G12 8QQ, Scotland; e-mail: wadler@dcs.gla.ac.uk
 
-  これらの特性が欠如しているのは、技術的な面が欠落しているだけではなく、プログラムの意味をその型と分けて理解できないために発生します。
-  これにより、プログラマが利用できるプログラムの理解方法の範囲が狭くなり、コンパイラが利用できるプログラムを実装する方法の範囲が狭くなります。
+  ---
 
-#### 制限型クラス
+  A consequence of this is that two of the most celebrated properties of the Hindley/Milner type system are not satisfied in the presence of type classes: there is no semantic soundness result, and the principal types result holds only in a weak form.
 
-  型クラスの単純な制限によって、プログラムがその型とは無関係に決定できる意味を持つことを保証することができます。
+  The semantic soundness result shows a correspondence between the typed static semantics of program and its untyped dynamic semantics.
+  It is summarised by Milner's catchphrase `well typed programs cannot go wrong'.
+  One cannot even formulate such a result for type classes, as no untyped dynamic semantics exists.
 
-  型クラスは、オーバーロード演算子が定義されている型だけを範囲とするような型変数、例えば `a` を限定することを思い出してください。オーバーロードされた演算子は、 `a` を含む任意の型を有することができます。
-  ここでは、 Haskell の standard prelude の簡略化された部分を表すいくつかの例を示します。
+  The principal type result shows that every typable program has a single most general type.
+  This is also true for type classes.
+  However, much of the utility of this result arises from another property of the Hindley/Milner system: every typeable program remains typeable if all type declarations are removed from it, so type declarations are never required.
+  This fails for type classes: some programs are inherently ambiguous, and require type declarations for disambiguation.
+  Put another way: under Hindley/Milner, a program is untypeable only if it may have no meaning; under type classes, a program may be untypeable because it has too many meanings.
+
+  The absence of these properties is not merely the lack of a technical nicety: they arise because the meaning of a program cannot be understood separately from its type.
+  This reduces the range of ways of understanding programs available to a programmer, and reduces the range of ways of implementing programs available to a compiler.
+
+### Restricting type classes
+
+  By a simple restriction to type classes, we may ensure that a program possesses a meaning that can be determined independently of its type.
+
+  Recall that a type class limits a type variable, say a, to range over only those types on which an overloaded operator is defined; the overloaded operator may have any type involving a.
+  Here are some examples, representing in simpli ed form parts of the Haskell standard prelude.
 
     class (Num a) where
       (+) :: a -> a -> a
@@ -91,42 +87,36 @@
       showList :: [a] -> String
       read :: String -> a
 
-  たとえば、 `a` に定義された指定された型の演算子 `（*）`、 `neg`、 `fromInteger` がある場合にのみ、型 `a` はクラス `Num` に属します。
+  For instance, the first of these states that type a belongs to class Num only when there are operators (+), (*), neg, and fromInteger of the specified types defined for a.
 
-  制限は以下の通りです: 型変数 `a` に対する型クラスの場合、それぞれのオーバーロードされた演算子は、 `a -> t` 型の型を持たなければなりません。
-  上の例では `（+）`、 `（*）`、 `neg`、 `（==）`、 `show` はこの制限を満たしていますが、 `fromInteger`、 `showList`、 ` read` はそうではありません。
+  The restriction is as follows: for a type class over a type variable a, each overloaded operator must have a type of the form a -> t, where t may itself involve a.
+  In the above, (+), (*), neg, (==), and show satisfy this restriction, while fromInteger, showList, and read do not.
 
-  注目すべきことに、この単純な制限により、型なしの動的セマンティクスを構築することが可能になり、あいまいさが生じないことが保証されます。したがって、型の健全性と主要な型の強力な形式が保持されます。
-  結果として得られるシステムは、算術、等価性のオーバーロードを処理して文字列として値を表示するのに十分強力ですが、数値定数のオーバーロードや文字列を値として読み取るほど強力ではありません。
-  後者はおそらく前者よりも重要ではありません: Miranda も SML も後者のオーバーロードをサポートしておらず、 Kaes は元の論文 [<a name="rKae88"></a>[Kae88](#Kae88)] でこの制限されたオーバーロードの形態のみを考慮しました。
+  Remarkably, this simple restriction enables one to construct an untyped dynamic semantics, and ensures that no ambiguity can arise: hence type soundness and the strong form of principal types do hold.
+  The resulting system is still powerful enough to handle the overloading of arithmetic, equality, and showing a value as a string, but not powerful enough to handle the overloading of numerical constants or reading a string as a value.
+  The latter are perhaps less essential than the former: neither Miranda nor SML support overloading of the latter sort, and Kaes considered only this restricted form of overloading in his original paper [Kae88].
 
-  この制限の値の例として、 `[] == []` というフレーズを考えてみましょう。
-  Haskell では、このフレーズの意味はあいまいであり、無意味です。
-  リスト要素の型を指定することで曖昧さを解消する必要があります。
-  これは、プログラムの意味が変換 `eqList eqElt [] []` によって与えられるからです。
-  ここで、 `eqList` はリストの等価であり、 `eqElt` はリスト要素の等価です。
+  As an example of the value of this restriction, consider the phrase [] == [].
+  In Haskell, this phrase as it stands is ambiguous, and hence meaningless: one must disambiguate by specifying the type of the list elements.
+  This is because the meaning of the program is given by the translation eqList eqElt [] [], where eqList is equality on lists, and eqElt is equality over on the list elements.
 
-  我々の制限されたシステムでは、 `[] == []` というフレーズが型に依存しない意味を持つことが保証されています;
-  すべての有効な変換がこの意味をもたらすことを示しています。
-  実装者は、3章の型のない動的セマンティクスに対応するランタイム分岐、または4章の型付き静的セマンティクスに対応するコンパイル時変換によってオーバーロードを実装することができます。
-  後者の場合、プログラムの有効な変換は `eqList undef [] []` です。
-  ここで、 `undef` はどこでも定義されていない関数です。
-  一貫性は、プログラムが変換を強制しない場合、変換が実行することを保証するためです。
-  無制限の Haskell の場合、コンパイラライターは動的セマンティクスがないので変換を選択しなければならず、適切な一貫性のある結果がないため、 `undef` ではなく `eqElt` を選択する必要があります。
+  In our restricted system, we are guaranteed that the phrase [] == [] has a meaning independent of types; and that all valid translations yield this meaning.
+  The implementor has a choice: overloading may be implemented by run-time branching, corresponding to the untyped dynamic semantics of Section 3, or by compile-time translation, corresponding to the typed static semantics of Section 4.
+  In the latter case, a valid translation of the program is eqList undef [] [], where undef is the function that is everywhere undefined; this is because coherence guarantees that if the program doesn't force a translation, then any translation will do.
+  For unrestricted Haskell the compiler writer must choose a translation, because there is no dynamic semantics, and must choose eqElt rather that undef, because there is no suitable coherence result.
 
-  したがって、型クラスの制限により、保持する追加の有用なプロパティが保証されます。
-  これらの付加的な特性は、型クラスの一般化を検討することを可能にします。
+  Thus, our restriction of type classes ensures additional useful properties that hold.
+  These additional properties in turn make it possible for us to consider a generalisation of type classes.
 
-#### 一般化型クラス
+### Generalising type classes
 
-  型クラスは、ある種のオーバーロードされた演算子が定義されている型の範囲になるように型変数を制約します。
-  これは、有界多相と密接に関連しているように見えます。この多相型は、型変数が指定された型のサブ型である型を越えるように制約します [<a name="rCW85"></a>[CW85](#CW85),<a name="rBTCGS91"></a>[BTCGS91](#BTCGS91)]。
-  実際、レコードの通常の部分型の関係では、束縛された多相型を模倣するために型クラスを使用することができます [<a name="rPet94"></a>[Pet94](#Pet94)]。
-  しかし、厄介なことに、この模倣は単相レコードに対してのみ働きます。 型クラスは、多態性のレコードを処理するのに十分強力ではありません。
+  Type classes constrain type variables to range over types at which certain overloaded operators are defined.
+  This appears to be closely related to bounded polymorphism, which constrains type variables to range over types that are subtypes of a given type [CW85, BTCGS91].
+  Indeed, one can use type classes to mimic bounded polymorphism for the usual subtyping relation on records [Pet94].
+  But, annoyingly, this mimicry works only for monomorphic records; type classes are not quite powerful enough to handle polymorphic records.
 
-  たとえば、 `xcoord` と `ycoord` の操作は、これらのフィールドを含むレコード型に適用されると期待されます。
-  (たとえば、2つのフィールドだけを含む型 `Point` と、色を加えた両方のフィールドを含む型 `CPoint`)
-  Haskell でこのようなレコードを模倣する方法は次のとおりです。
+  For instance, one would expect the operations xcoord and ycoord to apply to any record type that contains those fields, for instance it should apply both to a type Point containing just those two fields, and to a type CPoint that contains both those fields plus a colour.
+  Here is how one can mimic such records in Haskell.
 
     class (Pointed a) where
       xcoord :: a -> Float
@@ -146,34 +136,33 @@
     distance :: (Pointed a) => a -> Float
     distance p = sqrt (sqr (xcoord p) + sqr (ycoord p))
 
-  関数 `distance` は、与えられた点の原点からの距離を計算します。
-  型シグニチャは、クラス宣言と関数本体だけが与えられていると推論されるので、オプショナルです。
+  Function distance computes the distance of a point from the origin.
+  The type signature is optional, as it may be inferred given only the class declaration and the function body.
 
-  この模倣は、クラス宣言に現れることができる単相型を持つレコードの各フィールドに依存することに注意してください。
-  上記の多相対応は、ペアまたは三つ組の対応するコンポーネントを返す操作を1番目と2番目に持つことです。これらのコンポーネントは、 `Float` に制限されるのではなく、任意の型を持つことができます。
-  しかし、 Haskell でこれを行う方法はありません。
+  Note, alas, that this mimicry depends on each field of the record having a monomorphic type that can appear in the class declaration.
+  The polymorphic equivalent of the above would be to have operations first and second that return the corresponding components of either a pair or a triple, where these may have any type rather than being restricted to Float.
+  But there is no way to do this in Haskell.
 
-  この問題の原因はクラス宣言です。
-  `xcoord` の場合、インスタンス
+  The source of this problem is class declarations. For
 
     xcoord :: Point -> Float
     xcoord :: CPoint -> Float
 
-  は以下のクラス宣言のインスタンス化として発生することができます:
+  can arise as instantiations of the class declaration
 
     xcoord :: a -> Float .
 
-  しかし、 `first` のインスタンス
+  But for first the instances
 
     first :: (a,b) -> a
     first :: (a,b,c) -> a
 
-  には対応するクラス宣言がありません。
+  have no corresponding class declaration.
 
-  この問題は、クラス宣言を取り除くことで解決します。
-  演算子のグループがクラスに属し、型宣言を指定すると宣言するのではなく、演算子が多重定義され、型宣言を与えないように指定するだけです。
+  We solve this problem by getting rid of class declarations.
+  Instead of declaring that a group of operators belong to a class and specifying a type declaration, we only specify that an operator is overloaded and give no type declaration.
 
-  ここでは、新しい表記法の前の例を示します。
+  Here is the previous example in our new notation.
 
     over xcoord
     over ycoord
@@ -196,10 +185,10 @@
     distance :: (xcoord,ycoord::a->Float) => a -> Float
     distance p = sqrt (sqr (xcoord p) + sqr (ycoord p))
 
-  ここでも、 `distance` の型宣言は、その本体から推測されるかもしれません
-  （単純に、 `sqrt`、 `sqr`、 `+` のオーバーロードを無視してください）。
+  Again, the type declaration for distance may be inferred from its body (ignoring, for simplicity, the overloading of
+  sqrt, sqr, and +).
 
-  さらに、 `first` と `second` の多相的なペアおよび三つ組をオーバーロードすることが可能になりました。
+  Furthermore, it is now possible to overload first and second on polymorphic pairs and triples.
 
     over first
     over second
@@ -223,83 +212,82 @@
     demo :: (first::a->b,second::a->c) => a -> (c,b)
     demo r = (second r, first r)
 
-  関数 `demo` はペアまたは三つ組をとり、 `second` と `first` の順序でコンポーネントを返します。
-  ここでも、その型を推論できます。
+  Function demo takes a pair or triple and returns its second and first components, in that order.
+  Again, its type can be inferred.
 
-  要するに、クラス宣言を削除すると、束縛された多態性をモデル化するのに十分強力な型クラスになります。
+  In short, eliminating class declarations makes type classes powerful enough to model bounded polymorphism.
 
-  クラス宣言を削除すると、クラス内でどの操作がどのクラスに属しているかを事前に決定する必要がなくなります。
-  多くの状況で、これはプラスの利点になります。
-  たとえば、ペアを扱う場合は、 `first` と `second` のペアをグループ化するだけですが、三つ組を処理する場合は、 `third` も必要になります。
-  さらなる例として、 Haskell デザイナーが数値演算子をクラスにグループ化する方法を決定していたという困難を考慮してください。
-  この設計はまだ議論されています: `+` と `*` は `ring` クラスにあるべきでしょうか?
-  Haskell には、ユーザが与えられたクラスをより小さなクラスに分割するメカニズムがないので、この問題は悪化します。
+  Eliminating class declarations means one need no longer decide in advance which operations belong together in a class.
+  In many situations, this will be a positive advantage.
+  For instance, if we're dealing with pairs we only want first and second grouped together, but if we're dealing with triples we'll want third as well.
+  As a further example, consider the diculties that the Haskell designers had deciding how to group numeric operators into classes.
+  This design is still argued: should + and * be in a `ring' class? The problem is exacerbated because there is no mechanism in Haskell whereby a user may break a given class into smaller classes.
 
-  一方、クラス宣言を削除すると、推論された型はより冗長になります。すべてのオーバーロードされた演算子の型を記述する必要があります。
-  レコードは、関連する操作をグループ化するために、共通のオーバーロードされた識別子を使用しているため、ここでいくつかの救済策が提供されています。
-  これについては第5章で詳しく説明します。
+  On the other hand, eliminating class declarations means that inferred types become more verbose: the type of every overloaded operator must be mentioned.
+  Records provide some relief here, since they allow us to group related operations together, using a common overloaded identifier for them all.
+  This is explained in more detail in Section 5.
 
-#### この研究の貢献
+### Contributions of this work
 
-  上記の制限と型クラスの一般化を組み合わせて、次のプロパティを持つオーバーロードの型システムであるシステムOを定義します。
+  We combine the above restrictions and generalisations of type classes to define System O, a type system for overloading with the following properties.
 
-  - システムOは、型指定されていない動的セマンティクスを持ち、対応する型健全性定理を満たします。
-  - システムOは強力な主要型のプロパティを持っています。
-    プログラムの曖昧さを解消するために型宣言を追加する必要はありません。
-  - 型クラスと同様に、標準的な辞書変換があり、システムOの正しく型付けされたプログラムを Hindley/Milner システムの同等の型付きプログラムに変換します。
-  - システムOは、多相型レコードを含む、レコードに対してF限定の多相の限定された形式をモデル化するのに十分強力です。
+  - System O possesses an untyped dynamic semantics, and satisfies a corresponding type soundness theorem.
+  - System O has a strong principal types property.
+  It is never necessary to add type declarations to disambiguate a program.
+  - As with type classes, there is a standard dictionary transform which takes well-typed programs in System O into equivalent well-typed programs in the Hindley/Milner system.
+  - System O is powerful enough to model a limited form of F-bounded polymorphism over records, including polymorphic records.
 
-  ----
 
-  これにより、システムOは型クラスの興味深い代替手段になると考えています。
+  We believe that this makes System O an interesting alternative to type classes.
 
-#### 関連研究
+## Related work.
 
-  多想プログラミング言語のオーバーロードは、 Kaes [<a name="rKae88"></a>[Kae88](#Kae88)] と Wadler と Blott [<a name="rWB89"></a>[WB89](#WB89)] によって最初に研究されました。
-  同様の概念は、記号代数 [<a name="rJT81"></a>[JT81](#JT81)] の初期の研究で見出すことができます。
-  この論文は、オーバーロードが関数に限定されている点で、 Kaes の伝統に非常に似ています。
-  これは、述語や型クラスのすべての構文的宣言を取り除く、彼のシステムの簡素化として見ることができます。
-  型の健全性の証明と型付けレコードの関係によって、彼の仕事の範囲を広げます。
+  Overloading in polymorphic programming languages has first been studied by Kaes [Kae88] and Wadler and Blott [WB89].
+  Similar concepts can be found in earlier work in symbolic algebra [JT81].
+  This paper is very much in the tradition of Kaes in that overloading is restricted to functions.
+  It can be seen as a simplification of his system that gets rid of all syntactic declarations of predicates or type classes.
+  We extend the scope of his work by a proof of type soundness and the relationship to record typing.
 
-  オーバーロードに関する後の作業の大半は、 Haskell の型クラスの設計と実装によって駆動されます。 例えば、Nipkow et al。
-  Haskell の型クラスの正式な定義については Halls、 Hammond、 Peyton Jones、 Wadler [<a name="rHHPW94"></a>[HHPW94](#HHPW94)] のように、型再構築のための [<a name="rNS91"></a>[NS91](#NS91),<a name="rNP93"></a>[NP93](#NP93)]、 Augsson [<a name="rAug93"></a>[Aug93](#Aug93)]、 Peterson と Jones [<a name="rPJ93"></a>[PJ93](#PJ93)] があります。
-  我々はすでに、我々のシステムを Haskell のようなプログラムでは許されないと主張してきました。
+  Much of the later work on overloading is driven by the design and implementation of Haskell's type classes, e.g.
+  Nipkow et al.
+  [NS91, NP93] on type reconstruction, Augustsson [Aug93] and Peterson and Jones [PJ93] on implementations, and Hall, Hammond, Peyton Jones and Wadler [HHPW94] on the formal definition of type classes in Haskell.
+  We have already compared our system to that of Haskell.
 
-  他の Haskell の型クラスの一般化が提案されています。
-  Wadler と Blott、 Jones は、複数の型変数を持つ型クラスを考えます [<a name="rWB89"></a>[WB89](#WB89), <a name="rJon92b"></a>[Jon92b](#Jon92b)]。
-  Chen、 Hudak および Odersky のパラメトリック型クラス [<a name="rCHO92"></a>[CHO92](#CHO92)] も複数の型変数を持ちますが、関数の依存関係は主クラス変数と従属変数の間に課されます。
-  パラメトリック型クラスはコンテナクラスとレコードをモデル化できます。
-  コンストラクタークラスは型クラスを一般化してコンストラクターを型付けします [<a name="rJon93"></a>[Jon93](#Jon93)]。
-  コンストラクタークラスは、異なる要素型を持つ類似のコンテナー間を仲介する操作でコンテナをモデリングするのに非常に優れています。
-  我々は、我々の型システムが型コンストラクタに一般化できるかどうかを決定する重要な問題と考えます。
+  Other generalisations of Haskell type classes have been proposed.
+  Wadler and Blott, and Jones, consider type classes with multiple type variables [WB89, Jon92b].
+  Chen, Hudak and Odersky's parametric type classes [CHO92] also have multiple type variables, but a functional dependence is imposed between a primary class variable and dependent parameters.
+  Parametric type classes can model container classes and records.
+  Constructor classes generalize type classes to type constructors [Jon93].
+  Constructor classes are very good at modeling containers with operations that mediate between similar containers with different element types.
+  We consider it an important problem to determine whether our type system can be generalized to type constructors.
 
-  これまでに議論されたすべてのシステムは、オープン・ワールドのアプローチを実装しています。
-  インスタンスをまったく持たない空のクラスでさえ、合法であると見なされます。
-  このアプローチは、型検査器がインスタンス宣言の完全な情報を持っていない別々のコンパイルを持つシステムでうまく機能します。
-  対照的に、例えば、 [<a name="rRou90"></a>[Rou90](#Rou90),<a name="rSmi91"></a>[Smi91](#Smi91),<a name="rKae92"></a>[Kae92](#Kae92)] は、空の型式を排除します。
-  Duggan と Ophel [<a name="rDO94"></a>[DO94](#DO94)] は、開かれたものと閉じたものとを区別することによって、両方のアプローチをサポートしています。
-  Volpano [<a name="rVol93"></a>[Vol93](#Vol93)] は、これまでに知られている多くのオープン・ワールド・システムが不健全であると主張しています。
-  Volpano の負の結果は、型クラスを持つプログラムの型なしの動的セマンティクスで動作するために発生します。
-  我々は、これが Haskell のようなプログラムでは許されないと主張してきました。
-  また、システムOの型なしの動的セマンティクスに関して型の健全性を証明することによって、 Volpano の批判は一般的にオープン・ワールド・システムには適用されないことを示しています。
+  All systems discussed so far implement an open world approach, where even empty classes, which do not have any instances at all, are considered legal.
+  This approach works well in a system with separate compilation, where the type checker does not have complete knowledge of instance declarations.
+  By contrast, the closed world approach of e.g.
+  [Rou90, Smi91 , Kae92] rules out empty type schemes.
+  Duggan and Ophel [DO94] support both approaches by distinguishing between open and closed kinds.
+  Volpano [Vol93] has argued that many previously known open world systems are unsound.
+  Volpano's negative results arise because he works with an untyped dynamic semantics for programs with type classes.
+  We have argued here that this is not permissible for Haskell-like programs.
+  Also, by proving type soundness with respect to the untyped dynamic semantics of System O, we show that Volpano's critique does not apply to open world systems in general.
 
-  typecase構造を使用して、オーバーロードされたバリアントを区別し、オーバーロードの代替の処理方法は、それを動的タイピングの特殊なケースとみなします [<a name="rDRW95"></a>[DRW95](#DRW95),<a name="rHM95"></a>[HM95](#HM95)]。
-  これらと同様のセマンティクスは、 Thatte [<a name="rTha94"></a>[Tha94](#Tha94)] によって研究されました。
-  Thatte のセマンティクスは、プログラムを XML [<a name="rMH88"></a>[MH88](#MH88)] と同様に明示的に型付けされた多態性言語にマップします。
-  型クラスは、この言語の再帰型の集合を表します。
-  これとは対照的に、我々のセマンティクスは、型と型式のスキームがイデアル(ideal)を示す型のない言語にマップされます。
+  An alternative treatment of overloading regards it as a special case of dynamic typing, using a typecase construct to discriminate between overloaded variants [DRW95, HM95].
+  A semantics along these lines was studied by Thatte [Tha94].
+  Thatte's semantics maps programs to an explicitly typed polymorphic language similar to XML [MH88].
+  Type classes denote sets of recursive types in this language.
+  By contrast, our semantics maps to an untyped language where types and type schemes denote ideals.
 
-#### アウトライン
+### Outline
 
-  この論文の残りの部分は次のように構成されています。
-  2章は、システムOの構文と型定義の規則を示しています。
-  3章は、構成的セマンティクスを開発し、型健全性の定理を証明します。
-  4章では、辞書パッシング変換について説明します。
-  5章は、多相レコード計算の符号化を提示します。
-  6章では、型の再構成と主要型のプロパティについて説明します。
-  7章で結論付けます。
+  The rest of this paper is organized as follows.
+  Section 2 presents syntax and typing rules of System O.
+  Section 3 develops a compositional semantics and proves a type soundness theorem.
+  Section 4 discusses the dictionary passing transform.
+  Section 5 presents an encoding of a polymorphic record calculus.
+  Section 6 discusses type reconstruction and the principal type property.
+  Section 7 concludes.
 
-## 2 型システム
+## 2 Type System
 
     Unique variables       u ∈ U
     Overloaded variables   o ∈ O
@@ -316,7 +304,7 @@
     Constraints on α       πα= o1 : α -> τ1, ..., on : α -> τn  (n ≧ 0, with o1, ..., on distinct)
     Typotheses             Γ = x1 : σ1, ..., xn : σn            (n ≧ 0)
 
-  図1: システムOの抽象構文
+  Figure 1: Abstract syntax of System O.
 
     Γ ⊢ x : σ (x : σ ∈ Γ)              (TAUT)
 
@@ -349,768 +337,838 @@
     ------------------------------------ (INST)
     Γ ⊢ inst o : στ = e in p : σ'
 
-  図2: システムOの型付け規則
-
-  オーバーロードされた識別子を持つ単純な関数型言語の議論に基づいています。
-  図1は、項と型の構文を示しています。
-  変数のアルファベットをユニーク変数のサブアルファベット `U` に分割し、
-  オーバーロードされた変数には `u`、 変数は `o`、 データコンストラクタには `k`、 データコンストラクタには `K` を使用しました。
-  文字 `x` は、ユニーク変数とオーバーロードされた変数、およびコンストラクタの両方に渡ります。
-  オーバーロードされていないすべての変数 `u` は、たかだか1回のプログラムで束縛されていると仮定します。
-
-  項の構文は、[<a name="rMil78"></a>[Mil78](#Mil78)] の Exp 言語と同じです。
-  プログラムは、一連のインスタンス宣言と項で構成されています。
-  インスタンス宣言（`inst o:στ = e in p`）は、型コンストラクタ `T` から構築されたすべての引数に `e` によって与えられた関数で識別子 `o` の意味をオーバーロードします。
-
-  型 `τ` は、型変数、関数型、またはデータ型です。
-  データ型は、データ型コンストラクタ `D` から構築されます。
-  簡潔にするために、データ型 `Dτ1...τn` のすべての値コンストラクタとセレクタが事前定義されており、いくつかの固定初期型拘束では拘束が `Γ0` であると仮定します。
-  ユーザ定義の型宣言では、与えられたプログラムで実際に宣言されているすべてのセレクタとコンストラクタを `Γ0` で単に収集します。
-  `K_D` は、いくつかの型 `τ1,...,τn` に対して `Dτ1,...,τn` の値を生成するすべての値コンストラクタの集合です。
+  Figure 2: Typing rules for System O.
 
-  `K_⫫ = ∅` であるボトムデータ型 `⫫ ∈ D` が存在すると仮定します。
-  この型は Miranda に存在し、 `（）` と書かれていますが、 `（）` に値コンストラクタがあり、 `（）` と書かれている Haskell では存在しません。
-  `T` はデータ型コンストラクタと関数型コンストラクタ `（->）` の間にあり、 `（->） τ τ` は `τ -> τ` の同義語となります。
+We base our discussion on a simple functional language with overloaded identifiers.
+Figure 1 gives the syntax of terms and types.
+We split the variable alphabet into subalphabets U for unique variables, ranged over by u, O for overloaded variables, ranged over by o, and K for data constructors, ranged over by k.
+The letter x ranges over both unique and overloaded variables as well as constructors.
+We assume that every non-overloaded variable u is bound at most once in a program.
 
-  型スキーム `σ` は、型 `τ` と、型変数のいくつかの `τ` の量化子からなります。
-  Hindley/Milner 多相型とは異なり、定量化された変数 `α` には束縛のセット（おそらく空の）である `πα` という制約が付いています。
-  オーバーロードされた変数 `o` は、せいぜい制約内に一度しか現れません。
-  制約は、指定された型でオーバーロードされた識別子が定義されることを要求することによって、型スキームのインスタンス型を制限します。
-  Hindley/Milner 型スキーム `∀α.σ` は `∀α.（）=>σ` の構文糖とみなされます。
+The syntax of terms is identical to the language Exp in [Mil78 ].
+A program consists of a sequence of instance declarations and a term.
+An instance declaration (inst o : T = e in p) overloads the meaning of the identifier o with the function given by e on all arguments that are constructed from the type constructor T .
 
-  図2は、システムOの型付け規則を定義しています。
-  型システムは、2つの変更を除いて、[<a name="rDM82"></a>[DM82](#DM82)] に示されている元の Hindley/Milner システムと同じです。
+A type  is a type variable, a function type, or a datatype.
+Datatypes are constructed from datatype constructors D.
+For simplicity, we assume that all value constructors and selectors of a datatype D 1 ::: n are prede ned, with bindings in some fixed initial typothesis 0 .
+With user-defined type declarations, we would simply collect in 0 all selectors and constructors actually declared in a given program.
+Let KD be the set of all value constructors that yield a value in D 1; ::::; n for some types 1; ::::; n.
+We assume that there exists a bottom datatype ? 2 D with K? = ;.
+Note that this type is present in Miranda, where it is written (), but is absent in Haskell, where () has a value constructor, also written ().
+We let T range over datatype constructors as well as the function type constructor (!), writing (!)   0 as a synonym for  !  0 .
 
-  - 規則（∀I）において、導入された束縛変数 `α` に対する制約 `πα` は、仮説と型式の間で交換されます。
-    ルール（∀E）は、除去された制約のインスタンス化を前提としています。
-    制約は、ルール（SET）を使用して導出されます。
-    これはルール（∀I）と（∀E）をルール（->I）と（->E）に対称にすることに注意してください。
+A type scheme  consists of a type  and quantifiers for some of the type variables in  .
+Unlike with Hindley/Milner polymorphism, a quantified variable ff comes with a constraint ff, which is a (possibly empty) set of bindings o : ff !  .
+An overloaded variable o can appear at most once in a constraint.
+Constraints restrict the instance types of a type scheme by requiring that overloaded identifiers are defined at given types.
+The Hindley/Milner type scheme 8ff: is regarded as syntactic sugar for 8ff:() ) .
+Figure 2 defines the typing rules of System O.
+The type system is identical to the original Hindley/Milner system, as presented in in [DM82], except for two modifications.
 
-  - インスタンス宣言のための追加規則（INST）があります。
-    オーバーロードされた変数 `o` が明示的な型スキーム `στ` を有し、変数 `o` の各インスタンス化において型コンストラクタ `T` が異なることを除いて、ルールは（LET）に類似しています。
+- In rule (8I), the constraint ff on the introduced bound variable ff is traded between typothesis and type scheme.
+Rule (8E) has as a premise an instantiation of the eliminated constraint.
+Constraints are derived using rule (SET).
+Note that this makes rules (8I) and (8E) symmetric to rules (!I) and (!E).
 
-  ----
+- There is an additional rule (INST) for instance declarations.
+The rule is similar to (LET), except that the overloaded variable o has an explicit type scheme T and it is required that the type constructor T is different in each instantiation of a variable o.
 
-  最も外側の引数型のコンストラクタとして `T` を持つ閉じた型のスキームに対して `στ` の範囲を与えます:
 
-    στ  = T α1 ... αn -> τ    (tv(τ) ⊆ {α1, ..., αn})
-        | ∀α.πα => στ'       (tv(πα) ⊆ tv(στ')) .
+We let T range over closed type schemes that have T as outermost argument type constructor:
 
-  規則（INST）における `στ` の明示的宣言は、主要型が常に存在することを保証するために必要です。
-  それがなければ、次のようなインスタンス宣言を宣言するかもしれません:
+T = T ff1 ::: ffn !  (tv( )  fff1; : : : ; ffng) j 8ff:ff ) 0 T (tv(ff)  tv(0 T )):
 
-    inst o = λx.x in p
+The explicit declaration of T in rule (INST) is necessary to ensure that principal types always exist.
+Without it, one might declare an instance declaration such as
 
-  ここで `o` がオーバーロードされている型コンストラクタを一意に決定することはできません。
+    inst o = x:x in p
 
-  型スキーム `στ` に対する構文上の制限は、3つの性質を強制します:
-  第１に、オーバーロードされたインスタンスは、指定された型コンストラクタのすべての引数に対して一様に働く必要があります。
-  第2に、引数型は結果型を一意に決定しなければなりません。
-  最後に、すべての制約が引数のコンポーネント型に適用される必要があります。
-  制限は、型再構築アルゴリズムの終了を確実にするために必要です。
-  例は6章で与えられます。
+where the type constructor on which o is overloaded cannot be determined uniquely.
 
-  型スキーム `στ` の構文上の制限は、制約 `πα` のオーバーロード変数がペアをつくれなければならない理由も説明します。
-  オーバーロードされた関数の単相の引数は、その関数のインスタンス型を完全に決定します。
-  したがって、任意の引数型 `τ` およびオーバーロードされた変数 `o` の場合、 `τ` 型の引数に `o` というインスタンス型が1つしか存在しないことがあります。
-  このルールを型制約の制約の形で具体化することで、可能な限り早くそれを実施します。
+The syntactic restrictions on type schemes T enforce three properties: First, overloaded instances must work uniformly for all arguments of a given type constructor.
+Second the argument type must determine the result type uniquely.
+Finally, all constraints must apply to component types of the argument.
+The restrictions are necessary to ensure termination of the type reconstruction algorithm.
+An example is given in Section 6.
 
-  **例 2.1** 以下のプログラムの断片は、等価関数 `（==）` のインスタンス宣言を示しています。
-  我々は Haskell の規則に表記法を適合させるため、型定義に `:` の代わりに `::` と書き、
-  `∀α.(o : α -> τ1) => τ2` ではなく `(o::a->t1)=>t2` と書き、
-  `inst o : σ = e` の代わりに `inst o :: s; o = e` と書きます。
+The syntactic restrictions on type schemes T also explain why the overloaded variables of a constraint ff must be pairwise different.
+A monomorphic argument to an overloaded function completely determines the instance type of that function.
+Hence, for any argument type  and overloaded variable o, there can be only one instance type of o on arguments of type  .
+By embodying this rule in the form of type variable constraints we enforce it at the earliest possible time.
 
-    inst (==) :: Int -> Int -> Bool
-         (==) = primEqInt
+Example 2.1
 
-    listEq :: ((==)::a->a->Bool) => [a]->[a]->Bool
-    listEq [] []         = True
-    listEq (x:xs) (y:ys) = x == y && listEq xs ys
+The following program fragment gives instance declarations for the equality function (==).
+We adapt our notation to Haskell's conventions, writing :: instead of : in a typing; writing (o::a->t1)=>t2 instead of 8ff:(o : a ! 1) ) 2; and writing inst o :: s; o = e instead of inst o :  = e.
 
-    inst (==) :: ((==):: a->a->Bool) => [a]->[a]->Bool
-         (==) = listEq
 
-  インスタンス宣言は再帰的ではないので、2番目のインスタンス宣言で `（==）` を直接使用することはできません。
-  再帰的なインスタンス宣言に対するシステムOの拡張は価値がありますが、ここでは簡略化のために省略されています。
+inst (==) :: Int -> Int -> Bool (==) = primEqInt listEq :: ((==)::a->a->Bool) => [a]->[a]->Bool listEq [] [] = True listEq (x:xs) (y:ys) = x == y && listEq xs ys inst (==) :: ((==):: a->a->Bool) => [a]->[a]->Bool (==) = listEq 
 
-  **例 2.2** 以下の例は、オブジェクト指向のプログラミングスタイルを示し、 Haskell の型クラスよりも表現力が高いところを示しています。
-  メンバーテストと2つの集合の和集合、交差と差異を計算する演算を使って、多相クラス `Set` のインスタンスを記述します。
-  Haskell では、固定要素の型集合しか表現できませんでした。
-  この例では、5章のレコード拡張を使用しています。
-  そこにレコード構文の説明があります。
 
-    type Set a sa
-      = (union, inters, diff :: sa -> sa,
-         member :: a -> Bool)
-    inst set :: ((==)::a->a->Bool) => [a] -> Set a [a]
-        set xs =
-          (union  = \ys -> xs ++ ys,
-           inters = \ys -> [y | y <- ys | y `elem` xs],
-           diff   = \ys -> xs \\ ys,
-           member = \y  -> y `elem` xs)
+Note that using (==) directly in the second instance declaration would not work, since instance declarations are not recursive.
+An extension of System O to recursive instance declaration would be worthwhile but is omitted here for simplicity.
 
-    inst set :: ((==),(<):: a->a->Bool)
-                          => Tree a -> Set a (Tree a)
-        set = ...
 
-        -- m Here are some functions that work with sets.
-        -- ここでは、集合で動作する関数をいくつか紹介します。
+Example 2.2
 
-    union :: (set: sa -> Set a sa) => sa -> sa -> sa
-    union xs ys = #union (set xs) ys
+The following example demonstrates an object-oriented style of programming, and shows where we are more expressive than Haskell's type classes.
+We write instances of a polymorphic class Set, with a member test and operations to compute the union, intersection, and difference of two sets.
+In Haskell, only sets of a fixed element type could be expressed.
+The example uses the record extension of Section 5; look there for an explanation of record syntax.
 
-    diff :: (set: sa -> Set a sa) => sa -> sa -> sa
-    diff xs ys = #diff (set xs) ys
+type Set a sa = (union, inters, diff :: sa -> sa, member :: a -> Bool |} inst set :: ((==)::a->a->Bool) => [a] -> Set a [a] set xs = (union = \ys -> xs ++ ys, inters = \ys -> [y | y <- ys | y `elem` xs], diff = \ys -> xs \\ ys, member = \y -> y `elem` xs) inst set :: ((==),(<):: a->a->Bool) => Tree a -> Set a (Tree a) set = ...
 
-    simdiff :: (set: sa -> Set a sa) => sa -> sa -> sa
-    simdiff xs ys = union (diff xs ys) (dif ys xs)
+m Here are some functions that work with sets.
 
-## 3 意味論
+union :: (set: sa -> Set a sa) => sa -> sa -> sa union xs ys = #union (set xs) ys diff :: (set: sa -> Set a sa) => sa -> sa -> sa diff xs ys = #diff (set xs) ys simdiff :: (set: sa -> Set a sa) => sa -> sa -> sa simdiff xs ys = union (diff xs ys) (diff ys xs)
 
-  ここで、システムOの構成的意味論を示し、型付けがそれを尊重して健全であることを示します。
-  セマンティクスは、関数の遅延評価を指定しますが、オーバーロードされた関数を除いて、最初の引数は正格です。
-  あるいは、我々の定義にほとんど変化がなく、結果に変化がなく、すべての関数に対して正格評価を一様に仮定することができました。
+## 3 Semantics
 
-  項の意味は、 `CPO V` の値であり、ここで `V` は次の式の最小解です
+We now give a compositional semantics of System O and show that typings are sound with respect it.
+The semantics specifies lazy evaluation of functions, except for overloaded functions, which are strict in their first argument.
+Alternatively, we could have assumed strict evaluation uniformly for all functions, with little change in our definitions and no change in our results.
+The meaning of a term is a value in the CPO V, where V is the least solution of the equation
 
-    V = W_⊥ + V -> V + Σ(k ∈ K) (k V1 ... V_{arity(k)})_⊥.
+V = W? + V ! V + X k2K (k V1 ::: Varity(k))?:
 
-  ここで `（+）` と `Σ` は 融和した(coalesced) 和 <a name="r1"></a>[1](#1) を表し、 `V - > V` は連続関数空間を表します。
-  値 `W` は型エラーを示します - これはしばしば "間違っている" と言われます。
-  正しく型付けされたプログラムの意味は常に "間違っている" のではないことを示しています。
+Here, (+) and P denote coalesced sums 1 and V ! V is the continuous function space.
+The value W denotes a type error { it is often pronounced "wrong".
+We will show that the meaning of a well-typed program is always different from "wrong".
 
-  項内の関数 `〚・〛` の意味は図3に示されています。
-  これは、項と環境 `η` を引数としてとり、 `V` の要素を生成します。
-  環境 `η` は、一意の変数を `V` の任意の要素にマップし、オーバーロードされた変数を正格な関数にマップします:
+The meaning function [[]] on terms is given in Figure 3.
+It takes as arguments a term and an environment  and yields an element of V.The environment  maps unique variables to arbitrary elements of V, and it maps overloaded variables to strict functions:
 
-    η : U -> V ∪ O -> (V o-> V).
+ : U ! V [ O ! (V ! V):
 
-  `η [x:= v]` という表記は、 `x` と `v` との結合による環境 `η` の拡張を表します。
+The notation [x := v] stands for extension of the environment  by the binding of x to v.
 
-  我々のセマンティクスは、 Milner のセマンティクス [<a name="rMil78"></a>[Mil78](#Mil78)] よりも間違った項を検出する上で、より "怠惰" であることに注意してください。
-  Milner のセマンティクスは関数アプリケーション `f W` を常に `W` にマップしますが、 `f` が正格な場合にのみ `f W = W` というセマンティクスではマッピングします。
-  我々のセマンティクスは、引数が評価されたときに実際に実行される動的型チェックによく似ています。
-  Milner の厳しいエラーチェックが採用されれば、結果は変わらないと予想しています。
+Note that our semantics is more \lazy" in detecting wrong terms than Milner's semantics [Mil78 ].
+Milner's semantics always maps a function application f W to W whereas in our semantics f W = W only if f is strict.
+Our semantics correspond better to the dynamic type checking which would in practice be performed when an argument is evaluated.
+We anticipate no change in our results if Milner's stricter error checking is adopted.
 
-  今、我々は型に意味を与えます。
-  最初に、型変数を含まない型（単相型とも呼ばれます）から始めます。
-  我々は単項式の範囲を決めるのに `μ` を使います。
+We now give a meaning to types.
+We start with types that do not contain type variables, also called monotypes.
+We use μ to range over monotypes.
+Following [Mil78 ] and
 
-  ----
+----
+1 Injection and pro jection functions for sums will generally be left implicit to avoid clutter.
+----
 
-  <a name="1"></a>[1](#r1) 総和の射影関数と射影関数は、一般に、混乱を避けるために暗黙のうちに残されます。
+Figure 3: Semantics of terms.
 
-  ----
+[MPS86], we let monotypes denote ideals.
+For our purposes, an ideal I is a set of values in V which does not contain W, is downward-closed and is limit-closed.
+That is, y 2 I whenever y  x and x 2 I , and F X 2 I whenever x 2 I for all elements x of the directed set X.
 
-    〚x〛                    η = η (x)
+The meaning function [[]] takes a monotype μ to an ideal.
+It is defined as follows.
 
-    〚λu.e〛                 η = λv.〚e〛 η [u := v]
+Proposition 3.1 Let μ be a monotype. Then [[μ]] is an ideal.
 
-    〚k M1 ... Mn〛          η = k(〚M1〛 η) ... (〚Mn〛 η),
-                                 where n = arity(k)
+Proof: A straightforward induction on the structure of μ. □
 
-    〚e e'〛                 η = if 〚e〛 η ∈ V -> V then (〚e〛 η)(〚e'〛 η)
-                                 else W
+When trying to extend the meaning function to type schemes we encounter the diculty that instances of a constrained type scheme 8ff:ff )  depend on the overloaded instances in the environment.
+This is accounted for by indexing the meaning function for type schemes with an environment.
 
-    〚let u = e in e'〛      η = 〚e'〛 η [u := 〚e〛 η]
+Definition.
 
-    〚inst o : στ = e in p〛 η =
-            if 〚e〛 η ∈ V -> V then
-                〚p〛 η [o := extend(T,〚e〛 η,η(o))]
-            else W
-    where
-      extend((->), f, g) =
-        λv.if v ∈ V -> V then f(v) else g(v)
-      extend (D, f, g) =
-        λv.if ∃k ∈ K_D.v ∈ k {V...V | arity(k)} then f(v) else g(v).
+A monotype μ is a semantic instance of a type scheme  in an environment , written  j= μ μ , iff this can be derived from the two rules below.
 
-  図3: 項の意味論
+(a)  j= μ μ μ.
 
-  ----
+(b)  j= μ μ (8ff:ff ) )
+if there is a monotype μ0 such that  j= μ μ [μ0 =ff] and (o) 2 [[[μ0 =ff] ]], for all o :  2 ff.
 
-  [<a name="rMil78"></a>[Mil78](#Mil78)] と [<a name="rMPS86"></a>[MPS86](#MPS86)] に続いて、単相型はイデアルを示すようにします。
-  我々の目的のために、イデアル `I` は、 `W` を含まず、下向きに閉じられ、限定的に閉じられている `V` の値の集合です。
-  すなわち、 `y ≦ x` および `x ∈ I` のときはいつでも `y ∈ I` であり、有向集合 `X` のすべての要素 `x` については `x ∈ I` です。
+Definition.
 
-  意味関数 `〚・〛` は、イデアルに単相型 `μ` をとります。
-  それは以下のように定義されます。
+The meaning [[]] of a closed type scheme  is given by
 
-    〚D μ1 ... μm〛 =
-      {⊥} ∪ ∪{k 〚μ1'〛 ... 〚μn'〛
-                 | Γ0 ⊢ k : μ1' -> ... -> μn' -> D μ1 ... μm}
-    〚μ1 -> μ2〛 =
-      {f ∈ V -> V | v ∈ 〚μ1〛 => f v ∈ 〚μ2〛}.
+    [[]] = \ f[[μ]] j  j= μ μ g:
+    
+Definition.
 
-  **命題 3.1** `μ` を単相型とします。 このとき、 `〚μ〛` はイデアル(ideal)です。
+ j= e1 : 1; : : : ; en : n iff [[ei]] 2 [[i]], for i = 1; : : : ; n.
 
-  証明: `μ` の構造に対する帰納法により自明です。 □
+The meaning of type schemes is compatible with the meaning of types:
 
-  意味関数を型スキームに拡張しようとすると、制約付き型スキーム `∀α.πα=>σ` のインスタンスが環境内のオーバーロードされたインスタンスに依存するという難点があります。
-  これは、環境と型スキームのための意味関数を索引付けすることによって説明されます。
+Proposition 3.2 Let μ be a monotype, and let  be an environment.　Then [[μ]] = [[μ]].
 
-  **定義** 単相型 `μ` は、環境 `η` における型スキーム `σ` の意味論的事例であり、これは以下の2つの規則から導き出すことができるならば、 `η ⊨ μ ≼ σ` です。
+Proof: Direct from the definitions of [[]] and μ. □
 
-  (a) `η ⊨ μ ≼ μ`.
+We now show that type schemes denote ideals.
+The proof needs two facts about the bottom type ? .
 
-  (b) `η ⊨ μ ≼ [μ'/α] σ` かつ `η(o) ∈ 〚 [μ'/α] τ〛` となるような単相型 `μ'` が存在する場合、 `η ⊨ μ ≼ (∀α.πα => σ)` を全ての `o : τ ∈ πα` に対して行います。
+Lemma 3.3 Let  be an environment.
+(a)  j= o : ?? ! μ, for any variable o, monotype μ.
+(b) Let  = 8ff1 :ff 1 ) : : : 8ffn:ff n )  be a type scheme.
+Then  j= [? =ff1; : : : ; ? =ffn] μ .
 
-  **定義** 閉じた型スキーム `σ` の意味 `〚σ〛 η` は、以下の式で与えられます
+Proof: (a) Assume v 2 [[? ]].
+Since ? does not have any constructors, [[? ]] = f?g, hence v = ?.
+Since (o) is a strict function, (o)v = ?, which is an element of every monotype.
+(b) Follows from the definition of μ and (a). □
 
-    〚σ〛 η = ∩{〚μ〛 | η ⊨ μ ≼ σ}.
-
-  **定義** `i = 1, ..., n` であるとき `〚ei〛 η ∈ 〚σi〛 η` ならば `η ⊨ e1 : σ1, ..., en : σn` です。
-
-  型スキームの意味は、型の意味と互換性があります。
-
-  **命題3.2** `μ` を単相型とし、 `η` を環境とします。 このとき、 `〚μ〛 η = 〚μ〛`。
-
-  証明: `〚σ〛 η` と `≼` の定義から自明です。 □
-
-  ここで、型スキームがイデアルを示すことを示します。
-  この証明には、ボトム型 `⫫` について2つの事実が必要です。
-
-  **補題3.3** `η` を環境とします。
-
-  （a） 任意の変数 `o`、 単相型 `μ` で `η ⊨ o : ⫫ -> μ` です。
-
-  （b） `σ = ∀α1 :πα1 => ... ∀αn :παn => τ` を型スキームとします。
-    このとき、 `η ⊨ [⫫/α1, ..., ⫫/αn] τ ≼ σ` となります。
-
-  証明: （a） `v∈ 〚⫫〛` とします。 `⫫` はコンストラクタを持たないので、 `〚⫫〛 = {⊥}`、 したがって `v = ⊥` です。
-  `η（o）` は正格な関数なので、 `η（o）v = ⊥` は全ての単相型の要素です。
-
-  （b） `≼` と（a）の定義に従います。 □
-
-  **命題3.4** `σ` を型スキームとし、 `η` を環境とすると、 `〚σ〛 η` はイデアルです。
-
-  証明:
-  クロージャの特性は、 `σ` の構造上の直接的な誘導によって示されます。
-  それは `W ∉ 〚σ〛` と示されたままです。
-  補題3.3（b）では、 `η ⊨ μ ≼ σ` というような単相型 `μ` が存在します。
-  したがって、 `〚σ〛 η ⊆ 〚μ〛` です。
-  しかし、 `〚μ〛` はイデアルなので、 `W` を含んでいません。 □
-
-  命題3.4は、我々のセマンティクスの重要な特性を表現しています。
-  たとえそれが型変数制約 `o : α -> τ` を含んでいても、すべての型スキームはイデアルです。ここで `o` は明示的に宣言されたインスタンスをまったく持っていません。
-  したがって、そのような型式を静的に排除する必要はありません。
-  これは、 [<a name="rSmi91"></a>[Smi91](#Smi91)] などの "閉じた世界" のアプローチとは対照的に、型チェックに対する Haskell の "オープンワールド" アプローチに対応します。
-  興味深いことに、型スキームのセマンティクスでこれらの2つのアプローチを区別する唯一のものは、ボトム型 `⫫` がないか存在していることです。
-
-  ここでは、システムOが健全であること、すなわち、構文型判定 `Γ ⊢ p : σ` が意味型判定 `Γ ⊨ p : σ` に反映されることを示します。
-
-  **定義** `e` を項とし、 `Γ` を閉じた型とし、 `σ` を閉じた型スキームとします。
-  このとき、すべての環境 `η` において、 `η ⊨ Γ` が `η ⊨ e : σ` を意味するならば、 `Γ ⊨ e : σ` です。
-
-  最初のステップとして、項の健全性定理を証明します。
-  これには補題が必要です。その補題は簡単です。
-
-  **補題3.5** `η ⊨ e : σ` かつ `η ⊨ μ ≼ σ` ならば `η ⊨ e : μ` です。
-
-  **定理3.6** （項の健全性）
-  `Γ ⊢ e : σ` を有効な型判定とし、 `S` を `SΓ` と `Sσ` を閉じるように置き換えると、 `SΓ ⊨ e : Sσ` となります。
-
-  証明:
-  `Γ ⊢ e : σ` かつ `η ⊨ SΓ` を仮定します。
-  我々は `Γ ⊢ e : σ` の導出について誘導を行います。
-  我々は、対応する推論規則が Hindley/Milner システムと異なるケース（∀I）、（∀E）のみを示します。
-  他の規則の証明は [<a name="rMil78"></a>[Mil78](#Mil78)] の扱いに似ています。
-
-    Γ ⊢ u : σ ≻ u          (u : σ ∈ Γ)                 (TAUT)
-    Γ ⊢ k : σ ≻ u          (k : σ ∈ Γ)                 (TAUT)
-    Γ ⊢ o : σ ≻ u_{o,σ}    (o : σ ∈ Γ)                 (TAUT)
-
-    Γ, o1 : τ1, ..., on : τn ⊢ e : σ ≻ e*    α ∉ tv(Γ)
-    ---------------------------------------------------- (∀I)
-    Γ ⊢ e : ∀α.(o1 : τ1, ..., on : τn) => σ
-      ≻ λu_{o1,τ1}....λu_{on,τn}.e*
-
-    Γ ⊢ e : ∀α.(o1 : τ1 ,..., on : τn) => σ ≻ e*
-    Γ ⊢ oi : [τ/α] τi ≻ ei*       (i = 1, ..., n)
-    ---------------------------------------------------- (∀E)
-    Γ ⊢ e: [τ/α] σ
-      ≻ e* e1* ... en*
-
-    Γ, u : τ ⊢ e : τ' ≻ e*
-    ------------------------------------------------- (->I)
-    Γ ⊢ λu.e : τ -> τ
-      ≻ λu.e*
-
-    Γ ⊢ e1 : τ' -> τ ≻ e1*       Γ ⊢ e2 : τ' ≻ e2* 
-    ------------------------------------------------- (->E)
-    Γ ⊢ e1 e2 : τ
-      ≻ e1* e2*
-
-    Γ ⊢ e1 : σ ≻ e1*     Γ, u : σ ⊢ e2 : τ ≻ e2* 
-    ------------------------------------------------- (LET)
-    Γ ⊢ let u = e1 in e2 : τ
-      ≻ let u = e1* in e2* : τ
-
-    o : στ' ∈ Γ => T ≠ T'
-    Γ ⊢ e : στ ≻ e       Γ, o : στ ⊢ p : σ' ≻ p*
-    ------------------------------------------------ (INST)
-    Γ ⊢ inst o : στ = e in p : σ'
-      ≻ let u_{o,στ} = e* in p*
-
-  図4:辞書パッシング変換
-
-  （∀I）のケース: 導出の最後のステップは、いくつかの `α`、 `πα`、 `σ` と `σ = ∀α.πα => σ'` の
-
-    Γ, πα ⊢ e : σ'   α ∉ tv(Γ)
-    --------------------------------
-    Γ ⊢ e : ∀α.πα => σ'
-
-  です。
-
-  すべての `μ` に対して `η ⊨ η ≼ ∀α.S πα => S σ'` となるように `e ∈ 〚μ〛` を示さなければなりません。
-  そのような `μ` を任意に選びます。
-  `（≼）` の定義により、 `η ⊨ [μ'/α] (S πα)` かつ `η ⊨ μ ≼ [μ'/α] (Sσ')` であるのような `a μ'` が存在します。
-  `S' = [μ'/α] o S` $すると、 `η ⊨ S'Γ` かつ `η ⊨ S'(Γ,πα)` となります。
-  `α∉tv（Γ）`、 `η| =S'Γ` $あり、従って `η| = S '（Γ、πα） ` $す。
-  次に、帰納仮説によって、 `η ⊨ e : S' σ'` となります。
-  補題3.5により `η ⊨ e : μ` となります。
-
-  （∀E）のケース: 導出の最後のステップは
-
-    Γ ⊢ e : ∀α.πα => σ'    Γ ⊢ [τ / α] πα
-    ------------------------------------------
-    Γ ⊢ e : [τ / α] σ'
-
-  `σ = [τ/α] σ'` であるいくつかの `α`、 `πα`、 `σ'`、 `τ` とします。
-
-  すべての `μ` に対して `η ⊨ μ ≼ [Sτ/α] Sσ'` となるように `e ∈ 〚μ〛` を示さなければなりません。
-  そのような `μ` を任意に選びます。 帰納仮説によって、 `η ⊨ e : ∀α:Sπα => Sσ'` かつ `η ⊨ [Sτ/α] (Sπα)` となります。
-  それは `η ⊨ μ ≼ ∀α:Sπα => Sσ'` という `≼` の定義に従います。
-  補題3.5により、 `η ⊨ e : μ` となります。 □
-
-  今、型宣言を含むことができるプログラム全体に型健全性定理を拡張します。
-
-  **定理3.7** （プログラムの型健全性）
-  `Γ ⊢ p : σ` を有効な閉じた型判定とすると、 `Γ ⊨ p : σ` となります。
-
-  証明:
-  `p` の構造上の誘導によって証明します。
-  `p` が項である場合、結果は定理3.6に従います。
-  それ以外の場合、 `p` はトップレベルのインスタンス宣言です。
-  次に、 `Γ ⊢ p : σ` の導出の最後のステップは、いくつかの型スキーム `στ` のため
-
-      o : στ' ∈ Γ => T ≠ T'
-      Γ ⊢ e : στ    Γ, o : στ ⊢ p : σ
-      -----------------------------------
-      Γ ⊢ inst o : στ = e in p' : σ
-  です。
-  我々は、 `η ⊨ inst o : στ = e in p' : σ` を示さなければなりません。
-  定理3.6により、 `η ⊨ e : στ` となり、 `〚e〛 η` は関数であることを意味します。
-  したがって、 `〚p〛 η = 〚p'〛 η [o := f]` ここで `f = extend(T,〚e〛 η,η(o))` です。
-
-  次のステップは `f∈ 〚στ〛 η` を示すことです。
-  `μ` は、 `η ⊨ μ ≼ στ` となるようにすると、いくつかの単相型 `μ1, ..., μn, μ'` に対して、 `μ = T μ1, ..., μn -> μ'` となります。
-    
-
-  ここで、 `v ∈ 〚Tμ1, ..., μn〛` と仮定します。
-  `v = ⊥` ならば `f v = ⊥ ∈ 〚μ'〛` です。
-  そうでなければ、 `extend` の定義によって、 `f v = 〚e〛 η v` かつ `〚e〛 η v ∈ 〚μ'〛` です。
-  どちらの場合も `f v ∈ 〚μ'〛` です。
-  `v ∈ 〚Tμ1, ..., μn〛` は任意だったので、 `f ∈ 〚μ〛` となります。
-  `μ` は任意であるので、これは `f ∈ [στ] η` を意味します。
-
-  それは `η [o := f] ⊨ o : στ` となります。
-  さらに、 `η ⊨ Γ` であり、 `Γ` はルール（INST）の前提によって、 `o : στ` という束縛を含んでいないので、 `η [o := f] ⊨ Γ` です。
-  まとめると、 `η [o := 0 f] ⊨ Γ,o : στ` です。
-  帰納仮説によって、 `η [o := f] ⊨ p' : σ` が命題を意味します。 □
-
-  この定理の結果は、"正しく型付けされたプログラムに間違いはない" というスローガンを支持しています。
-
-  **系3.8**
-  `Γ ⊢ p : σ` を有効な閉じた型判定とし、 `η` を環境とします。
-  `η ⊨ Γ` ならば、 `〚p〛 η ≠ W` です。
-
-  証明: 定理3.7と命題3.4から自明です。 □
-
-## 4 変換
-
-  この章では、システムOから Hindley/Milner システムへの"辞書パッシング"変換を研究します。
-  その中心的なアイディアは、 `∀α.πα=>τ` 型の項を、 `πα` でオーバーロードされた変数の実装を引数とする関数に変換することです。
-  これらの引数は"辞書"とも呼ばれます。
-
-  変換のターゲット言語は、型スキームのオーバーロード変数 `o` 、インスタンス宣言、 および制約 `πα` を取り除くことによってシステム Oから得られる Hindley/Milner システムです。
-  項の変換は図4に示されています。
-  これは型導出の関数として定式化されます。ここでは、項またはプログラム `p` の変換を定義する追加の構成要素 `e*` を使用して型判定を補強します。(例`Γ ⊢ p : σ ≻ p*`)
-  変換の一貫性を保証するために、型変数制約 `{o1 : α -> τ1, ..., on : α -> τn}` のオーバーロードされた識別子 `oi` は常に辞書順に並べられると仮定します。
-
-  型と型スキームは次のように変換されます。
-
-                            τ* = τ
-                 (∀α.e => σ)* = ∀α.σ*
-    (∀α.o : α -> τ, πα => σ)* = ∀α.(α -> τ) -> (∀πα => σ)*
-
-  最後の句は、型スキームを矢印の結果部分として生成できる点で、型構文に違反します。
-  これは、以下を定義することによって補償されます
-
-    τ -> ∀α.σ def= ∀α.τ -> σ.
-
-  バインディングとタイポは次のように変換されます。
-
-                 (u : σ)* = u : σ* 
-                 (o : σ)* = u_{o,σ} : σ*.
-    o1 : σ1, ..., on : σn = (o1 : σ1)*, ..., (on : σn)*.
-
-  これは、オーバーロードされた変数 `o` を、新しい固有変数 `u_{o,σ}` に変換し、その固有性は、名前 `o` とその型スキーム `σ` の両方に依存します。
-
-  システムOの各派生ルール `Γ ⊢ p : σ` は、 Hindley/Milner システムの変換された仮説、項、型スキームの導出に対応します。
-  したがって:
-
-  **命題 4.1** `Γ ⊢ p : σ ≻ p*` が有効な場合、 `Γ* ⊢ p* : σ*` は Hindley/Milner システムで有効です。
-
-  変換は、以下の意味でセマンティクスを満たしていると考えています。
-
-  **推測** `p` をプログラム、 `η` を単相型、 `η` を環境とします。
-  `Γ` をオーバーロード変数を含まない定理とします。
-  `Γ ⊢ p : μ ≻ p*` かつ `η ⊨ Γ` の場合、 `〚p〛 η = 〚p*〛 η` です。
-
-  上記のクレームは明らかに正しいようですが、その正式な証明は自明ではありません。
-  変換の一貫性は、上記の推測から直ちに続くことに注意してください。
-  一貫性は明白なように見えますが、 [<a name="rBlo91"></a>[Blo91](#Blo91), <a name="rJon92a"></a>[Jon92a](#Jon92a)] のデモンストレーションをするのは難しいことであるので、上記の推測がこのプロパティを共有することはおそらく驚くことではありません。
-
-## 5 レコード型付けとの関系
-
-  この章では、大堀の [<a name="rOho92"></a>[Oho92](#Oho92)] と同様の簡単な多相レコード計算法を用いて、型システムの拡張を研究します。
-  図5は拡張計算を詳述しています。
-  システムOに以下を追加します
-
-  - レコード型 `{l1:τ1、...、ln:τn}`、
-  - レコード式 `{l1 = e1、...、ln = en}`、 および
-  - セレクタ関数 `＃l`。
-
-  大堀の仕事のように、レコードの更新を追加するのは簡単だが、Wand [<a name="rWan87"></a>[Wan87](#Wan87)] や Remy [<a name="rRem89"></a>[Rem89](#Rem89)] の仕事のように、レコードの拡張を扱うのは難しいことです。
-  Jones [<a name="rJon92a"></a>[Jon92a](#Jon92a)] は、レコードのAC理論への統合を拡張し、レコード内にフィールドがないことを示す（マルチパラメータ）型のクラスを使用することによって、Remy の拡張可能なシステムを埋め込む方法を示しました。
-  ただし、ここでは簡単にするために更新と拡張の両方を省略しています。
-
-  セレクタ関数の型を現時点で開いたままで、これまで提示されているシステムは、レコードが Standard ML で定義されている方法におおよそ対応しています。
-  セレクタは Standard ML でオーバーロード関数として扱われます。
-  すべてのオーバーロードされた関数と同様に、セレクタの引数の型は静的に知る必要があります。
-  そうでない場合は、オーバーロードの解決エラーが発生します。
-
-  我々のレコード拡張では、セレクタをオーバーロードされた関数として扱いますが、システムOのオーバーロードの概念を使用しています。
-  セレクタ `＃l` の最も一般的な型式は以下の通りです
-
-    ∀β.∀α.(α ≦ {l : β}) => α -> β.
-
-  これは、フィールド `l : τ` を持つレコードに `#l` を適用できることを示しており、この場合、型 `τ` の値が得られます。
-  型スキームは、部分型制約 `α ≦ ρ` を使用します。
-  部分型の制約は、図5の部分型の規則を使用して検証されます。
-  それ以外の点では、それらは、制約 `o : α -> τ` のオーバーロードのように動作します。
-
-  **例 5.1** 以下のプログラムは、（便宜上、 `max` の型が追加されている）システムOで型付け可能です。
-
-      let max : ∀β.((<) : β -> β -> bool) =>
-                  ∀α. (α ≦ {key : β}) => α -> α -> α
-              = λx.λy. if #key x < #key y then y else x
-      in
-          max {key = 1, data = a} {key = 2, data = b}
-
-  Standard ML では、セレクタ `＃key` の引数型も、多重定義関数 `(<)` の引数型も静的に解決できないので、同じプログラムは型付けできません。
-
-  部分型制約のバインドされた変数は、次のように制約レコード型にも現れることに注意してください。
-
-    ∀α.(α ≦ {l : α -> bool}) => [α]
-
-  したがって、我々の計算には束縛された多相型に関連した包摂および反変則が欠けているので、限られた形のF束縛多相型 [CCH + 89] が限定されて限られています [<a name="rCW85"></a>[CW85](#CW85)]。
-  我々のシステムがオブジェクト指向プログラミングをモデル化するためにどれほど適しているかはまだ分かりません。
-  オブジェクト指向プログラミング言語におけるいくつかの最近の進展は、部分型を抽象クラスに限定することによって、同じ方向に進むように見えます [<a name="rSOM93"></a>[SOM93](#SOM93)]。
-
-  ここでは、レコードの拡張によって基本的に新しいことは何も追加されないことが示されています。
-  これを行うには、システムOからシステムOへのレコードを含むエンコーディングを提示します。
-  エンコーディングのソースはレコードを持つプログラムで、ソースプログラムのすべてのレコード式 `{l1 = e1, ..., ln = en}` のラベル `l1, ..., ln` は辞書順にソートされています（そうでない場合は、フィールドを並べ替えるだけです）。
-  エンコーディングの詳細は次のとおりです。
-
-  - 1 プログラム内のすべてのレコードフィールドラベル `l` は、 `l` と呼ばれるオーバーロードされた変数で表されます。
-
-  - 2 プログラム内のすべてのレコード式 `{l1 = e1, ..., ln = en}` に対して、同じ名前のコンストラクタを使用して新しい `n-ary` データ型 `R_{l1...ln}` を追加します。 宣言によって与えられたセレクタは以下の通りです
-
-      data R_{l1...ln} α1 ...αn = R_{l1...ln} α1 ...αn.
-
-  - 3 ステップ2で作成したすべてのデータ型 `R_{l1...ln}` とすべてのラベル `li(i = 1, ...,n)` に対して、インスタンス宣言を追加します
-
-        inst li : ∀_{α1...αn}.R_{l1...ln} α1 ...αn -> αi
-              = λ (R_{l1...ln} x1 ... xn) :xi
-
-    （仮パラメータのパターン記法が便宜のために使用される）。
-
-  - 4 レコード式 `{l1 = e1, ..., ln = en}` は、 `R_{l1...ln} e1 ...en` と変換されます。
-  - 5 セレクタ関数 `#l` は `l` に変換されます。
-  - 6 レコード型 `{l1 : τ1, ..., ln : τn}` は、 `Rl1 ... lnτ1...τn` と変換されます。
-
-  ---
-
-    Additional Syntax
-        Field labels        l  ∈ L
-        Terms               e  = ... | #l | {l1 = e1, ..., ln = en}  (n ≧ 0)
-        Record types        ρ  = {l1 : τ1, ..., ln : τn}             (n ≧ 0, with l1, ..., ln distinct)
-        Types               τ  = ... | ρ
-        Constraints on α    πα = ... | α ≦ ρ
-        Typotheses          Γ  = ... | α ≦ ρ
-
-    Subtyping Rules
-
-        Γ, α ≦ ρ ⊢ α ≦ ρ                                            (Taut)
-
-        Γ ⊢   {l1 : τ1, ..., ln : τn, ln+1 : τn+1, ..., ln+k : τn+k}
-             ≦ {l1 : τ1, ..., ln : τn}                                (Rec)
-
-    Additional Typing Rules
-
-        Γ ⊢ e1 : τ1   ...   Γ ⊢ en : τn
-        --------------------------------------------------------------({} I)
-        Γ ⊢ {l1 = e1, ..., ln = en} : {l1 : τ1, ..., ln : τn}
-
-        Γ ⊢ #l : ∀β: ∀α ≦ {l : β}.α -> β                            ({} E)
-
-  図5: レコード型の拡張
-
-  - 7 部分型制約 `α ≦ {l1 : τ1, ..., ln : τn}` は、オーバーロード制約 `l1 : α -> τ1, ..., ln : α -> τn` となります。
-
-  `e†`、 `σ†`、 または `Γ†` を、この変換を、項 `e`、 型スキーム `σ`、 または仮説 `Γ` に適用した結果とします。
-  次に、
-
-  **命題5.2** `Γ† ⊢ e† : τ†` ならば `Γ ⊢ e : τ`。
-
-  命題5.2は、システムOの型の健全性と主要型のプロパティをレコードの拡張に拡張することを可能にします。
-  また、オーバーロードされた識別子の実装体系を考慮して、レコードの実装体系も指しています。
-
-  **例 5.3** 例 5.1のプログラムは以下に変換されます
-
-    inst data : ∀α∀β:R_{data,key} α β -> α
-              = λR_{data,key} x y. x in
-    inst key  : ∀α∀β:R_{data,key} α β -> β
-              = λR_{data,key} x y. y in
-    let max   : ∀β.((<) : β -> β -> bool) =>
-                ∀α.(key : α -> β)=> α -> α -> α
-              = λx.λy.if key x < key y then y else x
-    in
-          max (R_{data,key} 1 a) (R_{data,key} 2 b)
-
-  レコードは、型シグネチャにオーバーロードされた識別子の数を含めるのに役立ちます。
-  この考え方は、オーバーロードされた単一の識別子で構成されたレコードに関連する操作を入れることです。
-  次の例は、このように単純化された `Num` クラスをモデル化する方法を示しています。
-  Haskell のような構文では、レコードに対して中括弧 `{...}` のかわりに `(...)` を使用します。
-
-    type Num a = (plus :: a -> a -> a,
-                  minus:: a -> a -> a,
-                  neg  :: a -> a)
-    over num
-    inst num :: Int -> Num Int
-        num = ...
-
-    (+), (-) :: (num :: a -> Num a) => a -> a -> a
-    neg      :: (num :: a -> Num a) => a -> a
-    (+) x y = #plus  (num x) x y
-    (-) x y = #minus (num x) x y
-    neg x   = #neg   (num x) x
-
-  辞書の受け渡しとの類似点に注意してください。
-  Haskell のクラス宣言に関するこのスキームの1つの欠点は、サブクラス化に関係します。
-  例えば、 `(num :: a -> Num a) => a` 型の変数を型の関数に渡すことができませんでした
-
-    (num :: a -> (plus  :: a -> a -> Bool,
-                  minus :: a -> a -> Bool)) => a -> b
-
-  レコードに完全な部分型を導入しなくても、この一般的なケースに対処するためにシステムを補うことは役に立ちます。
-  これを決定するにはさらに経験が必要です。
-
-## 6 型再構築
-
-  図6と図7は、システムOの型再構築と単一化アルゴリズムを示しています。
-  Milner のアルゴリズムW [<a name="rMil78"></a>[Mil78](#Mil78)] と比較すると、2つの拡張があります。
-
-  - 単一化アルゴリズムにおいて型変数を束縛する場合が拡張されています。
-    型変数 `α` を型 `τ` にバインドするには、 `Γα` の制約を満たす必要があります。
-    関数 `mkinst` は、型 `τ` が制約 `Γα` を保証することを保証します。
-
-   - 関数 `tp` は、インスタンス宣言 `o : στ = e in p` の分岐で拡張されます。
-     この場合、オーバーロード項 `e` の推論された型 `στ'` は、与えられた型 `στ` より一般的ではないことをチェックしなければなりません。
-
-  ここで、アルゴリズム `unify` と ` tp` の健全性と完全性の結果を述べます。
-  これらの結果の証明は、[<a name="rChe94"></a>[Che94](#Che94)] と同様に行います。 ここでは省略されています。
-
-  以下の略語を使用します:
-
-    Γα = {o : α -> τ | o : α -> τ ∈ Γ}
-    ΓA = ∪_{α ∈ A} Γα
-
-  ここで `A` は型変数の集合です。
-
-  **定義**
-  構成は、すべての `α ∈ dom(S)` に対して、 `Γα = ∅` であるような仮説 `Γ` と置換 `S` の対です。
-
-    unify : (τ,τ) -> (Γ,S) -> (Γ,S)
-    unify (τ1,τ2) (Γ,S) = case (S τ1,S τ2) of
-      (α,α) =>
-        (Γ,S)
-      (α,τ),(τ,α) where α ∉ tv(τ) =>
-        foldr mkinst (Γ \ Γα,[τ / α] o S) Γα
-      (T τ1s,T τ2s) =>
-        foldr unify (Γ,S) (zip(τ1s,τ2s))
-
-    mkinst : (o : α -> τ) -> (Γ,S) -> (Γ,S)
-    mkinst (o : α -> τ) (Γ,S) = case S α of
-      β =>
-        if ∃o : β -> τ' ∈ Γ
-        then unify (τ,τ') (Γ,S)
-        else (Γ ∪ {o : β -> [β / α] τ},S)
-      T τs =>
-        case {newinst(στ,Γ,S) | o : στ ∈ Γ} of
-          {(τ1,Γ1,S1)} => unify (α -> τ,τ1) (Γ1,S1)
-
-  図6: 制約付き単一化アルゴリズム
-
-  **定義** 以下では、置換と構成に関する前順序(preorder) `≼` と型スキームの前順序 `≼Γ` を定義しています。
-  `X≼Y` なら `Y` は `X` より一般的です。
-
-  - `S' = R o S` となるような置換 `R` が存在する場合、 `S' ≼ S` です。
-  - `S' ≼ S`, `S'Γ' ⊢ S'Γdom(S')` かつ `Γ' ⊇ Γ \ Γdom(S')` ならば `(Γ',S') ≼ (Γ,S)` です。
-  - すべての `u ∉ dom(Γ)` に対して、 `Γ ⊢ u : σ` が `Γ ⊢ u : σ'` を意味するならば、 `σ' ≼Γ σ` です。
-
-  **定義** 制約付き単一化問題は、 `(τ1,τ2)(Γ,S)` の組で、 `τ1,τ2` は型であり、 `(Γ,S)` は構成です。
-
-  構成 `(Γ',S')` は、 `(Γ',S') ≼ (Γ,S)` かつ `S' τ1 = S' τ2` の場合、 `(τ1,τ2)(Γ,S)` の単一化構成と呼ばれます。
-
-  `(Γ'',S'') ≼ (Γ',S')` の場合は単一化構成 `(Γ',S')` は、他のすべての単一化構成 `(Γ'',S'')` で最も一般的です。
-
-  **定義** 型付け問題は、 `(Γ,S)` が構成であり、 `p` が `fv(p) ⊆ dom(Γ)` を持つ項またはプログラムである三つ組 `(p,Γ,S)` です。
-
-  型付け問題 `(p,Γ,S)` の型付け解決は3つ組 `(σ,Γ',S')` です。ここで `(Γ',S') ≼ (Γ,S)` かつ `S'Γ' ⊢  p : S'σ` です。
-
-  他のすべての型付け解決 `(σ'',Γ'',S'')` は `(Γ'',S'') ≼ (Γ',S')` かつ `S'' σ'' ≼S''Γ'' S'' σ` が成り立つ場合、型付け解決 `(σ,Γ',S')` が最も一般的です。
-
-  **定理6.1** `(τ1,τ2)(Γ,S)` を束縛された単一化問題とします。
-
-  （a） `unify(τ1,τ2)(Γ,S) = (Γ',S')` の場合、 `(Γ',S')` は `(τ1,τ2)(Γ,S)` の最も一般的な単一化構成です。
-
-  （b） `unify(τ1,τ2)(Γ,S)` が失敗した場合、 `(τ1,τ2)(Γ,S)` の単一化構成は存在しません。
-
-  **定理6.2** `(p,Γ,S)` は型付け問題とします。
-
-  （a） `tp (p,Γ,S) = (σ,Γ',S')` ならば、 `(σ,Γ',S')` は最も一般的な `(p,Γ,S)` の解です。
-
-  （b） `tp (p,Γ,S)` が失敗した場合、 `(p,Γ,S)` は解決策を持ちません。
-
-  定理6.2の結果として、すべての型付きプログラムは `tp` によって見つけられる主要な型を持つことが分かります。
-
-  **結果6.3** (主要型) `(p,Γ, id)` が `tv(Γ) = ∅` となるような型付け問題とします。
-
-  (a) `gen (tp (p,Γ,id)) = (σ',Γ',S)` かつ `let σ = Sσ'` と仮定すると、
-
-      Γ ⊢ p : σ                かつ
-      Γ ⊢ p : σ'' => σ'' ≼Γ σ, すべての型スキーム σ'' について.
-
-  （b） `tp (p,Γ,id)` が失敗すると、 `Γ ⊢ p : σ` となる型スキーム `σ` はありません。
-
-  `unify` と `mkinst` の終了は、オーバーロードされた型スキーム `στ` の形式に非常に依存します:
-
-    στ = T α1 ... αn -> τ   (tv(τ) ⊆ {α1, ..., αn})
-       | ∀α.πα => στ'      (tv(πα) ⊆ tv(στ')).
-
-  我々は、 `στ` が `T` の引数でパラメトリックでなければならない例を示します。
-  以下のプログラムを考えてみましょう。ここで `k ∈ KT` です。
-
-    p = let (;) x y = y in
-        inst o : ∀α.o : α -> α => T(Tα) -> α
-            = λk (k x).o x
-        in λx.λy.λf. o x; o y; f (k y); f x
-
-  次に、 `tp (p,∅,id)` の計算は、 `x : α, y : β, f : Tβ -> δ ∈ Γ` を用いて `tp (f x,Γ,S)` と呼びます。
-  これは、次の仮定が成り立つところで、 `unify (α,Tβ)(Γ,S)` を呼び出します。
-
-  - `στ = ∀α.o : α -> α => T(Tα) -> α`
-  - `Γ ⊇ {o : α -> α,o : β -> β,o : στ}`,
-  - `S` は `α,β ∉ dom (S)` の置換です。
-
-  ----
-
-  `unify` を展開すると `mkinst (o : α -> α)(Γ \ Γα, S')` (ここで `S' = [Tβ/α] o S`) が得られ、次の2つの呼び出しにつながります:
-
-  - 1 `newinst(στ, Γ \ Γα, S') = (T (T γ) -> γ, Γ', S')` ここで `Γ' ⊇ {o : β -> β, o : γ -> γ, o : στ}` であり、かつ `γ` は新鮮な型変数であり、
-
-  - 2 `unify (α -> α, T (T γ) -> γ)(Γ', S')` です。
-
-  ----
-
-  `S' α = Tβ` 以降、 （2）を展開すると、 `unify (β, Tγ)(Γ,S)` を呼び出す `Tβ` と `T (Tγ))` を単一化しようとします。
-  これは、元の呼び出し `unify (α, Tβ)(Γ,S)` を `α,β` から `β,γ` にモジュロ改名することと同等です。
-  したがって、この状況では `unify` がループします。
-
-  `στ` に対する他の制限の必要性は、同様の構成によって示されます。
-  たとえば、単一化を通常のツリーに拡張することによって [<a name="rKae92"></a>[Kae92](#Kae92)]、これらの制限を解除する、より一般的なシステムが実現可能かどうかはまだ分かっていません。
-
-## 7 結論
-
-  我々は、 Hindley/Milner システムのやや控えめな拡張が、限定されたF境界型多相型を持つ多重定義と多相型レコードの両方をサポートするのに十分であることを示しました。
-  得られたシステムは、 Hindley/Milner システムに完全に類似した型の健全性および主要型の特性を備えた、ML型の伝統にしっかりと留まります。
-
-    newinst     : (σ,Γ,S)  ->  (τ,Γ,S)
-    newinst(∀α.πα => σ,Γ,S)
-                = let β a new type variable
-                  in  newinst
-                  ([β/α] σ,Γ ∪ [β/α] πα,S)
-    newinst(τ,Γ,S)
-                = (τ,Γ,S)
-
-    skolemize   : (σ,Γ,S) -> (τ,Γ,S)
-    skolemize (∀α.πα => σ,Γ,S)
-                = let T a new 0-ary type constructor
-                  in  skolemize
-                      ([T/α] σ,Γ ∪ [T/α] πα,S)
-    skolemize (τ,Γ,S)
-                = (τ,Γ,S)
-
-    gen         : (τ,Γ,S) -> (σ,Γ,S)
-    gen (σ,Γ,S) = if ∃ α.α ∈ tv(Sσ) \ tv(S (Γ\Γα))
-                  then gen (∀α.Γα => σ,Γ\Γα,S)
-                  else (σ,Γ,S)
-
-    tp          : (p,Γ,S) -> (τ,Γ,S)
-    tp (u,Γ,S)  = if u : σ ∈ Γ
-                  then newinst (σ,Γ,S)
-
-    tp (o,Γ,S)  = newinst (∀β ∀α: (o : α -> β) => α -> β,Γ,S)
-
-    tp (λu.e,Γ,S)
-                = let α a new type variable
-                    (τ,Γ1,S1) = tp (e, Γ ∪ {u : α},S)
-                  in (α -> τ,Γ1,S1)
-
-    tp (e e',Γ,S)
-                = let (τ1,Γ1,S1) = tp (e,Γ,S)
-                      (τ2,Γ2,S2) = tp (e,Γ1,S1)
-                      α a new type variable
-                      (Γ3,S3) = unify (τ1,τ2 -> α) (Γ2,S2)
-                  in (α,Γ3,S3)
-
-    tp (let u = e in e',Γ,S)
-                = let (σ,Γ1,S1) = gen (tp (e,Γ,S))
-                  in tp (e,Γ1 ∪ {u : σ},S1)
-
-    tp (inst o : στ = e in p,Γ,S)
-                = let (στ',Γ1,S1) = gen (tp (e,Γ,S))
-                      (τ2,Γ2,S2) = skolemize (στ,Γ1,S1)
-                      (τ3,Γ3,S3) = newinst (στ',Γ2,S2)
-                  in if ∀o : στ' ∈ Γ . T ≠ T' ∧
-                        unify (τ2,τ3)(Γ3,S3) defined then
-                          tp (p, Γ1 ∪ {o : στ},S1)
-
-  図7: システムOの型再構築アルゴリズム
-
-  システムOの多相レコード計算の符号化は、F境界のある多相性とオーバーロードとの間により深い関係がある可能性があることを示しています。
-  これは、型クラスのための辞書変換と有界多相のためのペン変換 [<a name="rBTCGS91"></a>[BTCGS91](#BTCGS91)] との間の類似点によっても示唆されます。
-  これらの関係の研究は今後の課題として残されています。
-
-## 謝辞
-
-  本書のこれまでの草案に関する貴重なコメントをお寄せいただきました Kung Chen と John Maraist には感謝しています。
-  レコードに関する章は、 Simon Peyton Jones、 Mark Jones、 および Haskell のメーリングリストの他の人が主催したディスカッションによって動機づけられました。
-  多数の参加者との他の多くの議論もこの作業に貢献しています。
-
-## 参考文献
+Proposition 3.4 Let  be a type scheme and let  be an environment.
+Then [[]] is an ideal.
+Proof: The closure properties are shown by straightforward inductions on the structure of .
+It remains to be shown that W 62 [[]].
+By Lemma 3.3(b) there is a monotype μ such that  j= μ μ .
+Hence, [[]]  [[μ]].
+But [[μ]] is an ideal and therefore does not contain W.
+2 Proposition 3.4 expresses an important property of our semantics: every type scheme is an ideal, even if it contains a type variable constraint o : ff !  , where o does not have any explicitly declared instances at all.
+Consequently, there is no need to rule out such a type scheme statically.
+This corresponds to Haskell's \open world" approach to type-checking, as opposed to the \closed world" approach of e.g.
+[Smi91].
+Interestingly, the only thing that distinguishes those two approaches in the semantics of type schemes is the absence or presence of the bottom type ? .
+
+We now show that System O is sound, i.e.
+that syntactic type judgements ` p :  are reected by semantic type judgements j= p : .
+
+Definition.
+
+Let e be a term, let be a closed typothesis, and let  be a closed type scheme.
+Then j= e :  iff, for all environments ,  j= implies  j= e : .
+
+As a first step, we prove a soundness theorem for terms.
+This needs an auxiliary lemma, whose proof is straightforward.
+
+Lemma 3.5 If  j= e :  and  j= μ μ  then  j= e : μ.
+
+Theorem 3.6 (Type Soundness for Terms) Let ` e :  be a valid typing judgement and let S be a substitution such that S and S are closed.
+Then S j= e : S.
+
+Proof: Assume ` e :  and  j= S.
+We do an induction on the derivation of ` e : .
+We only show cases (8I), (8E), whose corresponding inference rules differ from the Hindley/Milner system.
+The proofs of the other rules are similar to the treatment in [Mil78 ].
+
+Case (8I): Then the last step in the derivation is
+
+
+Figure 4: The dictionary passing transform
+
+for some ff, ff, 0
+with  = 8ff:ff ) 0
+.
+We have to show
+that e 2 [[μ]], for all μ such that  j= μ μ 8ff:Sff ) S0
+.
+Pick an arbitrary such μ.
+By definition of (μ), there exists
+a μ0
+such that  j= [μ0
+=ff](Sff) and  j= μ μ [μ0
+=ff](S0
+).
+Let S0
+= [μ0
+=ff]  S.
+Then  j= S0
+ff and  j= μ μ S0
+0
+.
+Since ff 62 tv(),
+ j= S0
+
+and therefore  j= S0
+(;
+ff). Then
+by the induction hypothesis,  j= e : S0
+0
+. It follows with
+Lemma 3.5 that  j= e : μ.
+
+
+Case (8E): Then the last step in the derivation is
+
+` e : 8ff:ff ) 0
+
+` [ =ff]ff
+
+` e : [ =ff]0
+for some ff, ff, 0
+,  with  = [ =ff]0
+. We have to show
+that e 2 [[μ]], for all μ such that  j= μ μ [S =ff]S0
+. Pick
+an arbitrary such μ. By the induction hypothesis,  j= e :
+8ff:Sff ) S0
+and  j= [S =ff](Sff). It follows with the
+definition of μ that  j= μ μ 8ff:Sff ) S0
+. Then by
+Lemma 3.5,  j= e : μ. 2
+We now extend the type soundness theorem to whole programs
+that can contain instance declarations.
+Theorem 3.7 (Type Soundness for Programs)
+Let
+` p :  be a valid closed typing judgement. Then
+
+j= p : .
+Proof: By induction on the structure of p. If p is a term, the
+result follows from Theorem 3.6. Otherwise p is an instance
+declaration at top-level. Then the last step in the derivation
+of
+` p :  is
+o : T 0 2
+) T 6= T 0
+
+` e : T ;
+o : T ` p : 
+
+` inst o : T = e in p
+0
+: 
+for some type scheme T . We have to show that  j= inst o :
+T = e in p
+0
+: . By Theorem 3.6,  j= e : T , which implies
+that [[e]] is a function. Therefore, [[p]] = [[p
+0
+]][o := f ]
+where f = extend(T ; [[e]]; (o)).
+Our next step is to show that f 2 [[T ]]. Let μ be
+such that  j= μ μ T . Then μ = T μ1 ; : : : ; μn ! μ0
+,
+for some monotypes μ1 ; : : : ; μn; μ0
+. Now assume that v 2
+[[T μ1; : : : ; μn]]. If v = ? then f v = ? 2 [[μ0
+]]. Otherwise, by
+the definition of extend, f v = [[e]] v, and [[e]] v 2 [[μ0
+]]. In
+both cases f v 2 [[μ0
+]]. Since v 2 [[T μ1; : : : ; μn]] was arbitrary,
+we have f 2 [[μ]]. Since μ was arbitrary, this implies f 2
+[[T ]]
+It follows that [o := f ] j= o : T . Furthermore, since
+ j= ,
+and
+contains by the premise of rule (INST) no
+binding o : T , we have that [o := f ] j= .
+Taken together,
+[o := f ] j= ;
+o : T . By the induction hypothesis, [o :=
+f ] j= p
+0
+: , which implies the proposition. 2
+A corollary of this theorem supports the slogan that \well
+typed programs do not go wrong".
+Corollary 3.8 Let
+` p :  be a valid closed typing judgement
+and let  be an environment. If  j=
+then [[p]] 6= W.
+Proof: Immediate from Theorem 3.7 and Proposition 3.4. 2
+
+## 4 Translation
+
+This section studies the \dictionary passing" transform from System O to the Hindley/Milner system.
+Its central idea is to convert a term of type 8ff:ff )  to a function that takes as arguments implementations of the overloaded variables in ff.
+These arguments are also called \dictionaries".
+The target language of the translation is the Hindley/Milner system, which is obtained from System O by eliminating overloaded variables o, instance declarations, and constraints ff in type schemes.
+The translation of terms is given in Figure 4.
+It is formulated as a function of type derivations, where we augment type judgements with an additional component e
+
+that defines the translation of a term
+or program p, e.g.
+` p :   p
+
+. To ensure the coherence of
+the translation, we assume that the overloaded identifiers oi
+in a type variable constraint fo1 : ff ! 1 ; : : : ; on : ff ! ng
+are always ordered lexicographically.
+Types and type schemes are translated as follows.
+
+
+= 
+(8ff: ) )
+
+= 8ff:
+(8ff:o : ff !  ; ff ) )
+
+= 8ff:(ff !  ) ! (8ff ) )
+
+The last clause violates our type syntax in that a type
+scheme can be generated as the result part of an arrow.
+7
+This is compensated by defining
+ ! 8ff:
+def
+= 8ff: ! :
+Bindings and typotheses are translated as follows.
+(u : )
+
+= u : 
+(o : )
+
+= uo; : 
+:
+o1 : 1 ; : : : ; on : n = (o1 : 1)
+
+; : : : ; (on : n)
+
+:
+This translates an overloaded variable o to a new unique
+variable uo; , whose identity depends on both the name o
+and its type scheme, .
+Each derivation rule
+` p :  in System O corresponds
+to a derivation of translated typotheses, terms and type
+schemes in the Hindley/Milner system. One therefore has:
+Proposition 4.1 If
+` p :   p
+
+is valid then
+` p
+
+: 
+is valid in the Hindley/Milner system
+We believe that the translation preserves semantics in
+the following sense.
+Conjecture Let p be a program, μ be a monotype, and let
+ be an environment. Let
+be a typothesis which does not
+contain overloaded variables. If
+` p : μ  p
+
+and  j=
+then [[p]] = [[p
+
+]].
+Although the above claim seems clearly correct, its formal
+proof is not trivial. Note that coherence of the translation
+would follow immediately from the above conjecture. Coherence,
+again, is a property that appears obvious but is
+notoriously tricky to demonstrate [Blo91, Jon92a], so it is
+perhaps not surprising that the above conjecture shares this
+property.
+5 Relationship with Record Typing
+In this section we study an extension of our type system
+with a simple polymorphic record calculus similar to Ohori's
+[Oho92]. Figure 5 details the extended calculus. We add to
+System O
+ record types fl1 : 1; : : : ; ln : ng,
+ record expressions fl1 = e1 ; :::; ln = eng, and
+ selector functions #l.
+It would be easy to add record updates, as in the work
+of Ohori, but more dicult to handle record extension, as
+in the work of Wand [Wan87] or Remy [Rem89]. Jones
+[Jon92a] has shown how to embed Remy's system of extensible
+records by extending unification to an AC theory for
+records and using (multi-parameter) type classes for stating
+the absence of fields in a record. Both updates and extensions
+are however omitted here for simplicity.
+Leaving open for the moment the type of selector functions,
+the system presented so far corresponds roughly to
+the way records are defined in Standard ML. Selectors are
+treated in Standard ML as overloaded functions. As with
+all overloaded functions, the type of the argument of a selector
+has to be known statically; if it isn't, an overloading
+resolution error results.
+Our record extension also treats selectors as overloaded
+functions but uses the overloading concept of System O. The
+most general type scheme of a selector #l is
+8fi :8ff:(ff  fl : fig) ) ff ! fi :
+This says that #l can be applied to records that have a field
+l :  , in which case it will yield a value of type  . The
+type scheme uses a subtype constraint ff  . Subtype constraints
+are validated using the subtyping rules in Figure 5.
+In all other respects, they behave just like overloading constraints
+o : ff !  .
+Example 5.1 The following program is typable in System
+O (where the typing of max is added for convenience).
+let max : 8fi :((<) : fi ! fi ! bool) )
+8ff:(ff  fkey : fig) ) ff ! ff ! ff
+= x:y:if #key x < #key y then y else x
+in
+max fkey = 1; data = ag fkey = 2; data = bg
+In Standard ML, the same program would not be typable
+since neither the argument type of the selector #key nor the
+argument type of the overloaded function (<) are statically
+known.
+Note that the bound variable in a subtype constraint can
+also appear in the constraining record type, as in
+8ff:(ff  fl : ff ! boolg) ) [ff]
+Hence, we have a limited form of F-bounded polymorphism
+[CCH+
+89] | limited since our calculus lacks the subsumption
+and contravariance rules often associated with bounded
+polymorphism [CW85]. It remains to be seen how suitable
+our system is for modeling object-oriented programming.
+Some recent developments in object-oriented programming
+languages seem to go in the same direction, by restricting
+subtyping to abstract classes [SOM93].
+We now show that the record extension adds nothing
+essentially new to our language. We do this by presenting
+an encoding from System O with records to plain System O.
+The source of the encoding is a program with records, where
+we assume that the labels l1 ; : : : ; ln of all record expressions
+fl1 = e1; :::; ln = eng in the source program are sorted lexicographically
+(if they are not, just rearrange fields). The
+details of the encoding are as follows.
+1. Every record-field label l in a program is represented by
+an overloaded variable, which is also called l.
+2. For every record expression fl1 = e1; :::; ln = eng in
+a program, we add a fresh n-ary datatype Rl1 :::ln with a
+constructor of the same name and selectors as given by the
+declaration
+data Rl1:::ln ff1 ::: ffn = Rl1:::ln ff1 ::: ffn:
+3. For every datatype Rl1:::ln created in Step 2 and every
+label li (i = 1; :::; n), we add an instance declaration
+inst li : 8ff1:::ffn:Rl1:::ln ff1 ::: ffn ! ffi
+= (Rl1 :::ln x1 ::: xn):xi
+(where the pattern notation in the formal parameter is used
+for convenience).
+4. A record expression fl1 = e1; :::; ln = eng now translates
+to Rl1:::ln e1 ::: en.
+5. A selector function #l translates to l.
+6. A record type fl1 : 1; :::; ln : ng is translated to
+Rl1:::ln 1 ::: n.
+8
+Additional Syntax
+Field labels l 2 L
+Terms e = : : : j #l j fl1 = e1; : : : ; ln = eng (n  0)
+Record types  = fl1 : 1; : : : ; ln : ng (n  0, with l1 ; : : : ; ln distinct)
+Types  = : : : j 
+Constraints on ff ff = : : : j ff  
+Typotheses
+= : : : j ff  
+Subtyping Rules
+(Taut) ;
+ff   ` ff  
+` fl1 : 1; : : : ; ln : n; ln+1 : n+1; : : : ; ln+k : n+k g (Rec)
+ fl1 : 1; : : : ; ln : ng
+Additional Typing Rules
+(f gI)
+` e1 : 1 : : :
+` en : n
+
+` fl1 = e1; : : : ; ln = eng : fl1 : 1; : : : ; ln : ng
+
+` #l : 8fi :8ff  fl : fig:ff ! fi (f gE)
+Figure 5: Extension with record types.
+7. A subtype constraint ff  fl1 : 1; :::; ln : ng becomes an
+overloading constraint l1 : ff ! 1; : : : ; ln : ff ! n:
+Let e
+y
+, y
+, or y
+be the result of applying this translation
+to a term e, a type scheme , or a typothesis .
+Then one
+has:
+Proposition 5.2
+` e :  iff y
+` e
+y
+: 
+y
+.
+Proposition 5.2 enables us to extend the type soundness and
+principal type properties of System O to its record extension
+without having to validate them again. It also points to an
+implementation scheme for records, given an implementation
+scheme for overloaded identifiers.
+Example 5.3 The program of Example 5.1 translates to
+inst data : 8ff8fi :Rdata;key ff fi ! ff
+= Rdata;key x y: x in
+inst key : 8ff8fi :Rdata;key ff fi ! fi
+= Rdata;key x y: y in
+let max : 8fi :((<) : fi ! fi ! bool) )
+8ff:(key : ff ! fi) ) ff ! ff ! ff
+= x:y:if key x < key y then y else x
+in
+max (Rdata;key 1 a) (Rdata;key 2 b)
+
+Records can help to contain the number of overloaded identifiers in type signatures.
+The idea is to put related operations in a record which is constructed with a single overloaded identifier.
+The next example expresses shows how to model a simplified Num class in this way.
+In the Haskell-like syntax we use parentheses (...) instead of braces {...} for records.
+
+type Num a = (plus :: a -> a -> a,
+minus:: a -> a -> a,
+neg :: a -> a)
+over num
+inst num :: Int -> Num Int
+num = ...
+(+), (-) :: (num :: a -> Num a) => a -> a -> a
+neg :: (num :: a -> Num a) => a -> a
+(+) x y = #plus (num x) x y
+(-) x y = #minus (num x) x y
+neg x = #neg (num x) x
+
+Note the similarity to dictionary passing.
+One shortcoming of this scheme with respect to Haskell's class declarations concerns subclassing.
+For instance, we could not pass a variable of type (num :: a -> Num a) => a to a function of type
+
+    (num :: a -> (plus :: a -> a -> Bool,
+    minus :: a -> a -> Bool)) => a -> b
+
+Even without introducing full subtyping on records it may be helpful to supplement our system with some way for dealing with this common case.
+Further experience will be required to determine this.
+
+## 6 Type Reconstruction
+
+Figures 6 and 7 present type reconstruction and unification algorithm for System O.
+Compared to Milner's algorithm W [Mil78] there are two extensions.
+
+- The case of binding a type variable in the unification algorithm is extended.
+To bind a type variable ff to a type  the constraints of  have to be satisfied.
+The function mkinst ensures that type  statisfies the constraints .
+- The function tp is extended with a branch for instance declarations inst o : T = e in p.
+In this case it must be checked that the inferred type 0 T for the overloading term e is less general then the given type T .
+We now state soundness and completeness results for the algorithms unif y and tp.
+The proofs of these results are along the lines of [Che94]; they are omitted here.
+We use the following abbreviations:
+
+ = fo : ff !  j o : ff !  2 g
+A
+= [ff2A
+
+where A is a set of type variables.
+Definition. A configuration is a pair of a typothesis
+and
+a substitution S such that, for all ff 2 dom(S),
+ = ;.
+9
+unif y : ( ;  ) ! (;
+S) ! (;
+S)
+unif y (1; 2) (;
+S) = case (S1; S2 ) of
+(ff; ff) )
+(;
+S)
+(ff;  ); ( ; ff) where ff 62 tv( ) )
+f oldr mkinst (n
+; [ =ff]  S)
+
+(T  1; T  2) )
+f oldr unif y (;
+S) (zip ( 1;  2))
+mkinst : (o : ff !  ) ! (;
+S) ! (;
+S)
+mkinst (o : ff !  ) (;
+S) = case Sff of
+fi )
+if 9o : fi ! 
+0
+2
+then unif y ( ;  0
+) (;
+S)
+else (
+[ fo : fi ! [fi=ff] g; S)
+T  )
+case fnewinst (T ; ;
+S) j o : T 2 g
+of
+f(1 ; 1;
+S1 )g ) unif y (ff !  ; 1) (1;
+S1 )
+Figure 6: Algorithm for constrained unification
+Definition. The following defines a preorder μ on substitutions
+and configurations and a preorder μ
+on type schemes.
+If X μ Y we say that Y is more general than X.
+ S0
+μ S iff there is a substitution R such that S0
+= RS.
+ (0
+; S0
+) μ (;
+S) iff S0
+μ S, S0
+0
+` S0
+dom(S0
+) and
+0
+
+n dom(S0
+) .
+ 0
+μ
+ iff, for all u 62 dom(),
+
+` u :  implies
+
+` u : 0
+.
+Definition. A constrained unification problem is a pair of
+tuples (1; 2)(;
+S) where 1; 2 are types and (;
+S) is a
+configuration.
+A configuration (0
+; S0
+) is called a unifying configuration
+for (1; 2)(;
+S) iff (0
+; S0
+) μ (;
+S) and S0
+1 = S0
+2 .
+The unifying configuration (0
+; S0
+) is most general iff
+(00
+; S00 ) μ (0
+; S0
+), for every other unifying configuration
+(00
+; S00 ).
+Definition. A typing problem is a triple (p; ;
+S) where
+(;
+S) is a configuration and p is a term or program with
+fv(p)  dom().
+A typing solution of a typing problem (p; ;
+S) is a triple
+(; 0
+; S0
+) where (0
+; S0
+) μ (;
+S) and S0
+0
+` p : S0
+.
+The typing solution (; 0
+; S0
+) is most general iff for every
+other typing solution (00
+; 00
+; S00 ) it holds (00
+; S00) μ (0
+; S0
+)
+and S0000 μS0000
+S00.
+Theorem 6.1 Let (1; 2 )(;
+S) be a constrained unification
+problem
+(a) If unif y(1; 2 )(;
+S) = (0
+; S0
+) then (0
+; S0
+) is a most
+general unifying configuration for (1; 2 )(;
+S).
+(b) If unif y(1 ; 2)(;
+S) fails then there exists no unifying
+configuration for (1; 2)(;
+S).
+Theorem 6.2 Let (p; ;
+S) be a typing problem.
+(a) If tp (p; ;
+S) = (; 0
+; S0
+) then (; 0
+; S0
+) is a most general
+solution of (p; ;
+S).
+(b) If tp (p; ;
+S) fails, then (p; ;
+S) has no solution.
+As a corollary of Theorem 6.2, we get that every typable
+program has a principal type, which is found by tp.
+Corollary 6.3 (Principal Types) Let (p; ;
+id) be a typing
+problem such that tv()
+= ;.
+(a) Assume gen (tp (p; ;
+id)) = (0
+; 0
+; S) and let  =
+S0
+. Then
+
+` p :  and
+
+` p : 00 ) 00 μ
+; for all type schemes 00
+.
+(b) If tp (p; ;
+id) fails then there is no type scheme  such
+that
+` p : .
+The termination of unif y and mkinst critically depends on
+the form of overloaded type schemes T :
+T = T ff1 ::: ffn !  (tv( )  fff1; : : : ; ffng)
+j 8ff:ff ) 0
+T (tv(ff)  tv(0
+T )):
+We show with an example why T needs to be parametric
+in the arguments of T . Consider the following program,
+where k 2 KT .
+p = let (;) x y = y in
+inst o : 8ff:o : ff ! ff ) T (T ff) ! ff
+= k(k x):o x
+in x:y:f : o x ; o y ; f (k y) ; f x
+Then computation of tp(p; ;; id) leads to a call tp(f x; ;
+S)
+with x : ff; y : fi ; f : T fi !  2 .
+This leads in turn to a call
+unif y(ff; T fi)(;
+S) where the following assumptions hold:
+ T = 8ff:o : ff ! ff ) T (T ff) ! ff
+
+ fo : ff ! ff; o : fi ! fi ; o : T g,
+ S is a substitution with ff; fi 62 dom(S).
+Unfolding unify gives mkinst(o : ff ! ff)(
+n
+; S0
+) where
+S0
+= [T fi=ff]  S, which leads in turn to the following two
+calls:
+1. newinst(T ;
+n
+; S0
+) = (T (T ) !  ; 0
+; S0
+)
+where 0
+ fo : fi ! fi ; o :  !  ; o : T g and  is a
+fresh type variable, and
+2. unif y(ff ! ff; T (T ) ! )(0
+; S0
+).
+Since S0
+ff = T fi, unfolding of (2) results in an attempt
+to unify T fi and T (T )), which leads to the call
+unif y(fi ; T )(0
+; S0
+). This is equivalent to the original call
+unif y(ff; T fi)(;
+S) modulo renaming of ff; fi to fi ; .
+
+Hence, unif y would loop in this situation.
+The need for the other restrictions on T are shown by similar constructions.
+It remains to be seen whether a more general system is feasible that lifts these restrictions, e.g.
+by extending unification to regular trees [Kae92].
+
+## 7 Conclusion
+
+We have shown that a rather modest extension to the Hindley/Milner system is enough to support both overloading and polymorphic records with a limited form of F-bounded polymorphism.
+The resulting system stays firmly in the tradition of ML typing, with type soundness and principal type properties completely analogous to the Hindley/Milner system.
+
+Figure 7: Type reconstruction algorithm for System O
+
+The encoding of a polymorphic record calculus in System O indicates that there might be some deeper relationships between F-bounded polymorphism and overloading.
+This is also suggested by the similarities between the dictionary transform for type classes and the Penn translation for bounded polymorphism [BTCGS91].
+A study of these relationships remains a topic for future work.
+Acknowledgments We are grateful to Kung Chen and John Maraist for valuable comments on previous drafts of this paper.
+The section on records was motivated in part by a discussion led by Simon Peyton Jones, Mark Jones and others on the Haskell mailing list.
+Many other discussions with numerous participants have also contributed to this work.
+
+# References
 
   [<a name="App93"></a>[App93](#rApp93)] Andrew W. Appel. A critique of standard ML. Journal of Functional Programming, 3(4), 1993.
 
