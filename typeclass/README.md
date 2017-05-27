@@ -1,107 +1,51 @@
 # Type classes
 
-# 型クラス
-
 Philip Wadler
 
-Ｐ・ワドラー
+## 1. 暗黙の計算： ジェネリックプログラミングの新しい基盤 - The Implicit Calculus: A New Foundation for Generic Programming
 
-## The Implicit Calculus: A New Foundation for Generic Programming
+  Bruno C. D. S. Oliveira、Tom Schrijvers、Wontae Choi、Wonchanchan、Kwangkeun Yi、Philip Wadler。ドラフト・ペーパー、2014年。
 
-## 陰の微積分法：一般的なプログラミングの新しい基盤
+  汎用プログラミング（GP）は、プログラミング言語においてますます重要な傾向となっている。
+  型クラスやC++0xのコンセプト提案などのよく知られているGPメカニズムは、通常、2つの機能を組み合わせています:
+  1）特別なインターフェースの型; と
+  2）それらのインタフェースの実装の暗黙的なインスタンス化です。
 
-Bruno C. D. S. Oliveira, Tom Schrijvers, Wontae Choi, Wonchan Lee, Kwangkeun Yi, Philip Wadler. Draft paper, 2014.
+  Scala implicitsは、特別なインタフェースの型で暗黙的なインスタンスを結合するという伝統に打ち勝つ、型クラスに触発されたGP言語メカニズムです。
+  代わりに、implicitsは、暗黙的なインスタンス化のみを提供します。
+  これは、どのような型でも機能するように一般化されています。 
+  Scalaのimplicitsは、他のGPメカニズムに現れる多くの制限に対処するために、非常に強力で有用であることが分かります。
 
-ブルーノC. D. S.オリベイラ、トムSchrijvers、Wontaeチェ、Wonchanリー、Kwangkeun一、Ｐ・ワドラー。召集令状、2014。
+  この論文では、暗黙の計算(\lambda_?)と呼ばれる最小限の一般的なコア計算で正式なimplicitsの重要なアイデアを合成し、その上に暗黙的なインスタンス化をサポートするソース言語を構築する方法を示します。
+  この計算の新規性は、部分解決と高階規則（以前に提案されているが、形式化も実装もされていない機能）のサポートです。
+  最終的に、暗黙の計算は、言語設計者が自分の言語で同様のメカニズムの実装を研究し、通知するために使用できる形式的なimplicitsのモデルを提供します。
 
-Generic programming (GP) is an increasingly important trend in programming languages. Well-known GP mechanisms, such as type classes and the C++0x concepts proposal, usually combine two features: 1) a special type of interfaces; and 2) implicit instantiation of implementations of those interfaces.
+## 2. オーバーロードの第2の見方 - A second look at overloading
 
-一般的なプログラミング（GP）は、プログラミング言語のますます重要な傾向です。有名なGPメカニズム（例えば型クラスとC++0x概念提案）は、通常2つの特徴を結合します： 1) 特別な種類のインターフェース;そして、2）それらのインターフェースの実施の潜在的な例示。
+  Martin Odersky、Philip Wadler、Martin Wehr。 1995年6月、カリフォルニア州サンディエゴのACM Press、Functional Programming and Computer Architectureに関する第7回国際会議。
 
+  我々は、オーバーロードと多相レコードをサポートするHindley/Milnerシステムの最小限の拡張を研究します。
+  標準の型なしの構成的セマンティクスに関して型システムは健全であることを示します。
+  また、このシステムのすべての型付け可能な項には主要型があり、その型を再構築(型推論)するアルゴリズムが示されています。
 
+## 3. Haskellで型クラス - Type classes in Haskell
 
-Scala implicits are a GP language mechanism, inspired by type classes, that break with the tradition of coupling implicit instantiation with a special type of interface. Instead, implicits provide only implicit instantiation, which is generalized to work for any types. Scala implicits turn out to be quite powerful and useful to address many limitations that show up in other GP mechanisms.
+  コーデリア・ホール、ケヴィン・ハモンド、サイモン・ペイトン・ジョーンズ、フィリップ・ワドラー。プログラミングに関する欧州シンポジウム、LNCS 788、Springer Verlag、pp。241-256、1994年4月。
 
-階implicitsはGP言語メカニズムです。そして、型クラス（特別な種類のインターフェースで継手潜在的な例示の伝統を破ります）の影響を受けます。その代わりに、implicitsは潜在的な例示だけを提供します。そして、それはどんなタイプのためにでも仕事に一般化されます。階implicitsは、全く強力で他のGPメカニズムで現れる多くの限界について述べるために役に立つことがわかります。
+  この論文では、型クラスによって導入されたオーバーロードを解決するための型推論規則のセットを定義します。
+  型クラスを含むプログラムは、Hindley-Milner推論規則によって型付けされたプログラムに変換されます。
+  型クラスに関する他の作業とは対照的に、ここに示す規則はユーザープログラムに直接関連しています。
+  この作業の革新的な側面は、2階のラムダ計算を使用してプログラムの型情報を記録することです。
 
+## 4. Haskellの静的セマンティクス - A static semantics for Haskell
 
+  サイモン・ペイトン・ジョーンズとフィリップ・ワドラー。 ドラフト紙、グラスゴー、1991年。
 
-This paper synthesizes the key ideas of implicits formally in a minimal and general core calculus called the implicit calculus (\lambda_?), and it shows how to build source languages supporting implicit instantiation on top of it. A novelty of the calculus is its support for partial resolution and higher-order rules (a feature that has been proposed before, but was never formalized or implemented). Ultimately, the implicit calculus provides a formal model of implicits, which can be used by language designers to study and inform implementations of similar mechanisms in their own languages.
+## 5. アドホック多相をより随所に作る方法 - How to make ad-hoc polymorphism less ad hoc
 
-本論文は陰の微積分法と呼ばれている最小で一般的な必須微積分学で正式にimplicitsについての鍵となる考えを総合します（\lambda_？）、そして、それはそれの上で潜在的な例示をサポートしている起点言語を構築する方法を示します。微積分学の目新しさは、部分的な決議と高次規則（プロポーズされたが、決して正式のものにされなかったか、インプリメントされる特徴）に対するその支持です。最後に、陰の微積分法はimplicitsの形式的モデルを提供します。そして、それは勉強して、彼ら自身の言語で実現例に類似したメカニズムを知らせるのに言語デザイナーによって用いられることができます。
+  フィリップ・ワドラーとスティーブン・ブロット。 プログラミング言語の原則に関する第16回シンポジウム、ACM Press、Austin、Texas、1989年1月。
 
-
-
-Available in: pdf.
-
-以下で利用できる：pdf.
-
-## A second look at overloading
-
-## オーバーローディングの2件目の観察
-
-Martin Odersky, Philip Wadler, Martin Wehr. 7'th International Conference on Functional Programming and Computer Architecture, ACM Press, San Diego, California, June 1995.
-
-マーティンOdersky、Ｐ・ワドラー、マーティン・ベーア。関数型プログラミングとコンピュータ建築、ACMプレス、サンディエゴ、カリフォルニア、6月の7'th国際会議1995.
-
-We study a minimal extension of the Hindley/Milner system that supports overloading and polymorphic records. We show that the type system is sound with respect to a standard untyped compositional semantics. We also show that every typable term in this system has a principal type and give an algorithm to reconstruct that type.
-
-我々は、オーバーローディングと多形記録をサポートするヒンドリー・ミルナー・システムの最小の拡張を研究します。我々は、タイプ・システムが標準的な非入力された構成意味論に関する音であることを示します。我々も、このシステムのtypableな学期ごとには主要なタイプがあることを示して、そのタイプを再構築するために、アルゴリズムを伝えます。
-
-
-
-Available in: dvi, ps, dvi.gz, ps.gz.
-
-以下で利用できる：dvi, ps, dvi.gz, ps.gz.
-
-## Type classes in Haskell
-
-## Haskellの型クラス
-
-Cordelia Hall, Kevin Hammond, Simon Peyton Jones, and Philip Wadler. European Symposium On Programming, LNCS 788, Springer Verlag, pp. 241-256, April 1994.
-
-コーデリア・ホール、ケビン・ハモンド、サイモン・ペイトン・ジョーンズとＰ・ワドラー。プログラミング、LNCS 788、はねる人Verlagの上のヨーロッパのシンポジウム、241-256、1994年4月に、pp.。
-
-This paper defines a set of type inference rules for resolving overloading introduced by type classes. Programs including type classes are transformed into ones which may be typed by the Hindley-Milner inference rules. In contrast to an other work on type classes, the rules presented here relate directly to user programs. An innovative aspect of this work is the use of second-order lambda calculus to record type information in the program.
-
-本論文は、型クラスによって導入されるオーバーローディングを分解することに対する一組のタイプ推論規則を定めます。型クラスを含むプログラムは、ヒンドリー・ミルナー推論規則によって入力されるかもしれないものに変わります。型クラスの他の研究と対照的に、ここで提示される規則は、直接ユーザープログラムに関するものです。この仕事の革新的な面は、プログラムでタイプ情報を記録する第2の順序ラムダ微積分法の使用です。
-
-
-
-Available in: dvi, ps, dvi.gz, ps.gz.
-
-以下で利用できる：dvi, ps, dvi.gz, ps.gz.
-
-## A static semantics for Haskell
-
-## Haskellのための静的意味論
-
-Simon Peyton Jones and Philip Wadler. Draft paper, Glasgow, 1991.
-
-サイモン・ペイトン・ジョーンズとＰ・ワドラー。召集令状、グラスゴー、1991。
-
-Available in: dvi, ps, dvi.gz, ps.gz.
-
-以下で利用できる：dvi, ps, dvi.gz, ps.gz.
-
-## How to make ad-hoc polymorphism less ad hoc
-
-## より特別に特別ポリエステル繊維モルフィズムを作らない方法
-
-Philip Wadler and Stephen Blott. 16'th Symposium on Principles of Programming Languages, ACM Press, Austin, Texas, January 1989.
-
-Ｐ・ワドラーとスティーブンBlott。 プログラミング言語、ACMプレス、テキサス州オースティン、1989年1月の原則に関する16'thシンポジウム。
-
-This paper presents type classes, a new approach to ad-hoc polymorphism. Type classes permit overloading of arithmetic operators such as multiplication, and generalise the ``eqtype variables'' of Standard ML. Type classes extend the Hindley-Milner polymorphic type system, and provide a new approach to issues that arise in object-oriented programming, bounded type quantification, and abstract data types. This paper provides an informal introduction to type classes, and defines them formally by means of type inference rules.
-
-本論文は、型クラス（アドホック多相への新しいアプローチ）を公演します。型クラスは掛け算のような算術演算子にオーバーロードすることを許可して、Standard MLの「eqtype変数」を一般化します。型クラスはヒンドリー・ミルナー多相型システムを拡張して、新しいアプローチをオブジェクト指向プログラミング、囲まれている型量化と抽象データ型で起こる問題に提供します。本論文は非公式の導入を型クラスに提供して、型推論規則によって正式に彼らを定めます。
-
-
-
-Available in: dvi, ps, dvi.gz, ps.gz.
-
-以下で利用できる：dvi, ps, dvi.gz, ps.gz.
-
-Philip Wadler,
-
-Ｐ・ワドラー,  
+  この論文では、アドホック多相への新しいアプローチである型クラスを紹介する。
+  型クラスは、乗算などの算術演算子のオーバーロードを許し、 Standard ML の ``eqtype変数'' を一般化します。
+  型クラスは Hindley-Milner多相型システムを拡張し、オブジェクト指向プログラミング、有界型の定量化、抽象データ型で発生する問題に対する新しいアプローチを提供します。
+  この論文では、型クラスを非公式に紹介し、型推論ルールを使用して形式的に定義します。
