@@ -19,56 +19,59 @@
   In addition to the basic type checking algorithm, an implementation of type classes also requires some form of program transformation.
 
   In all current Haskell compilers this takes the form of dictionary conversion, using functions as hidden parameters to overloaded values.
-  We present ecient techniques for type checking and dictionary conversion.
+  We present efficient techniques for type checking and dictionary conversion.
   A number of optimizations and extensions to the basic type class system are also described.
 
 ## 1 Introduction
 
-  In the study of programming languages, the term overloading is used to describe the ability of a single symbol to have dierent interpretations as determined by the context in which it appears.
+  In the study of programming languages, the term overloading is used to describe the ability of a single symbol to have different interpretations as determined by the context in which it appears.
   Standard examples of this include the use of + to represent both addition of integers and addition of oating point quantities, or the use of == to compare both character values and pointers.
   In each case, the intended meaning of the overloaded symbol can be determined from the types of the arguments to which it is applied.
   One common approach is to completely resolve overloading at compile time.
-  The compiler installs type specic meanings for all overloaded symbols, based either on type information attached to operands (the usual case) or some more general overloading resolution mechanism.
+  The compiler installs type specific meanings for all overloaded symbols, based either on type information attached to operands (the usual case) or some more general overloading resolution mechanism.
   A significant drawback to this approach is that overloaded operations cannot be abstracted while retaining their overloaded nature.
 
-  A more dynamic approach to overloading which preserves the ability to abstract overloaded denitions is found in object oriented languages.
+  A more dynamic approach to overloading which preserves the ability to abstract overloaded definitions is found in object oriented languages.
   Here, resolution of overloaded operations occurs at run time.
   There are two particular problems to be dealt with.
 
-  How do we determine which interpretation of an overloaded operator should be used in any particular situation? There are many examples for which the appropriate overloading cannot be determined at compile time.
-  For example, in a program that uses the function double = x :x + x to double both integer and oating point values, there is no way to x any single interpretation for the + symbol.
+  - How do we determine which interpretation of an overloaded operator should be used in any particular situation? There are many examples for which the appropriate overloading cannot be determined at compile time.
+  For example, in a program that uses the function double = λx.x + x to double both integer and oating point values, there is no way to fix any single interpretation for the + symbol.
 
-  How do we ensure that overloaded values are only ever used with appropriate arguments?
+  - How do we ensure that overloaded values are only ever used with appropriate arguments?
   For example, it would probably not make sense to try to add two character values.
   As a result, we must also ensure that the double function is never applied to a character value.
-  Standard ML uses two dierent approaches to overloading.
 
-  The type of each arithmetic operator such as + must be uniquely determined from its context, possibly by inserting an explicit type declaration.
-  This compile time resolution of overloaded operators is not able to preserve the full overloading of + in the double function; one specic implementation of + must be chosen.
 
-  Standard ML introduces a notion of equality types to deal with the typing of the equality function.
-  This is undesirable because it forces the programmer to accept a particular structural denition of equality { one which tests for equality of representation rather than equality of represented value.
-  In addition, Appel [1] reports that \Equality types add signicant complexity to the language and its implementation".
+  Standard ML uses two different approaches to overloading.
+
+  - The type of each arithmetic operator such as + must be uniquely determined from its context, possibly by inserting an explicit type declaration.
+  This compile time resolution of overloaded operators is not able to preserve the full overloading of + in the double function; one specific implementation of + must be chosen.
+
+  - Standard ML introduces a notion of equality types to deal with the typing of the equality function.
+  This is undesirable because it forces the programmer to accept a particular structural definition of equality { one which tests for equality of representation rather than equality of represented value.
+  In addition, Appel [1] reports that \Equality types add significant complexity to the language and its implementation".
+
 
   An alternative approach to the treatment of overloading was introduced by Wadler and Blott [11] based on the notion of a type class and is intended to provide a uniform and general framework for solving exactly these kinds of problems.
   Type classes are most widely known for their use in the functional programming language Haskell [6] where they are used mostly to deal with standard primitive functions such as + and ==.
-  In addition, we have also found that type classes can be useful in more specic application areas where they can help to produce clear and modular programs [7].
+  In addition, we have also found that type classes can be useful in more specific application areas where they can help to produce clear and modular programs [7].
   We should also mention that there does not appear to be any significant reason why the use of type classes should be limited to non-strict, purely functional languages: in principle, any language based on the basic Hindley/Milner/Damas type system could be extended to support the use of type classes.
 
   This paper is meant to serve as a practical guide for the implementation of type classes.
   Previous work in this area has concentrated on the typing rules and has culminated in a set of syntax-directed typing derivations which are the basis for our type checker.
   Here we will use the typing rules to create a concrete algorithm which both type checks and transforms the program.
   We hope to reveal the essential simplicity of both the theory and implementation of type classes.
-  Our concerns are type checking programs eciently, generating the best possible code from the type checker, and introducing a number of simple extensions to type classes which can be incorporated into our basic framework.
+  Our concerns are type checking programs efficiently, generating the best possible code from the type checker, and introducing a number of simple extensions to type classes which can be incorporated into our basic framework.
   This work is the result of our experience implementing type classes in both the Yale Haskell compiler and the Gofer interpreter..
 
 ## 2 Type classes - a summary
 
-  We begin by summarizing the main features of a system of type classes for a very simple and well known example - the denition of an equality operator, written as `==`, that is:
+  We begin by summarizing the main features of a system of type classes for a very simple and well known example - the definition of an equality operator, written as `==`, that is:
 
   - polymorphic: use of the operator is not restricted to values of any single type.
   - overloaded: the interpretation of equality is determined by the types of its arguments.
-  - extensible: the denition of equality can be extended to include new datatypes.
+  - extensible: the definition of equality can be extended to include new datatypes.
 
 
   Our example programs will be written using the concrete syntax of Haskell with explanatory comments where necessary.
@@ -82,28 +85,28 @@
   Each class has a name which is used in the type language.
   data type Type classes use the same sort of data types used by the ML type system.
   A type constructor names a data type in the type language while data constructors create values in the expression language.
-  instance An instance binds a data type to operations which implement the methods of a specied class for that type.
+  instance An instance binds a data type to operations which implement the methods of a specified class for that type.
 
-  The basic idea is to dene a set of types Eq, known as a type class in Haskell, that contains precisely those types for which a suitable denition of equality has been given using an instance declaration.
-  The denition of the class Eq is as follows:
+  The basic idea is to define a set of types Eq, known as a type class in Haskell, that contains precisely those types for which a suitable definition of equality has been given using an instance declaration.
+  The definition of the class Eq is as follows:
 
     class Eq a where
       (==) :: a -> a -> Bool
 
-  The rst line introduces a name for the class and indicates that the type variable a will be used to represent an arbitrary instance of the class in the following part of the denition.
+  The first line introduces a name for the class and indicates that the type variable a will be used to represent an arbitrary instance of the class in the following part of the definition.
   (In the general case, we use an expression of the form C t to represent the assertion that the type t is an instance of the class C.) The remaining part of the declaration lists a collection of method functions which are associated with the class.
-  In this particular example, there is only a single method function, written as an inx operator, ==.
+  In this particular example, there is only a single method function, written as an infix operator, ==.
   The type signature a -> a -> Bool indicates that, for each instance a of Eq, the == symbol behaves like a function that takes two arguments of type a and returns a value of type Bool.
 
-  A class declaration may also dene a set of superclasses for a given class.
-  The use of superclasses does not signicantly complicate this type system and will be discussed later.
+  A class declaration may also define a set of superclasses for a given class.
+  The use of superclasses does not significantly complicate this type system and will be discussed later.
 
   Using the notation of Haskell, the full type of == is written as (Eq a) => a -> a -> Bool.
-  Note the convention that all free variables in a type expression are implicitly bound by a universal quantier at the outermost level.
+  Note the convention that all free variables in a type expression are implicitly bound by a universal quantifier at the outermost level.
   Thus == is `polymorphic' in a, but the choice of types for a is restricted to instances of Eq.
   Type class constraints like this are often described as the context part of a type.
 
-  Even before we have dened a single instance of the class, we can use the == operator, either indirectly or directly, to dene other values.
+  Even before we have defined a single instance of the class, we can use the == operator, either indirectly or directly, to define other values.
   The restriction to instances of Eq is reected in the types assigned to these values.
   For example:
 
@@ -111,60 +114,60 @@
       member x [] = False
       member x (y:ys) = x==y || member x ys
 
-  The rst line of this denition gives the type of member.
+  The first line of this definition gives the type of member.
   Note that, in Haskell, [a] represents the type of lists of values of type a.
   As in the basic ML type system, user supplied type signatures are not actually required since they can be inferred automatically by the type system.
   We provide such signatures in our examples as documentation.
-  The second and third lines are typical of the way that functions are dened in Haskell.
+  The second and third lines are typical of the way that functions are defined in Haskell.
   In this example there are two equations, using pattern matching on the left hand side to distinguish between the two cases when the list argument to member is empty, [], or non-empty, written (y:ys) where y and ys are the head and tail, respectively, of the list.
 
-  The types which are members of a class are dened by a collection of instance declarations which may be distributed throughout the program, typically in dierent program modules where new datatypes are introduced.
-  For built-in types, the denition of equality may well be provided by a primitive function:
+  The types which are members of a class are defined by a collection of instance declarations which may be distributed throughout the program, typically in different program modules where new datatypes are introduced.
+  For built-in types, the definition of equality may well be provided by a primitive function:
 
     instance Eq Int where
       (==) = primEqInt
 
-  More generally, we can dene instances of the class Eq for any built-in and user-dened algebraic data types as in the following denition of equality on lists:
+  More generally, we can define instances of the class Eq for any built-in and user-defined algebraic data types as in the following definition of equality on lists:
 
     instance Eq a => Eq [a] where
       [] == []         = True
       (x:xs) == (y:ys) = x==y && xs==ys
       _ == _           = False
 
-  (The underscore character _ in the last line is used as a wildcard; it indicates that, if neither of the rst two cases can be applied, the the equality test will produce a result of False.)
-  The expression Eq a => Eq [a] in the rst line indicates that the denition of equality on lists depends on the denition of equality used for the elements held in the list:
+  (The underscore character _ in the last line is used as a wildcard; it indicates that, if neither of the first two cases can be applied, the the equality test will produce a result of False.)
+  The expression Eq a => Eq [a] in the first line indicates that the definition of equality on lists depends on the definition of equality used for the elements held in the list:
   if a is an instance of Eq, then so is [a].
 
-  The set of types dened by a nite collection of instance declarations may be innite (but recursively enumerable).
-  For example, the denitions given above describe the equality operator for integers, lists of integers, lists of lists of integers and so forth.
+  The set of types defined by a finite collection of instance declarations may be infinite (but recursively enumerable).
+  For example, the definitions given above describe the equality operator for integers, lists of integers, lists of lists of integers and so forth.
 
 ## 3 Implementing Overloading
 
   One standard technique used in the implementation of runtime overloading is to attach some kind of tag to the concrete representation of each object.
   Overloaded functions such as the equality operator described above can be implemented by inspecting the tags of their arguments and dispatching the appropriate function based on the tag value.
 
-  Many schemes exist for the encoding of tags to make the tag dispatch ecient.
+  Many schemes exist for the encoding of tags to make the tag dispatch efficient.
   This is essentially the method used to deal with the equality function in Standard ML of New Jersey [2].
-  One of the benets of static type checking is that it provides a compile-time check which ensures that the the equality function will never be applied to an object for which there is no corresponding denition of equality.
+  One of the benefits of static type checking is that it provides a compile-time check which ensures that the the equality function will never be applied to an object for which there is no corresponding definition of equality.
 
   Unfortunately, the use of tags as described above has a number of drawbacks.
   It can complicate data representation and may not be well suited to the underlying hardware.
-  Perhaps more signicantly, there are some forms of overloading that cannot be implemented using this approach.
-  In particular, it is not possible to implement functions where the overloading is dened by the returned type.
+  Perhaps more significantly, there are some forms of overloading that cannot be implemented using this approach.
+  In particular, it is not possible to implement functions where the overloading is defined by the returned type.
   A simple example of this is the read function used in Haskell to parse a string as a value of any type that is an instance of the Text class, the set of readable (and printable) types.
 
   An elegant way to avoid these problems is to separate objects from their tags, treating tags as data objects in their own right.
   For example, we can implement read as a function that takes an extra argument which gives the tag of the result value.
   This amounts to passing type information around at run-time but this is only necessary when overloaded functions are actually involved.
-  This is potentially more ecient than uniformly tagging every data object regardless how it will be used.
+  This is potentially more efficient than uniformly tagging every data object regardless how it will be used.
 
-  Using this approach, the member function in the previous section might be implemented by translating the original denition to:
+  Using this approach, the member function in the previous section might be implemented by translating the original definition to:
 
     member' :: (a -> a -> Bool) -> a -> [a] -> Bool
     member' eq x [] = False
     member' eq x (y:ys) = eq x y || member' eq x ys
 
-  In other words, the implementation of member is simply parameterized by the appropriate denition of equality.
+  In other words, the implementation of member is simply parameterized by the appropriate definition of equality.
   The tag in this case is the equality function itself.
 
   In this example, we could evaluate member 2 [1,2,3] by rewriting it as member' primEqInt 2 [1,2,3] and evaluating that expression instead.
@@ -177,11 +180,11 @@
     eqList eq xs ys
     eqList eq _ _ = False
 
-  The denition of eqList can be obtained directly from the instance declaration on lists in Section 2 in much the same way as the denition of member' was obtained from that of member.
-  Type classes do not require a particular denition of equality for a data type;
+  The definition of eqList can be obtained directly from the instance declaration on lists in Section 2 in much the same way as the definition of member' was obtained from that of member.
+  Type classes do not require a particular definition of equality for a data type;
   any function of the appropriate type can by supplied by the user to check equality.
 
-  As a convenience, Haskell allows the programmer to use derived instances for some of the standard classes like Eq, automatically generating appropriate instance denitions.
+  As a convenience, Haskell allows the programmer to use derived instances for some of the standard classes like Eq, automatically generating appropriate instance definitions.
 
   Note that this feature is not itself part of the underlying type system.
 
@@ -194,8 +197,8 @@
   One constraint on these declarations is that instances must be unique: only one instance declaration for a particular combination of data type and class is allowed.
   This ensures that the meaning of overloaded operations with respect to parameter data types is consistent throughout the program.
 
-  In the previous section we described how the member function can be implemented by parameterizing its denition with respect to an implementation of the `==` method.
-  In the general case, a class may have several dierent methods and it is sensible to parameterize the denitions of overloaded functions using dictionary values; tuples containing implementations for each of the methods for a particular instance of a class.
+  In the previous section we described how the member function can be implemented by parameterizing its definition with respect to an implementation of the `==` method.
+  In the general case, a class may have several different methods and it is sensible to parameterize the definitions of overloaded functions using dictionary values; tuples containing implementations for each of the methods for a particular instance of a class.
 
   Static analysis generates a dictionary for each instance declaration and these dictionaries themselves may be overloaded.
   When a dictionary contains overloaded functions, as manifested in the context component of an instance declaration, it will reference further subdictionaries when constructed.
@@ -204,8 +207,8 @@
   In our implementation, this captured dictionary is stored by partially applying eqList to just the eq argument when the dictionary containing eqList is created.
 
   Each instance can be converted to a 4-tuple containing the data type, the class, a dictionary, and the context associated with the instance.
-  A denition is inserted into the program which binds the dictionary value, a tuple of method functions, to a variable, the dictionary variable.
-  The instance context can be represented by a list of class constraints, one class constraint for each argument to the data type dened by the instance.
+  A definition is inserted into the program which binds the dictionary value, a tuple of method functions, to a variable, the dictionary variable.
+  The instance context can be represented by a list of class constraints, one class constraint for each argument to the data type defined by the instance.
   A class constraint is the (possibly empty) list of classes which must apply to the constituent type.
 
   The instance declaration for list equality would create this dictionary:
@@ -218,16 +221,16 @@
 
   where List is the name of the list type data constructor.
 
-  Since this class has only one method a tuple is not needed; normally a dictionary would be tuple containing a denition for each method.
-  The context indicates that the rst argument to the List type constructor must be in the Eq class.
+  Since this class has only one method a tuple is not needed; normally a dictionary would be tuple containing a definition for each method.
+  The context indicates that the first argument to the List type constructor must be in the Eq class.
 
   Dispatching a method requires selection of the appropriate function from a dictionary.
-  Selector functions which retreive a method from a dictionary are also dened as the static type environment is processed.
+  Selector functions which retreive a method from a dictionary are also defined as the static type environment is processed.
   (In the previous example no selectors are needed since there is no tuple in the dictionary.)
 
-  These simply extract a component of a dictionary tuple, a constant time operation since each member function is located at a specic place in the dictionary.
+  These simply extract a component of a dictionary tuple, a constant time operation since each member function is located at a specific place in the dictionary.
   Dictionaries are only used where overloading cannot be resolved at compile time.
-  When the type associated with a method is known at compile type the type specic version of the method is called directly without using the dictionary.
+  When the type associated with a method is known at compile type the type specific version of the method is called directly without using the dictionary.
 
 ## 5 Type Inference
 
@@ -513,7 +516,7 @@
 
 ## 8.1 Using a Class Hierarchy
 
-  In a Haskell class declaration, a set of classes may be declared as superclasses of the dened class.
+  In a Haskell class declaration, a set of classes may be declared as superclasses of the defined class.
   For example, in the declaration:
 
     class Text a => Num a where
@@ -531,30 +534,30 @@
   During dictionary conversion, a dictionary may not be directly available if the associated class has been absorbed as a superclass.
   In this case, the dictionary or method must be fetched from an embedded superclass dictionary.
 
-  Dictionary representation aects the speed of method selection.
+  Dictionary representation affects the speed of method selection.
   Deeply nested dictionaries can be avoided by attening dictionaries to include all methods in both the associated class and in all superclasses at the top level of the structure.
   This slows down dictionary construction but speeds up selection operations.
-  The eect of this tradeo in real programs is not yet known.
+  The effect of this tradeoff in real programs is not yet known.
   Optimizations which avoid dictionary construction make attening more attractive.
 
 ## 8.2 Default Method Declarations
 
   Class declarations may supply a default method to be used when an instance declaration does not provide an implementation of a method in the class.
-  This requires only that this denition bound to a variable for use during dictionary construction.
-  This variable is placed into any dictionary in which the method is not specied by the instance declaration.
+  This requires only that this definition bound to a variable for use during dictionary construction.
+  This variable is placed into any dictionary in which the method is not specified by the instance declaration.
 
-## 8.3 Typing Recursive Denitions
+## 8.3 Typing Recursive Definitions
 
   So far we have assumed that the letrec construct binds only one variable.
-  Mutually recursive denitions can be understood as a tupling of functions.
-  Mutually recursive functions `f` and `g` could be dened as follows:
+  Mutually recursive definitions can be understood as a tupling of functions.
+  Mutually recursive functions `f` and `g` could be defined as follows:
 
     letrec (f,g) = (fbody,gbody) in ...
 
   Here there is only a single recursive value, the tuple.
   Notice that the context of `f` and `g` are combined by this translation.
   Although mutually recursive functions are not actually implemented as tuples, they are type checked in this manner.
-  All functions dened by a single `letrec` share a common context.
+  All functions defined by a single `letrec` share a common context.
   This may create ambiguous functions when the type of a `letrec` bound variable does not contain the full context of the `letrec`.
   Such a function can be called within the `letrec` but not from outside.
   This is not an error in itself but the compiler provides a warning about such functions.
@@ -566,7 +569,7 @@
 
 ## 8.4 Reducing Constant Dictionaries
 
-  Another source of ineciency are local functions which are inferred to have an overloaded type but are used at only one overloading.
+  Another source of inefficiency are local functions which are inferred to have an overloaded type but are used at only one overloading.
   These can be detected during optimization or during type inference.
   During type inference, this involves saving the type variables created by freshly instantiation of the signature as it is referenced.
   If all of these variables are instantiated to the same concrete type the dictionary can be reduced to a constant.
@@ -574,8 +577,8 @@
 
 ## 8.5 Overloaded Methods
 
-  Haskell allows method functions to be overloaded in more than the type variable dened by class.
-  For example, a class denition may contain:
+  Haskell allows method functions to be overloaded in more than the type variable defined by class.
+  For example, a class definition may contain:
 
     class Foo a where
       m1 :: Bar b => a -> b
@@ -583,7 +586,7 @@
 
   Here, `m1` contains an extra overloading.
   A dictionary for this class should have a type `(Bar b => T -> b,T -> T)` for some type `T` in the class `Foo`.
-  That is, the rst component should be an overloaded function with `Bar` in the context while the second component is independent of `Bar`.
+  That is, the first component should be an overloaded function with `Bar` in the context while the second component is independent of `Bar`.
 
   Unfortunately, this type signature is not valid since the context will oat outside the tuple.
   In implementation terms, the tuple will attempt to bind a dictionary for `Bar` when the dictionary is constructed instead of simply placing a function which binds a `Bar` dictionary inside the tuple.
@@ -594,18 +597,18 @@
 ## 8.6 User Supplied Signatures
 
   User supplied type signatures are a very necessary part of the type system.
-  They can be used to avoid unwanted overloading and are essential for eciency.
-  Unlike the ML type system, user supplied signatures have a signicant impact on the generated code, possibly replacing higher order function calls (method selectors) with direct calls to instance functions.
+  They can be used to avoid unwanted overloading and are essential for efficiency.
+  Unlike the ML type system, user supplied signatures have a significant impact on the generated code, possibly replacing higher order function calls (method selectors) with direct calls to instance functions.
 
   While there are numerous ways of implementing these signatures, our system does this in a very clean way using readonly type variables.
   Type variables in signatures are marked as read-only to prevent type instantiation from violating the signatures.
   A read-only type variable cannot be instantiated or have its context augmented.
 
-  Another use of user-supplied signatures is to `x` the ordering of dictionaries during dictionary conversion.
-  Haskell uses interface les to support separate compilation.
-  These interfaces provide the signature of each denition in a module.
-  These interface signatures dene a specic ordering on the dictionaries passed to resolve overloading;
-  at the implementation level the types `(Foo a,Bar b) => a -> b` and `(Bar b,Foo a) => a -> b` are dierent in a very important way.
+  Another use of user-supplied signatures is to `fix` the ordering of dictionaries during dictionary conversion.
+  Haskell uses interface files to support separate compilation.
+  These interfaces provide the signature of each definition in a module.
+  These interface signatures define a specific ordering on the dictionaries passed to resolve overloading;
+  at the implementation level the types `(Foo a,Bar b) => a -> b` and `(Bar b,Foo a) => a -> b` are different in a very important way.
   The compiler must be aware of any interface for the module being compiled and use that signature to determine the dictionary ordering during generalization.
 
 ## 8.7 The Monomorphism Restriction
@@ -614,7 +617,7 @@
   This is intended to avoid problems with the loss of laziness that can occur when an overloaded variable is translated to a function with one or more dictionary parameters.
   Explicit type signatures can be used to avoid the monomorphism restriction in those cases where overloading would otherwise be restricted.
   Regardless of how the monomorphism issue is treated, it has a very simple implementation.
-  When this restriction applies to a variable, type variables in its context must not be generalized: they must remain in the type environment to avoid fresh instan- tiation while the body of the dening let expression is type checked.
+  When this restriction applies to a variable, type variables in its context must not be generalized: they must remain in the type environment to avoid fresh instan- tiation while the body of the defining let expression is type checked.
 
 ## 8.8 Avoiding Unnecessary Dictionary Construction
 
@@ -629,8 +632,8 @@
 
   The `eqDList` function constructs a dictionary for equality on lists of type `[a]` given a dictionary `d` for equality on values of type `a`.
   The `eq` function denotes the selector which extracts the method for `==` from a corresponding dictionary.
-  As it is written, many implementations of this denition will repeat the construction of the dictionary `eqDList d` at each step of the recursion.
-  One simple way to avoid this is to rewrite the denition in the form:
+  As it is written, many implementations of this definition will repeat the construction of the dictionary `eqDList d` at each step of the recursion.
+  One simple way to avoid this is to rewrite the definition in the form:
 
     eqList d
       = let eql = eq (eqDList d)
@@ -640,15 +643,15 @@
             e _ _           = False
       in e
 
-  As a further example of the same thing, consider a function doOne of type `C a -> a -> Bool` for some class `C` and suppose that the denition of this function requires the construction of a dictionary value.
-  Note that this fact may well be hidden from the compilation system if the denition of doOne appears in an external module.
+  As a further example of the same thing, consider a function doOne of type `C a -> a -> Bool` for some class `C` and suppose that the definition of this function requires the construction of a dictionary value.
+  Note that this fact may well be hidden from the compilation system if the definition of doOne appears in an external module.
 
-  Now suppose that we dene a function:
+  Now suppose that we define a function:
 
     doList []     = []
     doList (x:xs) = doOne x : doList xs
 
-  A naive implementation of doList might use the denition:
+  A naive implementation of doList might use the definition:
 
     doList d []     = []
     doList d (x:xs) = doOne d x : doList d xs
@@ -663,15 +666,15 @@
             doList' (x:xs) = doOne' x : doList' xs
             doOne'         = doOne d
 
-  An additional benet of this is that the garbage collector can reclaim the storage used for dictionary values as soon as the implementations of the required methods have been extracted from it.
+  An additional benefit of this is that the garbage collector can reclaim the storage used for dictionary values as soon as the implementations of the required methods have been extracted from it.
 
   Note that these problems will not occur in an implementation that supports full laziness.
   Indeed, in each of the examples above, the improved translation can be obtained from the original version using a translation to fully-lazy form as described in [9].
 
 ## 9 Performance Issues
 
-  How do type classes aect the compiler? Our observation is that they increase compilation time only slightly.
-  A minor increase in the cost of unication and the placement and resolution of placeholders make up the majority of the extra processing required for type classes.
+  How do type classes affect the compiler? Our observation is that they increase compilation time only slightly.
+  A minor increase in the cost of unification and the placement and resolution of placeholders make up the majority of the extra processing required for type classes.
 
   As far as program execution is concerned, type classes have two costs: the extra level of indirection when dispatching a method function and the time and space required to propagate dictionaries through overloaded functions.
   The cost of instance function dispatch is actually quite small since this requires only a reference to a tuple element followed by a function call.
@@ -680,12 +683,12 @@
   Passing and storing extra arguments to overloaded functions will incur slightly more function call overhead.
 
   Only overloaded dictionaries consume a non-constant amount of space.
-  However, for code which does not use overloaded functions (but still may use method functions) the class system adds no overhead at all since the specic instance functions are called directly.
+  However, for code which does not use overloaded functions (but still may use method functions) the class system adds no overhead at all since the specific instance functions are called directly.
   In the case of a lazy language such as Haskell the overhead of overloaded functions may be greater since overloading is implemented using higher order functions.
   Higher order functions may be much more expensive in Haskell than ML since it is much harder to apply strictness or uncurrying optimizations.
   This is very noticable for very simple functions such as basic arithmetic operators but for more complex functions, such as in the I/O system, the overhead of overloading is not noticable.
 
-  It is possible to completely eliminate dynamic method dispatch within an overloaded function at specic overloadings by creating type specic clones of overloaded function.
+  It is possible to completely eliminate dynamic method dispatch within an overloaded function at specific overloadings by creating type specific clones of overloaded function.
   This could be implemented in a more general partial evaluation context or be controlled through program annotations.
 
 ## 10 Conclusions and Related Work
@@ -724,7 +727,7 @@
 
   [7] M.P. Jones. Computing with lattices: An application of type classes. Journal of Functional Programming, Volume 2, Part 4, October 1992.
 
-  [8] M.P. Jones. Qualied types: Theory and Practice. D. Phil. Thesis. Programming Research Group, Oxford University Computing Laboratory. July 1992.
+  [8] M.P. Jones. Qualified types: Theory and Practice. D. Phil. Thesis. Programming Research Group, Oxford University Computing Laboratory. July 1992.
 
   [9] S.L. Peyton Jones and D. Lester. A modular fully-lazy lambda lifter in Haskell. Software { Practice and Experience, 21(5), May 1991.
 
