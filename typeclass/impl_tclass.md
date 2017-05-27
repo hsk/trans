@@ -323,12 +323,13 @@
   The fresh type variables associated with the variable are captured in the placeholders.
   For example, if f has type (Num a, Text b) => a -> b, the type checker will first freshly instantiate the type variables in f, yielding a typing of (Num t1,Text t2) => t1 -> t2.
   This fresh instantiation of type variables is part of ordinary ML style type checking.
-  The value f will be rewritten as an application: `f <Num, t1> <Text, t2>`.
+  The value f will be rewritten as an application: 
+
+    f <Num, t1> <Text, t2>
+
   The `<object, type>` notation will be used to represent placeholders.
   These placeholders become additional arguments to f which will be placed ahead of any other arguments.
   The classes Text and Num which appear in the placeholders indicate that the placeholder must resolve to an expression yielding a dictionary for that class.
-
-    f <Num, t1> <Text, t2>
 
   ----
 
@@ -366,14 +367,21 @@
   There are four possibilities:
 
   - 1. The type is a type variable in the parameter environment.
+
     In this case, the mapping defines a variable which will carry the dictionary at run-time.
     A class placeholder is resolved to the dictionary parameter variable; a method placeholder requires a selector function to be applied to the dictionary variable.
+
   - 2. The type has been instantiated to a type constructor.
+
     An instance declaration associated with this type supplies either the method itself for a method placeholder or a dictionary variable for a class placeholder.
     Since dictionaries or methods themselves may be overloaded the type checker may need to recursively generate placeholders to resolve this additional overloading.
+
   - 3. The type variable may still be bound in an outer type environment.
+
     The processing of the placeholder must be deferred to the outer declaration.
+
   - 4. If none of the above conditions hold, an ambiguity has been detected.
+
     The ambiguity may be resolved by some language specific mechanism or simply signal a type error.
 
 
@@ -681,7 +689,6 @@
   For all but the simplest method functions this should be negligible.
   The cost of dictionary creation and propagation is harder to pin down.
   Passing and storing extra arguments to overloaded functions will incur slightly more function call overhead.
-
   Only overloaded dictionaries consume a non-constant amount of space.
   However, for code which does not use overloaded functions (but still may use method functions) the class system adds no overhead at all since the specific instance functions are called directly.
   In the case of a lazy language such as Haskell the overhead of overloaded functions may be greater since overloading is implemented using higher order functions.
