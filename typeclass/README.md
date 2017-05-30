@@ -21,9 +21,7 @@
 
 ## 3. [Implementing Type Classes](impl_tclass.md)
 
-  John Peterson and Mark Jones
-
-  Department of Computer Science, Yale University,
+  John Peterson and Mark Jones Department of Computer Science, Yale University,
 
   We describe the implementation of a type checker for the functional programming language Haskell that supports the use of type classes.
   This extends the type system of ML to support overloading (ad-hoc polymorphism) and can be used to implement features such as equality types and numeric overloading in a simple and general way
@@ -34,3 +32,13 @@
   In all current Haskell compilers this takes the form of dictionary conversion, using functions as hidden parameters to overloaded values.
   We present efficient techniques for type checking and dictionary conversion.
   A number of optimizations and extensions to the basic type class system are also described.
+
+## 4. [Poor Mans Type Class](poor_mans_type_classes.md)
+
+  Martin Odersky EPFL IFIP WG2.8 working group meeting Boston, July 2006.
+
+## 5. [Proposal: Overloading in Haskell](class-leter.md)
+
+  Philip Wadler. Letter to Haskell working group (fplangc), 24 February 1988.
+
+  [The original proposal for type classes. Never published.]
