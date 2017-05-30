@@ -1,4 +1,4 @@
-# 貧しい人のタイプクラス
+# 貧者のタイプクラス
 
 マーティン オダスキー
 
@@ -28,7 +28,7 @@ _問題_：概念的費用
 
 _アイディア_：OOクラスと型の間のデルタに集中する
 
-_クラス_：implicits
+_クラス_: implicits
 
 2/15
 
@@ -36,7 +36,7 @@ _クラス_：implicits
 
 ## タイプクラスのない生活
 
-SemiGroupとMonoidのいくつかの標準クラス:
+SemiGroup と Monoid のいくつかの標準クラス:
 
     abstract class SemiGroup[a] {
       def add(x: a, y: a): a
@@ -245,13 +245,14 @@ Int、Stringなどを順序付けしたい。
 
 項eに暗黙の変換が適用される場合、
 
-- eは期待される型と互換性がありません：
+- e は期待される型と互換性がありません:
 
       val x: Ordered[Int] = 1
       ==>
       val x: Ordered[Int] = int2ordered(1)
 
 - 選択e.mにおいて、eにメンバーmがない場合。
+
       x < (1)
       ==>
       int2ordered(x).<(1)
