@@ -558,7 +558,6 @@
 
   (a) `η ⊨ o : ⫫ -> μ`, for any variable `o`, monotype `μ`.
 
-  >> TODO
   (b) Let `σ = ∀α1 :πα1 => ... ∀αn :παn => τ` be a type scheme.
   Then `η ⊨ [⫫/α1, ..., ⫫/αn] τ ≼ σ`.
 
@@ -568,39 +567,42 @@
 
   (b) Follows from the definition of `≼` and (a). □
 
-  **Proposition 3.4** Let σ be a type scheme and let η be an environment.
-  Then [[σ]]η is an ideal.
+  **Proposition 3.4** Let `σ` be a type scheme and let `η` be an environment.
+  Then `〚σ〛 η` is an ideal.
 
-  Proof: The closure properties are shown by straightforward inductions on the structure of σ.
-  It remains to be shown that W 62 [[σ]].
-  By Lemma 3.3(b) there is a monotype μ such that η j= μ μ σ.
-  Hence, [[σ]]η  [[μ]].
-  But [[μ]] is an ideal and therefore does not contain W. □
+  Proof:
+  The closure properties are shown by straightforward inductions on the structure of `σ`.
+  It remains to be shown that `W ∉ 〚σ〛`.
+  By Lemma 3.3(b) there is a monotype `μ` such that `η ⊨ μ ≼ σ`.
+  Hence, `〚σ〛 η ⊆ 〚μ〛`.
+  But `〚μ〛` is an ideal and therefore does not contain `W`. □
 
-Proposition 3.4 expresses an important property of our semantics: every type scheme is an ideal, even if it contains a type variable constraint o : ff -> τ , where o does not have any explicitly declared instances at all.
-Consequently, there is no need to rule out such a type scheme statically.
-This corresponds to Haskell's \open world" approach to type-checking, as opposed to the \closed world" approach of e.g.
-[Smi91].
-Interestingly, the only thing that distinguishes those two approaches in the semantics of type schemes is the absence or presence of the bottom type ? .
+  Proposition 3.4 expresses an important property of our semantics: every type scheme is an ideal, even if it contains a type variable constraint `o : α -> τ` , where `o` does not have any explicitly declared instances at all.
+  Consequently, there is no need to rule out such a type scheme statically.
+  This corresponds to Haskell's "open world" approach to type-checking, as opposed to the "closed world" approach of e.g.
+[<a name="rSmi91"></a>[Smi91](#Smi91)].
+  Interestingly, the only thing that distinguishes those two approaches in the semantics of type schemes is the absence or presence of the bottom type `⫫`  .
 
-We now show that System O is sound, i.e.
-that syntactic type judgements ` p : σ are reected by semantic type judgements j= p : σ.
+  We now show that System O is sound, i.e.
+  that syntactic type judgements `Γ ⊢ p : σ` are reected by semantic type judgements `Γ ⊨ p : σ`.
 
-**Definition.** Let e be a term, let be a closed typothesis, and let σ be a closed type scheme.
-Then j= e : σ iff, for all environments η, η j= implies η j= e : σ.
+  **Definition.** Let `e` be a term, let `Γ` be a closed typothesis, and let `σ` be a closed type scheme.
+  Then `Γ ⊨ e : σ` iff, for all environments `η`, `η ⊨ Γ` implies `η ⊨ e : σ`.
 
-As a first step, we prove a soundness theorem for terms.
-This needs an auxiliary lemma, whose proof is straightforward.
+  As a first step, we prove a soundness theorem for terms.
+  This needs an auxiliary lemma, whose proof is straightforward.
 
-**Lemma 3.5** If η j= e : σ and η j= μ μ σ then η j= e : μ.
+  **Lemma 3.5** If `η ⊨ e : σ` and `η ⊨ μ ≼ σ` then  `η ⊨ e : μ`.
 
-**Theorem 3.6** (Type Soundness for Terms) Let ` e : σ be a valid typing judgement and let S be a substitution such that S and Sσ are closed.
-Then S j= e : Sσ.
+  **Theorem 3.6** (Type Soundness for Terms)
+  Let `Γ ⊢ e : σ` be a valid typing judgement and let `S` be a substitution such that `SΓ` and `Sσ` are closed.
+  Then `SΓ ⊨ e : Sσ`.
 
-Proof: Assume ` e : σ and η j= S.
-We do an induction on the derivation of ` e : σ.
-We only show cases (∀I), (∀E), whose corresponding inference rules differ from the Hindley/Milner system.
-The proofs of the other rules are similar to the treatment in [Mil78 ].
+  Proof:
+  Assume `Γ ⊢ e : σ` and `η ⊨ SΓ`.
+  We do an induction on the derivation of `Γ ⊢ e : σ`.
+  We only show cases (∀I), (∀E), whose corresponding inference rules differ from the Hindley/Milner system.
+  The proofs of the other rules are similar to the treatment in [<a name="rMil78"></a>[Mil78](#Mil78)].
 
     Γ ⊢ u : σ ≻ u          (u : σ ∈ Γ)                 (TAUT)
     Γ ⊢ k : σ ≻ u          (k : σ ∈ Γ)                 (TAUT)
@@ -638,112 +640,73 @@ The proofs of the other rules are similar to the treatment in [Mil78 ].
     Γ ⊢ inst o : στ = e in p : σ'
       ≻ let u_{o,στ} = e* in p*
 
-Figure 4: The dictionary passing transform
+  Figure 4: The dictionary passing transform
 
-Case (∀I): Then the last step in the derivation is for some ff, πα, σ0 with σ = ∀α:πα ) σ0.
+  Case (∀I): Then the last step in the derivation is for some `α`, `πα`, `σ'` with `σ = ∀α.πα => σ'`.
 
     Γ, πα ⊢ e : σ'   α ∉ tv(Γ)
     --------------------------------
     Γ ⊢ e : ∀α.πα => σ'
 
 
-We have to show
-that e 2 [[μ]], for all μ such that η j= μ μ ∀α:Sπα ) Sσ0
-.
-Pick an arbitrary such μ.
-By definition of (μ), there exists
-a μ0
-such that η j= [μ0
-=ff](Sπα) and η j= μ μ [μ0
-=ff](Sσ0
-).
-Let S0
-= [μ0
-=ff]  S.
-Then η j= S0
-πα and η j= μ μ S0
-σ0
-.
-Since ff 62 tv(),
-η j= S0
-and therefore η j= S0
-(;
-πα). Then
-by the induction hypothesis, η j= e : S0
-σ0
-. It follows with
-Lemma 3.5 that η j= e : μ.
+  We have to show that `e ∈ 〚μ〛`, for all `μ` such that `η ⊨ η ≼ ∀α.S πα => S σ'`.
+  Pick an arbitrary such `μ`.
+  By definition of `(≼)`, there exists `a μ'` such that  `η ⊨ [μ'/α] (S πα)` and `η ⊨ μ ≼ [μ'/α] (Sσ')`.
+  Let `S' = [μ'/α] o S`. Then `η ⊨ S'Γ` and `η ⊨ S'(Γ,πα)`.
+  Since `α ∉ tv(Γ)`, `η ⊨ S'Γ` and therefore `η ⊨ S'(Γ, πα)`.
+  Then by the induction hypothesis, `η ⊨ e : S' σ'`.
+  It follows with Lemma 3.5 that `η ⊨ e : μ`.
 
-Case (∀E): Then the last step in the derivation is
+
+  Case (∀E): Then the last step in the derivation is
 
     Γ ⊢ e : ∀α.πα => σ'    Γ ⊢ [τ / α] πα
     ------------------------------------------
     Γ ⊢ e : [τ / α] σ'
 
-for some `α`, `πα`, `σ'`, `τ` with `σ = [τ/α]σ'`.
+  for some `α`, `πα`, `σ'`, `τ` with `σ = [τ/α]σ'`.
 
-We have to show
-that e 2 [[μ]], for all μ such that η j= μ μ [Sτ =ff]Sσ0
-.
- Pick an arbitrary such μ. By the induction hypothesis, η j= e :
-∀α:Sπα ) Sσ0
-and η j= [Sτ =ff](Sπα). It follows with the
-definition of μ that η j= μ μ ∀α:Sπα ) Sσ0
-. Then by
-Lemma 3.5, η j= e : μ. □
+  We have to show that `e ∈ 〚μ〛`, for all `μ` such that `η ⊨ μ ≼ [Sτ/α] Sσ'`.
+  Pick an arbitrary such `μ`. By the induction hypothesis, `η ⊨ e : ∀α:Sπα => Sσ'` and `η ⊨ [Sτ/α] (Sπα)` .
+  It follows with the definition of `≼` that `η ⊨ μ ≼ ∀α:Sπα => Sσ'`.
+  Then by Lemma 3.5, `η ⊨ e : μ`. □
 
-We now extend the type soundness theorem to whole programs
-that can contain instance declarations.
+  We now extend the type soundness theorem to whole programs that can contain instance declarations.
 
-**Theorem 3.7** (Type Soundness for Programs)
-Let
-` p : σ be a valid closed typing judgement. Then
-j= p : σ.
+  **Theorem 3.7** (Type Soundness for Programs)
+  Let `Γ ⊢ p : σ` be a valid closed typing judgement. Then `Γ ⊨ p : σ`.
 
-Proof: By induction on the structure of p. If p is a term, the
-result follows from Theorem 3.6. Otherwise p is an instance
-declaration at top-level. Then the last step in the derivation
-of
+  Proof:
+  By induction on the structure of `p`.
+  If `p` is a term, the result follows from Theorem 3.6.
+  Otherwise `p` is an instance declaration at top-level. Then the last step in the derivation of `Γ ⊢ p : σ`
 
       o : στ' ∈ Γ => T ≠ T'
       Γ ⊢ e : στ    Γ, o : στ ⊢ p : σ
       -----------------------------------
       Γ ⊢ inst o : στ = e in p' : σ
 
-for some type scheme σT . We have to show that η j= inst o :
+  for some type scheme `στ`.
+  We have to show that `η ⊨ inst o : στ = e in p' : σ`:
+  By Theorem 3.6, `η ⊨ e : στ` , which implies that `〚e〛 η` is a function.
+  Therefore, `〚p〛 η = 〚p'〛 η [o := f]` where `f = extend(T,〚e〛 η,η(o))`.
 
-σT = e in p
-0
-: σ. By Theorem 3.6, η j= e : σT , which implies
-that [[e]]η is a function. Therefore, [[p]]η = [[p
-0
-]]η[o := f ]
+  Our next step is to show that `f∈ 〚στ〛 η`.
+  Let `μ` be such that `η ⊨ μ ≼ στ`. Then `μ = T μ1, ..., μn -> μ'`, for some monotypes `μ1, ..., μn, μ'`.
 
-where f = extend(T ; [[e]]η; η(o)).
-Our next step is to show that f 2 [[σT ]]η. Let μ be
-such that η j= μ μ σT . Then μ = T μ1 ; : : : ; μn -> μ0
-,
-for some monotypes μ1 ; : : : ; μn; μ0
-. Now assume that v 2
-[[T μ1; : : : ; μn]]. If v = ? then f v = ? 2 [[μ0
-]]. Otherwise, by
-the definition of extend, f v = [[e]]η v, and [[e]]η v 2 [[μ0
-]]. In
-both cases f v 2 [[μ0
-]]. Since v 2 [[T μ1; : : : ; μn]] was arbitrary,
-we have f 2 [[μ]]. Since μ was arbitrary, this implies f 2
-[[σT ]]η
+  Now assume that `v ∈ 〚Tμ1, ..., μn〛`.
+  If `v = ⊥` then `f v = ⊥ ∈ 〚μ'〛`.
+  Otherwise, by the definition of `extend`, `f v = 〚e〛 η v` and `〚e〛 η v ∈ 〚μ'〛`.
+  In both cases `f v ∈ 〚μ'〛`.
+  Since `v ∈ 〚Tμ1, ..., μn〛` was arbitrary, we have `f ∈ 〚μ〛`.
+  Since `μ` was arbitrary, this implies `f ∈ [στ] η`
 
-It follows that η[o := f ] j= o : σT . Furthermore, since
-η j= ,
-and
-contains by the premise of rule (INST) no
-binding o : σT , we have that η[o := f ] j= .
-TODO ^^^^^^^^
-Taken together, `η [o := 0 f] ⊨ Γ,o : στ` .
-By the induction hypothesis, `η [o := f] ⊨ p' : σ` , which implies the proposition. □
+  It follows that `η [o := f] ⊨ o : στ`.
+  Furthermore, since `η ⊨ Γ`, and `Γ` contains by the premise of rule (INST) no binding `o : στ`, we have that `η [o := f] ⊨ Γ`.
+  Taken together, `η [o := 0 f] ⊨ Γ,o : στ` .
+  By the induction hypothesis, `η [o := f] ⊨ p' : σ` , which implies the proposition. □
 
-A corollary of this theorem supports the slogan that "well typed programs do not go wrong".
+  A corollary of this theorem supports the slogan that "well typed programs do not go wrong".
 
 **Corollary 3.8** Let
 `Γ ⊢ p : σ` be a valid closed typing judgement
@@ -757,6 +720,7 @@ and let `η` be an environment. If `η ⊨ Γ` then `〚p〛 η ≠ W` .
   Its central idea is to convert a term of type `∀α.πα=>τ` to a function that takes as arguments implementations of the overloaded variables in `πα`.
   These arguments are also called "dictionaries".
 
+TODO>>>
 The target language of the translation is the Hindley/Milner system, which is obtained from System O by eliminating overloaded variables `o`, instance declarations, and constraints `πα` in type schemes.
 The translation of terms is given in Figure 4.
 It is formulated as a function of type derivations, where we augment type judgements with an additional component `e*`
