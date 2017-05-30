@@ -792,7 +792,7 @@ and let `η` be an environment. If `η ⊨ Γ` then `〚p〛 η ≠ W` .
 
     ∀β.∀α.(α ≦ {l : β}) => α -> β.
 
-  This says that #l can be applied to records that have a field
+  This says that `#l` can be applied to records that have a field
   `l : τ`, in which case it will yield a value of type `τ`. The
   type scheme uses a subtype constraint `α ≦ ρ`. Subtype constraints
   are validated using the subtyping rules in Figure 5.
@@ -851,7 +851,7 @@ and let `η` be an environment. If `η ⊨ Γ` then `〚p〛 η ≠ W` .
   4. A record expression `{l1 = e1, ..., ln = en}` now translates
   to `R_{l1...ln} e1 ...en`.
   5. A selector function `#l` translates to `l`.
-  6. A record type `{l1 : τ1, ..., ln : τn}` is translated to
+  6. A record type `{l1 : τ1, ..., ln : τn}` is translated to `Rl1 ... lnτ1...τn`.
 
   ---
 
@@ -878,14 +878,14 @@ and let `η` be an environment. If `η ⊨ Γ` then `〚p〛 η ≠ W` .
 
         Γ ⊢ #l : ∀β: ∀α ≦ {l : β}.α -> β                            ({} E)
 
-  Figure 5. Extension with record types.
+  Figure 5: Extension with record types.
 
   7. A subtype constraint `α ≦ {l1 : τ1, ..., ln : τn}` becomes an overloading constraint `l1 : α -> τ1, ..., ln : α -> τn`:
 
   Let `e†`, `σ†`, or `Γ†` be the result of applying this translation to a term `e`, a type scheme `σ`, or a typothesis `Γ`.
   Then one has:
 
-  **Proposition 5.2** `Γ† ⊢ e† : τ†` ならば `Γ ⊢ e : τ`.
+  **Proposition 5.2** `Γ ⊢ e : τ` iff `Γ† ⊢ e† : τ†`.
 
   Proposition 5.2 enables us to extend the type soundness and principal type properties of System O to its record extension without having to validate them again.
   It also points to an implementation scheme for records, given an implementation scheme for overloaded identifiers.
@@ -998,7 +998,7 @@ and let `η` be an environment. If `η ⊨ Γ` then `〚p〛 η ≠ W` .
   A typing solution of a typing problem `(p,Γ,S)` is a triple
   `(σ,Γ',S')` where `(Γ',S') ≼ (Γ,S)` and `S'Γ' ⊢  p : S'σ`.
 
-  The typing solution `(σ'',Γ'',S'')` is most general iff for every
+  The typing solution `(σ'',Γ',S')` is most general iff for every
   other typing solution `(σ'',Γ'',S'')` it holds `(Γ'',S'') ≼ (Γ',S')`
   and `S'' σ'' ≼S''Γ'' S'' σ`.
 
@@ -1017,14 +1017,14 @@ and let `η` be an environment. If `η ⊨ Γ` then `〚p〛 η ≠ W` .
 
   (b) If `tp (p,Γ,S)` fails, then `(p,Γ,S)` has no solution.
 
-As a corollary of Theorem 6.2, we get that every typable program has a principal type, which is found by `tp`.
+  As a corollary of Theorem 6.2, we get that every typable program has a principal type, which is found by `tp`.
 
   **Corollary 6.3** (Principal Types) Let `(p,Γ, id)` be a typing problem such that `tv(Γ) = ∅`.
 
-  (a) Assume `gen (tp (p,Γ,id)) = (σ',Γ',S)`  and `let σ = Sσ'`.
+  (a) Assume `gen (tp (p,Γ,id)) = (σ',Γ',S)`  and `let σ = Sσ'`. Then
 
-      Then Γ ⊢ p : σ             and
-      Γ ⊢ p : σ'' => σ'' ≼Γ σ; for all type schemes σ''.
+      Γ ⊢ p : σ                   and
+      Γ ⊢ p : σ'' => σ'' ≼Γ σ,  for all type schemes σ''.
 
   (b) If `tp (p,Γ,id)`  fails then there is no type scheme `σ` such
   that `Γ ⊢ p : σ`.
@@ -1035,7 +1035,7 @@ As a corollary of Theorem 6.2, we get that every typable program has a principal
     στ = T α1 ... αn -> τ   (tv(τ) ⊆ {α1, ..., αn})
        | ∀α.πα => στ'      (tv(πα) ⊆ tv(στ')).
 
-  We show with an example why `σT` needs to be parametric
+  We show with an example why `στ` needs to be parametric
   in the arguments of `T`. Consider the following program,
   where  `k ∈ KT` .
 
@@ -1057,7 +1057,6 @@ As a corollary of Theorem 6.2, we get that every typable program has a principal
   Unfolding `unify` gives `mkinst (o : α -> α)(Γ \ Γα, S')` where `S' = [Tβ/α] o S`, which leads in turn to the following two calls:
 
   1. `newinst(στ, Γ \ Γα, S') = (T (T γ) -> γ, Γ', S')` where `Γ' ⊇ {o : β -> β, o : γ -> γ, o : στ}` and `γ` is a fresh type variable, and
-
 
   2. `unify (α -> α, T (T γ) -> γ)(Γ', S')`.
 
