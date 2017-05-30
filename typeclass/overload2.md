@@ -31,7 +31,8 @@
   Even if we limit our attention to languages based on the highly successful Hindley/Milner type system, we find many differing treatments of overloading.
   The same language may treat different operators differently; different languages may treat the same operator differently; and the same language may treat the same operator differently over time.
   For instance, in Miranda arithmetic is defined only on a single numeric type; equality is a polymorphic function defined at all types, including abstract types where it breaks the abstraction barrier; and the show function may be defined by the user for new types.
-  In the first version of SML equality was simply overloaded at all monomorphic types; while the second version introduced special equality type variables.
+  In the first version of SML equality was simply overloaded at all monomorphic types;
+  while the second version introduced special equality type variables.
 
   Type classes were introduced into Haskell in order to provide a uniform framework for overloading [WB89].
   It must have been an idea whose time had come, as it was independently described by Kaes [Kae88].
@@ -42,10 +43,12 @@
 
   ---
 
-  In Proc. FPCA'95 Conf. on Functional Programming Languages and Computer Architecture
+  <a name="*"></a>[*](#r*) In Proc. FPCA'95 Conf. on Functional Programming Languages and Computer Architecture
 
+  <a name="d"></a>[†](#rd)
   Institut fur Programmstrukturen, 76128 Karlsruhe, Germany.
 
+  <a name="dd"></a>[‡](#rdd)
   Department of Computing Science, University of Glasgow, Glasgow G12 8QQ,
 
   ---
@@ -58,9 +61,11 @@
 
   The principal type result shows that every typable program has a single most general type.
   This is also true for type classes.
-  However, much of the utility of this result arises from another property of the Hindley/Milner system: every typeable program remains typeable if all type declarations are removed from it, so type declarations are never required.
+  However, much of the utility of this result arises from another property of the Hindley/Milner system:
+  every typeable program remains typeable if all type declarations are removed from it, so type declarations are never required.
   This fails for type classes: some programs are inherently ambiguous, and require type declarations for disambiguation.
-  Put another way: under Hindley/Milner, a program is untypeable only if it may have no meaning; under type classes, a program may be untypeable because it has too many meanings.
+  Put another way: under Hindley/Milner, a program is untypeable only if it may have no meaning;
+  under type classes, a program may be untypeable because it has too many meanings.
 
   The absence of these properties is not merely the lack of a technical nicety: they arise because the meaning of a program cannot be understood separately from its type.
   This reduces the range of ways of understanding programs available to a programmer, and reduces the range of ways of implementing programs available to a compiler.
@@ -96,25 +101,31 @@
   The latter are perhaps less essential than the former: neither Miranda nor SML support overloading of the latter sort, and Kaes considered only this restricted form of overloading in his original paper [Kae88].
 
   As an example of the value of this restriction, consider the phrase `[] == []`.
-  In Haskell, this phrase as it stands is ambiguous, and hence meaningless: one must disambiguate by specifying the type of the list elements.
-  This is because the meaning of the program is given by the translation `eqList eqElt [] []`, where `eqList` is equality on lists, and `eqElt` is equality over on the list elements.
+  In Haskell, this phrase as it stands is ambiguous, and hence meaningless:
+  one must disambiguate by specifying the type of the list elements.
+  This is because the meaning of the program is given by the translation `eqList eqElt [] []`,
+  where `eqList` is equality on lists, and `eqElt` is equality over on the list elements.
 
-  In our restricted system, we are guaranteed that the phrase [] == [] has a meaning independent of types; and that all valid translations yield this meaning.
+  In our restricted system, we are guaranteed that the phrase `[] == []` has a meaning independent of types;
+  and that all valid translations yield this meaning.
   The implementor has a choice: overloading may be implemented by run-time branching, corresponding to the untyped dynamic semantics of Section 3, or by compile-time translation, corresponding to the typed static semantics of Section 4.
-  In the latter case, a valid translation of the program is eqList undef [] [], where undef is the function that is everywhere undefined; this is because coherence guarantees that if the program doesn't force a translation, then any translation will do.
-  For unrestricted Haskell the compiler writer must choose a translation, because there is no dynamic semantics, and must choose eqElt rather that undef, because there is no suitable coherence result.
+  In the latter case, a valid translation of the program is `eqList undef [] []`,
+  where `undef` is the function that is everywhere undefined;
+  this is because coherence guarantees that if the program doesn't force a translation, then any translation will do.
+  For unrestricted Haskell the compiler writer must choose a translation, because there is no dynamic semantics, and must choose `eqElt` rather that `undef`, because there is no suitable coherence result.
 
   Thus, our restriction of type classes ensures additional useful properties that hold.
   These additional properties in turn make it possible for us to consider a generalisation of type classes.
 
-### Generalising type classes
+#### Generalising type classes
 
   Type classes constrain type variables to range over types at which certain overloaded operators are defined.
   This appears to be closely related to bounded polymorphism, which constrains type variables to range over types that are subtypes of a given type [CW85, BTCGS91].
   Indeed, one can use type classes to mimic bounded polymorphism for the usual subtyping relation on records [Pet94].
   But, annoyingly, this mimicry works only for monomorphic records; type classes are not quite powerful enough to handle polymorphic records.
 
-  For instance, one would expect the operations xcoord and ycoord to apply to any record type that contains those fields, for instance it should apply both to a type Point containing just those two fields, and to a type CPoint that contains both those fields plus a colour.
+  For instance, one would expect the operations `xcoord` and `ycoord` to apply to any record type that contains those fields,
+  for instance it should apply both to a type `Point` containing just those two fields, and to a type `CPoint` that contains both those fields plus a colour.
   Here is how one can mimic such records in Haskell.
 
     class (Pointed a) where
@@ -135,11 +146,11 @@
     distance :: (Pointed a) => a -> Float
     distance p = sqrt (sqr (xcoord p) + sqr (ycoord p))
 
-  Function distance computes the distance of a point from the origin.
+  Function `distance` computes the distance of a point from the origin.
   The type signature is optional, as it may be inferred given only the class declaration and the function body.
 
   Note, alas, that this mimicry depends on each field of the record having a monomorphic type that can appear in the class declaration.
-  The polymorphic equivalent of the above would be to have operations first and second that return the corresponding components of either a pair or a triple, where these may have any type rather than being restricted to Float.
+  The polymorphic equivalent of the above would be to have operations first and second that return the corresponding components of either a pair or a triple, where these may have any type rather than being restricted to `Float`.
   But there is no way to do this in Haskell.
 
   The source of this problem is class declarations. For
@@ -184,10 +195,10 @@
     distance :: (xcoord,ycoord::a->Float) => a -> Float
     distance p = sqrt (sqr (xcoord p) + sqr (ycoord p))
 
-  Again, the type declaration for distance may be inferred from its body (ignoring, for simplicity, the overloading of
-  sqrt, sqr, and +).
+  Again, the type declaration for `distance` may be inferred from its body
+  (ignoring, for simplicity, the overloading of `sqrt`, `sqr`, and `+`).
 
-  Furthermore, it is now possible to overload first and second on polymorphic pairs and triples.
+  Furthermore, it is now possible to overload `first` and `second` on polymorphic pairs and triples.
 
     over first
     over second
@@ -211,22 +222,23 @@
     demo :: (first::a->b,second::a->c) => a -> (c,b)
     demo r = (second r, first r)
 
-  Function demo takes a pair or triple and returns its second and first components, in that order.
+  Function `demo` takes a pair or triple and returns its `second` and `first` components, in that order.
   Again, its type can be inferred.
 
   In short, eliminating class declarations makes type classes powerful enough to model bounded polymorphism.
 
   Eliminating class declarations means one need no longer decide in advance which operations belong together in a class.
   In many situations, this will be a positive advantage.
-  For instance, if we're dealing with pairs we only want first and second grouped together, but if we're dealing with triples we'll want third as well.
+  For instance, if we're dealing with pairs we only want `first` and `second` grouped together, but if we're dealing with triples we'll want `third` as well.
   As a further example, consider the diculties that the Haskell designers had deciding how to group numeric operators into classes.
-  This design is still argued: should + and * be in a `ring' class? The problem is exacerbated because there is no mechanism in Haskell whereby a user may break a given class into smaller classes.
+  This design is still argued: should + and * be in a `ring` class?
+  The problem is exacerbated because there is no mechanism in Haskell whereby a user may break a given class into smaller classes.
 
   On the other hand, eliminating class declarations means that inferred types become more verbose: the type of every overloaded operator must be mentioned.
   Records provide some relief here, since they allow us to group related operations together, using a common overloaded identifier for them all.
   This is explained in more detail in Section 5.
 
-### Contributions of this work
+#### Contributions of this work
 
   We combine the above restrictions and generalisations of type classes to define System O, a type system for overloading with the following properties.
 
@@ -248,8 +260,7 @@
   It can be seen as a simplification of his system that gets rid of all syntactic declarations of predicates or type classes.
   We extend the scope of his work by a proof of type soundness and the relationship to record typing.
 
-  Much of the later work on overloading is driven by the design and implementation of Haskell's type classes, e.g.
-  Nipkow et al.
+  Much of the later work on overloading is driven by the design and implementation of Haskell's type classes, e.g. Nipkow et al.
   [NS91, NP93] on type reconstruction, Augustsson [Aug93] and Peterson and Jones [PJ93] on implementations, and Hall, Hammond, Peyton Jones and Wadler [HHPW94] on the formal definition of type classes in Haskell.
   We have already compared our system to that of Haskell.
 
@@ -342,8 +353,7 @@
   We base our discussion on a simple functional language with overloaded identifiers.
   Figure 1 gives the syntax of terms and types.
 
-  We split the variable alphabet into subalphabets `U` for unique variables,
-  ranged over by `u`, `O` for overloaded variables, ranged over by `o`, and `K` for data constructors, ranged over by `k`.
+  We split the variable alphabet into subalphabets `U` for unique variables, ranged over by `u`, `O` for overloaded variables, ranged over by `o`, and `K` for data constructors, ranged over by `k`.
   The letter `x` ranges over both unique and overloaded variables as well as constructors.
   We assume that every non-overloaded variable `u` is bound at most once in a program.
 
@@ -392,7 +402,8 @@
 
   where the type constructor on which `o` is overloaded cannot be determined uniquely.
 
-  The syntactic restrictions on type schemes `στ` enforce three properties: First, overloaded instances must work uniformly for all arguments of a given type constructor.
+  The syntactic restrictions on type schemes `στ` enforce three properties:
+  First, overloaded instances must work uniformly for all arguments of a given type constructor.
   Second the argument type must determine the result type uniquely.
   Finally, all constraints must apply to component types of the argument.
   The restrictions are necessary to ensure termination of the type reconstruction algorithm.
@@ -404,7 +415,9 @@
   By embodying this rule in the form of type variable constraints we enforce it at the earliest possible time.
 
   **Example 2.1** The following program fragment gives instance declarations for the equality function `(==)`.
-  We adapt our notation to Haskell's conventions, writing `::` instead of `:` in a typing; writing `(o::a->t1)=>t2` instead of `∀α:(o : a -> τ1) ⇒ τ2` and writing `inst o :: s; o = e` instead of `inst o : σ = e`.
+  We adapt our notation to Haskell's conventions, writing `::` instead of `:`
+  in a typing; writing `(o::a->t1)=>t2` instead of `∀α:(o : a -> τ1) ⇒ τ2`
+  and writing `inst o :: s; o = e` instead of `inst o : σ = e`.
 
     inst (==) :: Int -> Int -> Bool
          (==) = primEqInt
@@ -422,7 +435,8 @@
   **Example 2.2** The following example demonstrates an object-oriented style of programming, and shows where we are more expressive than Haskell's type classes.
   We write instances of a polymorphic class `Set`, with a member test and operations to compute the union, intersection, and difference of two sets.
   In Haskell, only sets of a fixed element type could be expressed.
-  The example uses the record extension of Section 5; look there for an explanation of record syntax.
+  The example uses the record extension of Section 5;
+  look there for an explanation of record syntax.
 
     type Set a sa
       = (union, inters, diff :: sa -> sa,
@@ -536,8 +550,7 @@
 
   (a) `η ⊨ μ ≼ μ`.
 
-  (b) `η ⊨ μ ≼ (∀α.πα => σ)`
-  if there is a monotype `μ'` such that `η ⊨ μ ≼ [μ'/α] σ` and `η(o) ∈ 〚 [μ'/α] τ〛`, for all `o : τ ∈ πα`.
+  (b) `η ⊨ μ ≼ (∀α.πα => σ)` if there is a monotype `μ'` such that `η ⊨ μ ≼ [μ'/α] σ` and `η(o) ∈ 〚 [μ'/α] τ〛`, for all `o : τ ∈ πα`.
 
   **Definition.** The meaning `〚σ〛_η` of a closed type scheme  `σ` is given by
 
@@ -567,8 +580,7 @@
 
   (b) Follows from the definition of `≼` and (a). □
 
-  **Proposition 3.4** Let `σ` be a type scheme and let `η` be an environment.
-  Then `〚σ〛 η` is an ideal.
+  **Proposition 3.4** Let `σ` be a type scheme and let `η` be an environment. Then `〚σ〛 η` is an ideal.
 
   Proof:
   The closure properties are shown by straightforward inductions on the structure of `σ`.
@@ -583,8 +595,7 @@
 [<a name="rSmi91"></a>[Smi91](#Smi91)].
   Interestingly, the only thing that distinguishes those two approaches in the semantics of type schemes is the absence or presence of the bottom type `⫫`  .
 
-  We now show that System O is sound, i.e.
-  that syntactic type judgements `Γ ⊢ p : σ` are reected by semantic type judgements `Γ ⊨ p : σ`.
+  We now show that System O is sound, i.e. that syntactic type judgements `Γ ⊢ p : σ` are reected by semantic type judgements `Γ ⊨ p : σ`.
 
   **Definition.** Let `e` be a term, let `Γ` be a closed typothesis, and let `σ` be a closed type scheme.
   Then `Γ ⊨ e : σ` iff, for all environments `η`, `η ⊨ Γ` implies `η ⊨ e : σ`.
@@ -595,8 +606,7 @@
   **Lemma 3.5** If `η ⊨ e : σ` and `η ⊨ μ ≼ σ` then  `η ⊨ e : μ`.
 
   **Theorem 3.6** (Type Soundness for Terms)
-  Let `Γ ⊢ e : σ` be a valid typing judgement and let `S` be a substitution such that `SΓ` and `Sσ` are closed.
-  Then `SΓ ⊨ e : Sσ`.
+  Let `Γ ⊢ e : σ` be a valid typing judgement and let `S` be a substitution such that `SΓ` and `Sσ` are closed. Then `SΓ ⊨ e : Sσ`.
 
   Proof:
   Assume `Γ ⊢ e : σ` and `η ⊨ SΓ`.
@@ -717,7 +727,7 @@ and let `η` be an environment. If `η ⊨ Γ` then `〚p〛 η ≠ W` .
 ## 4 Translation
 
   This section studies the "dictionary passing" transform from System O to the Hindley/Milner system.
-  Its central idea is to convert a term of type `∀α.πα=>τ` to a function that takes as arguments implementations of the overloaded variables in `πα`.
+  Its central idea is to convert a term of type `∀α.πα => τ` to a function that takes as arguments implementations of the overloaded variables in `πα`.
   These arguments are also called "dictionaries".
 
   The target language of the translation is the Hindley/Milner system, which is obtained from System O by eliminating overloaded variables `o`, instance declarations, and constraints `πα` in type schemes.
@@ -753,7 +763,7 @@ and let `η` be an environment. If `η ⊨ Γ` then `〚p〛 η ≠ W` .
 
   **Conjecture** Let `p` be a program, `μ` be a monotype, and let `η` be an environment.
   Let `Γ` be a typothesis which does not contain overloaded variables.
-  If `Γ ⊢ p : μ ≻ p*` and `η ⊨ Γ` then `〚p〛 η = 〚p*〛 η` .
+  If `Γ ⊢ p : μ ≻ p*` and `η ⊨ Γ` then `〚p〛 η = 〚p*〛 η`.
 
   Although the above claim seems clearly correct, its formal proof is not trivial.
   Note that coherence of the translation would follow immediately from the above conjecture.
@@ -769,38 +779,26 @@ and let `η` be an environment. If `η ⊨ Γ` then `〚p〛 η ≠ W` .
   - record expressions `{l1 = e1、...、ln = en}`, and
   - selector functions `#l`.
 
-  It would be easy to add record updates, as in the work
-  of Ohori, but more dicult to handle record extension, as
-  in the work of Wand [Wan87] or Remy [Rem89]. Jones
-  [Jon92a] has shown how to embed Remy's system of extensible
-  records by extending unification to an AC theory for
-  records and using (multi-parameter) type classes for stating
-  the absence of fields in a record. Both updates and extensions
-  are however omitted here for simplicity.
+  It would be easy to add record updates, as in the work of Ohori, but more dicult to handle record extension, as in the work of Wand [Wan87] or Remy [Rem89].
+  Jones [Jon92a] has shown how to embed Remy's system of extensible records by extending unification to an AC theory for records and using (multi-parameter) type classes for stating the absence of fields in a record.
+  Both updates and extensions are however omitted here for simplicity.
 
-  Leaving open for the moment the type of selector functions,
-  the system presented so far corresponds roughly to
-  the way records are defined in Standard ML. Selectors are
-  treated in Standard ML as overloaded functions. As with
-  all overloaded functions, the type of the argument of a selector
-  has to be known statically; if it isn't, an overloading
-  resolution error results.
+  Leaving open for the moment the type of selector functions, the system presented so far corresponds roughly to the way records are defined in Standard ML.
+  Selectors are treated in Standard ML as overloaded functions.
+  As with all overloaded functions, the type of the argument of a selector has to be known statically;
+  if it isn't, an overloading resolution error results.
 
-  Our record extension also treats selectors as overloaded
-  functions but uses the overloading concept of System O. The
-  most general type scheme of a selector `#l` is
+  Our record extension also treats selectors as overloaded functions but uses the overloading concept of System O.
+  The most general type scheme of a selector `#l` is
 
     ∀β.∀α.(α ≦ {l : β}) => α -> β.
 
-  This says that `#l` can be applied to records that have a field
-  `l : τ`, in which case it will yield a value of type `τ`. The
-  type scheme uses a subtype constraint `α ≦ ρ`. Subtype constraints
-  are validated using the subtyping rules in Figure 5.
-  In all other respects, they behave just like overloading constraints
-  `o : α -> τ`.
+  This says that `#l` can be applied to records that have a field `l : τ`, in which case it will yield a value of type `τ`.
+  The type scheme uses a subtype constraint `α ≦ ρ`.
+  Subtype constraints are validated using the subtyping rules in Figure 5.
+  In all other respects, they behave just like overloading constraints `o : α -> τ`.
 
-  Example 5.1 The following program is typable in System
-  O (where the typing of `max` is added for convenience).
+  Example 5.1 The following program is typable in System O (where the typing of `max` is added for convenience).
 
       let max : ∀β.((<) : β -> β -> bool) =>
                   ∀α. (α ≦ {key : β}) => α -> α -> α
@@ -808,10 +806,7 @@ and let `η` be an environment. If `η ⊨ Γ` then `〚p〛 η ≠ W` .
       in
           max {key = 1, data = a} {key = 2, data = b}
 
-  In Standard ML, the same program would not be typable
-  since neither the argument type of the selector `#key` nor the
-  argument type of the overloaded function `(<)` are statically
-  known.
+  In Standard ML, the same program would not be typable since neither the argument type of the selector `#key` nor the argument type of the overloaded function `(<)` are statically known.
 
   Note that the bound variable in a subtype constraint can also appear in the constraining record type, as in
 
@@ -821,35 +816,25 @@ and let `η` be an environment. If `η ⊨ Γ` then `〚p〛 η ≠ W` .
   It remains to be seen how suitable our system is for modeling object-oriented programming.
   Some recent developments in object-oriented programming languages seem to go in the same direction, by restricting subtyping to abstract classes [SOM93].
 
-  We now show that the record extension adds nothing
-  essentially new to our language. We do this by presenting
-  an encoding from System O with records to plain System O.
-  The source of the encoding is a program with records, where
-  we assume that the labels `l1, ..., ln` of all record expressions
-  `{l1 = e1, ..., ln = en}` in the source program are sorted lexicographically
-  (if they are not, just rearrange fields). The
-  details of the encoding are as follows.
+  We now show that the record extension adds nothing essentially new to our language. We do this by presenting an encoding from System O with records to plain System O.
+  The source of the encoding is a program with records, where we assume that the labels `l1, ..., ln` of all record expressions `{l1 = e1, ..., ln = en}` in the source program are sorted lexicographically (if they are not, just rearrange fields).
+  The details of the encoding are as follows.
 
   1. Every record-field label `l` in a program is represented by
   an overloaded variable, which is also called `l`.
 
-  2. For every record expression `{l1 = e1, ..., ln = en}` in
-  a program, we add a fresh `n-ary` datatype `R_{l1...ln}` with a
-  constructor of the same name and selectors as given by the
-  declaration
+  2. For every record expression `{l1 = e1, ..., ln = en}` in a program, we add a fresh `n-ary` datatype `R_{l1...ln}` with a constructor of the same name and selectors as given by the declaration
 
       data R_{l1...ln} α1 ...αn = R_{l1...ln} α1 ...αn.
 
-  3. For every datatype `R_{l1...ln}` created in Step 2 and every
-  label `li(i = 1, ...,n)`, we add an instance declaration
+  3. For every datatype `R_{l1...ln}` created in Step 2 and every label `li(i = 1, ...,n)`, we add an instance declaration
 
         inst li : ∀_{α1...αn}.R_{l1...ln} α1 ...αn -> αi
               = λ (R_{l1...ln} x1 ... xn) :xi
 
-  (where the pattern notation in the formal parameter is used for convenience).
+    (where the pattern notation in the formal parameter is used for convenience).
 
-  4. A record expression `{l1 = e1, ..., ln = en}` now translates
-  to `R_{l1...ln} e1 ...en`.
+  4. A record expression `{l1 = e1, ..., ln = en}` now translates to `R_{l1...ln} e1 ...en`.
   5. A selector function `#l` translates to `l`.
   6. A record type `{l1 : τ1, ..., ln : τn}` is translated to `Rl1 ... lnτ1...τn`.
 
@@ -936,11 +921,11 @@ and let `η` be an environment. If `η ⊨ Γ` then `〚p〛 η ≠ W` .
   Compared to Milner's algorithm W [Mil78] there are two extensions.
 
   - The case of binding a type variable in the unification algorithm is extended.
-  To bind a type variable `α` to a type `τ` the constraints of `Γα` have to be satisfied.
-  The function `mkinst` ensures that type `τ` statisfies the constraints `Γα`.
+    To bind a type variable `α` to a type `τ` the constraints of `Γα` have to be satisfied.
+    The function `mkinst` ensures that type `τ` statisfies the constraints `Γα`.
 
   - The function `tp` is extended with a branch for instance declarations `inst o : στ = e in p`.
-  In this case it must be checked that the inferred type `στ'` for the overloading term `e` is less general then the given type `στ`.
+     In this case it must be checked that the inferred type `στ'` for the overloading term `e` is less general then the given type `στ`.
 
   We now state soundness and completeness results for the algorithms `unify` and `tp`.
   The proofs of these results are along the lines of [<a name="rChe94"></a>[Che94](#Che94)]; they are omitted here.
@@ -976,40 +961,30 @@ and let `η` be an environment. If `η ⊨ Γ` then `〚p〛 η ≠ W` .
 
   Figure 6: Algorithm for constrained unification
 
-  **Definition.** The following defines a preorder `≼` on substitutions
-  and configurations and a preorder `≼Γ` on type schemes.
+  **Definition.** The following defines a preorder `≼` on substitutions and configurations and a preorder `≼Γ` on type schemes.
   If `X≼Y` we say that `Y` is more general than `X`.
 
   - `S' ≼ S` iff there is a substitution `R` such that `S' = R o S`.
   - `(Γ',S') ≼ (Γ,S)` iff `S' ≼ S`, `S'Γ' ⊢ S'Γdom(S')` and `Γ' ⊇ Γ \ Γdom(S')`.
   - `σ' ≼Γ σ` iff, for all `u ∉ dom(Γ)` , `Γ ⊢ u : σ` implies `Γ ⊢ u : σ'`.
 
-  **Definition.** A constrained unification problem is a pair of
-  tuples `(τ1,τ2)(Γ,S)` where `τ1,τ2` are types and `(Γ,S)` is a
-  configuration.
+  **Definition.** A constrained unification problem is a pair of tuples `(τ1,τ2)(Γ,S)` where `τ1,τ2` are types and `(Γ,S)` is a configuration.
 
-  A configuration `(Γ',S')` is called a unifying configuration
-  for `(τ1,τ2)(Γ,S)` iff `(Γ',S') ≼ (Γ,S)` and `S' τ1 = S' τ2`.
+  A configuration `(Γ',S')` is called a unifying configuration for `(τ1,τ2)(Γ,S)` iff `(Γ',S') ≼ (Γ,S)` and `S' τ1 = S' τ2`.
 
   The unifying configuration `(Γ',S')` is most general iff `(Γ'',S'') ≼ (Γ',S')`, for every other unifying configuration `(Γ'',S'')`.
 
   **Definition.** A typing problem is a triple `(p,Γ,S)` where `(Γ,S)` is a configuration and `p` is a term or program with `fv(p) ⊆ dom(Γ)`.
 
-  A typing solution of a typing problem `(p,Γ,S)` is a triple
-  `(σ,Γ',S')` where `(Γ',S') ≼ (Γ,S)` and `S'Γ' ⊢  p : S'σ`.
+  A typing solution of a typing problem `(p,Γ,S)` is a triple `(σ,Γ',S')` where `(Γ',S') ≼ (Γ,S)` and `S'Γ' ⊢  p : S'σ`.
 
-  The typing solution `(σ'',Γ',S')` is most general iff for every
-  other typing solution `(σ'',Γ'',S'')` it holds `(Γ'',S'') ≼ (Γ',S')`
-  and `S'' σ'' ≼S''Γ'' S'' σ`.
+  The typing solution `(σ'',Γ',S')` is most general iff for every other typing solution `(σ'',Γ'',S'')` it holds `(Γ'',S'') ≼ (Γ',S')` and `S'' σ'' ≼S''Γ'' S'' σ`.
 
-  **Theorem 6.1** Let `(τ1,τ2)(Γ,S)` be a constrained unification
-  problem
+  **Theorem 6.1** Let `(τ1,τ2)(Γ,S)` be a constrained unification problem
 
-  (a) If `unify(τ1,τ2)(Γ,S) = (Γ',S')` then `(Γ',S')` is a most
-  general unifying configuration for `(τ1,τ2)(Γ,S)`.
+  (a) If `unify(τ1,τ2)(Γ,S) = (Γ',S')` then `(Γ',S')` is a most general unifying configuration for `(τ1,τ2)(Γ,S)`.
 
-  (b) If `unify(τ1,τ2)(Γ,S)` fails then there exists no unifying
-  configuration for `(τ1,τ2)(Γ,S)`.
+  (b) If `unify(τ1,τ2)(Γ,S)` fails then there exists no unifying configuration for `(τ1,τ2)(Γ,S)`.
 
   **Theorem 6.2** Let `(p,Γ,S)` be a typing problem.
 
@@ -1026,26 +1001,21 @@ and let `η` be an environment. If `η ⊨ Γ` then `〚p〛 η ≠ W` .
       Γ ⊢ p : σ                   and
       Γ ⊢ p : σ'' => σ'' ≼Γ σ,  for all type schemes σ''.
 
-  (b) If `tp (p,Γ,id)`  fails then there is no type scheme `σ` such
-  that `Γ ⊢ p : σ`.
+  (b) If `tp (p,Γ,id)`  fails then there is no type scheme `σ` such that `Γ ⊢ p : σ`.
 
-  The termination of `unif` and `mkinst` critically depends on
-  the form of overloaded type schemes `στ` :
+  The termination of `unif` and `mkinst` critically depends on the form of overloaded type schemes `στ` :
 
     στ = T α1 ... αn -> τ   (tv(τ) ⊆ {α1, ..., αn})
        | ∀α.πα => στ'      (tv(πα) ⊆ tv(στ')).
 
-  We show with an example why `στ` needs to be parametric
-  in the arguments of `T`. Consider the following program,
-  where  `k ∈ KT` .
+  We show with an example why `στ` needs to be parametric in the arguments of `T`. Consider the following program, where  `k ∈ KT` .
 
     p = let (;) x y = y in
         inst o : ∀α.o : α -> α => T(Tα) -> α
             = λk (k x).o x
         in λx.λy.λf. o x; o y; f (k y); f x
 
-  Then computation of `tp (p,∅,id)` leads to a call `tp (f x,Γ,S)`
-  with `x : α, y : β, f : Tβ -> δ ∈ Γ`.
+  Then computation of `tp (p,∅,id)` leads to a call `tp (f x,Γ,S)` with `x : α, y : β, f : Tβ -> δ ∈ Γ`.
   This leads in turn to a call `unify (α,Tβ)(Γ,S)` where the following assumptions hold:
 
   - `στ = ∀α.o : α -> α => T(Tα) -> α`
