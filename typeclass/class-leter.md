@@ -2,104 +2,104 @@
     Date: Sat, 27 Feb 88 15:33:30 GMT
     To: bob@lfcs.ed.ac.uk, fplangc@cs.ucl.ac.uk, mads@lfcs.ed.ac.uk,
             plw@cs.glasgow.ac.uk
-    Subject: Overloading in Haskell
+    Subject: Overloading in Haskell Haskellのオーバーロード
     Sender: fplangc-request@cs.ucl.ac.uk
 
 
-    Proposal: Overloading in Haskell
-      Phil Wadler
-    24 February 1988
+    提案：ハスケルのオーバーロード
+      フィルワドラー
+    1988年2月24日
 
 
-  Overloading was a topic that sparked much discussion at the Yale meeting.
-  It seemed clear that if the language was to be usable, we would at least need overloading of operations such as "+" and "*".
-  The overall philosophy of the language suggested that we should do this in as general a way as possible, rather than just as a special case for a few operators.
-  There appeared to be no easy "off-the-shelf" solution available for us to use.
+  オーバーロードは、イェール会議で多くの議論を巻き起こした話題でした。
+  言語が使えるようになったら、少なくとも「+」や「*」などの操作のオーバーロードが必要であることは明らかでした。
+  言語の全体的な考え方は、少数のオペレータの特殊なケースではなく、できるだけ一般的な方法でこれを行うべきだと示唆していました。
+  私たちが利用できる簡単な「既製品」のソリューションは存在しないようです。
 
-  A worrying point was exemplified by the definition
+  心配する点は、定義
 
     square x  =  x * x
 
-  Since "*" applies to values of both type "int" and type "float", shouldn't "square" apply to both as well?
-  Clearly this was desirable, but we could see no easy way to achieve it.
-  (The simplest method leads to a potential blow-up when the original source with overloading is translated to a core language with overloading removed.)
+  "*" は "int" 型とfloat型の両方の値に適用されるので、両方に "square" を適用しないでください。
+  明らかにこれは望ましいことでしたが、達成するための簡単な方法はありませんでした。
+  （最も簡単な方法は、オーバーロードを伴う元のソースがオーバーロードが除去された状態でコア言語に変換されると、潜在的なブローアップにつながります。）
 
-  Another source of discussion was the "polymorphic equality" operator.
-  The "polymorphic equality" operation found in Standard ML and Miranda is, from some perspectives, an odd beast.
-  Standard ML requires an extension to the type system, "equality types", to guarantee, for example, that two functions are never compared for equality.
-  Further, polymorphic equality is not "lambda definable"---it must be defined as a new primitive.
-  This poses problems for some implementations, such as TIM (though not insurmountable ones).
-  It was unclear whether it should be possible to extend the polymorphic equality operator with user-defined equality operations over abstract types.
+  議論のもう一つの源は、 "多態性平等"演算子でした。
+  標準的なMLとミランダに見られる "多態的な平等"操作は、いくつかの観点から、奇妙な獣です。
+  標準MLは、例えば、2つの関数が等しいかどうか比較されないことを保証するために、型システム「等価型」への拡張を必要とします。
+  さらに、多態性の等価性は「ラムダ定義可能」ではなく、新しいプリミティブとして定義する必要があります。
+  これは、TIMなどの一部の実装では問題を引き起こします（ただし、実現不可能なものではありません）。
+  抽象型に対してユーザー定義の等価操作を使用して多態性等価演算子を拡張できるかどうかは不明でした。
 
-  This proposal suggests a new approach to dealing with overloading.
-  It provides a solution to the "square" problem.
-  It is possible at compile-time to translate a program with overloading to a program without overloading, and to do so in a way that avoids blow-up.
-  Somewhat to my surprise, it also provides a solution to the polymorphic equality problem!
+  この提案は、オーバーロードを扱うための新しいアプローチを示唆しています。
+  これは「正方形」問題の解決法を提供します。
+  コンパイル時には、オーバーロードを伴うプログラムをオーバーロードなしでプログラムに変換し、ブローアップを回避するようにプログラムを変換することができます。
+  私の驚きには多少なりとも、それは多態性の平等問題の解決法を提供します！
 
-  I have organised this paper so that well-baked ideas appear near the beginning, and ideas become more poorly-baked as one approaches the end.
+  私はこのペーパーを整理して、熟成したアイデアが冒頭の近くに現れ、アイデアが終わりに近づくにつれてアイデアが貧弱になるようにしました。
 
-  Part 1 presents a limited form of overloading; it can be viewed as one way of making concrete the ideas for overloading discussed at the Yale meeting.
-  I first heard the idea from Jon, but it turns out to be exactly what is used in the Edinburgh implementation of Standard ML (although it is not included in the language standard).
+  パート1は、限定された形式のオーバーロードを示しています。それは、イェール会議で議論された過負荷の考え方を具体的にする一つの方法と見ることができます。
+  私はまずJonからそのアイデアを聞いたが、Standard MLのエジンバラ実装で使用されているものと正確に同じであることが分かった（言語標準には含まれていないが）。
 
-  (An interesting aside: Kevin Mitchell claims that the Appel/MacQueen implementation of overloading in Standard ML is more restrictive than the Edinburgh implementation.
-  The problem is that the standards document says that the overloading must be resolvable at compile-time, but says nothing about how it is to be resolved!)
+  （興味深いのは、Kevin Mitchell は Appel/MacQueen の S​​tandard ML でのオーバーロードの実装が Edinburgh の実装よりも制限的であると主張しています。
+  問題は、標準のドキュメントでは、オーバーロードがコンパイル時に解決可能でなければならないと言われていますが、解決方法については何も言いません！）
 
-  Part 2 describes generalised overloading.
-  I have presented the ideas in an informal manner.
+  第2部では、一般化されたオーバーロードについて説明します。
+  私は非公式にアイデアを発表しました。
 
-  The formal theory is still being developed.
-  I have discussed these ideas with Bob Harper and Mads Tofte at Edinburgh: we've found no obvious bugs yet, and there appear to be strong relations between these new ideas and some well-developed parts of type theory.
+  正式な理論はまだ開発中です。
+  私はエジンバラのBob HarperとMads Tofteとのアイデアについて議論しました。まだ明らかなバグは見つかっておらず、これらの新しいアイデアとタイプ理論のいくつかのよく発達した部分との間に強い関係があるようです。
 
-  Another encouraging development is that, as it turns out, similar ideas have been proposed independently by Kevin Mitchell (as an unimplemented extension to the Edinburgh Standard ML referred to above) and by Nick Rothwell (also at Edinburgh, who has implemented it as an extension to Prolog).
-  Unfortunately, they have not developed the corresponding theory, so important work remains to be done; but the existence of a running implementation based on these ideas is reassuring.
+  もう一つの奨励策は、Kevin Mitchell（前述のEdinburgh Standard MLの実装されていない拡張機能）とNick Rothwell（これも拡張機能として実装したEdinburghプロローグへ）。
+  残念ながら、彼らは対応する理論を開発していないので、重要な作業はまだ残っています。これらのアイディアに基づいて実行中の実装が存在することは安心です。
 
-  Acknowledgements usually come at the end of a paper, but this one requires an acknowledgement to Joe Fasel up front.
-  The original idea of handling overloading on numberical types in a polymorphic way and reflecting this in the type scheme is due to Joe.
-  He first suggested it to me at the POPL meeting in San Diego, immediately following the Yale meeting.
-  The idea has changed very much since then; I'm grateful to Joe, Luca Cardelli, John Hughes, Bob Harper, Mads Tofte, Kevin Mitchell, and Nick Rothwell for discussions that helped it evolve.
+  謝辞は通常、論文の終わりに来ますが、これはジョー・ファッセルの正式な承認を必要とします。
+  多態的な方法で数値型のオーバーロードを処理し、これを型スキームに反映させる元の考えは、Joeによるものです。
+  彼は最初、イェール会議の直後にサンディエゴのPOPL会合で私にそれを提案しました。
+  それ以来、アイデアは大きく変化しました。 Joe、Luca Cardelli、John Hughes、Bob Harper、Mads Tofte、Kevin Mitchell、Nick Rothwellに感謝しています。
 
-  This paper is organised as follows.
-  Part 0 contains notational preliminaries.
-  Part 1 presents a simple form of overloading.
-  Part 2, which is by far the largest part of the paper, presents a generalised form of overloading.
-  Part 3 concludes.
+  本論文は以下のように構成されている。
+  パート0には表記練習が含まれています。
+  第1部では、単純な形式のオーバーロードを示しています。
+  この論文のはるかに大きな部分であるパー​​ト2は、オーバーロードの一般化された形式を示しています。
+  第3部は結論を出します。
 
 
 
-## 0. Preliminaries
+## 0. 予選
 
-  Unlike in Standard ML or Miranda, type quantifiers will be written explicitly.
-  For example:
+  Standard MLやMirandaとは異なり、型指定子は明示的に記述されます。
+  例えば：
 
     k : \a b. a -> b -> a
     k = \x y. x
 
-  Note that I use "\" as concrete syntax for both "for every" in types, and "lambda" in expressions.
-  Which is meant should always be clear from context.
-  One advantage of explicit type quantification is that it eliminates the need to lexically distinguish type variables; thus we avoid uglies such as 'a in Standard ML or *** in Miranda.
+  型の "for every"と式の "lambda"の両方に "\"を具体的な構文として使用することに注意してください。
+  これは、文脈から常に明確であるべきであることを意味する。
+  明示的な型の定量化の利点の1つは、型変数を字句的に区別する必要がなくなることです。したがって、我々はミランダの標準MLまたは***のような醜い人物を避ける。
 
-  In the Hindley/Milner type system, quantifiers may only appear at the outer level of a type.
-  For example, the type given above for "k" is legal, whereas the type "\a. a -> (\b. b -> a)" is not.
+  Hindley / Milnerタイプのシステムでは、量子はあるタイプの外部レベルにしか現れません。
+  例えば、 "k"のための上記の型は合法ですが、 "\ a。a - >（\ b。b - > a）"型は合法です。
 
-  I will use ":" as concrete syntax for "has type", and "::" as concrete syntax for "cons".
+  私は "has type"の具体的な構文として "："を、 "cons"の具体的な構文として "::"を使用します。
 
-  I assume the existence of two types, "int" and "float", defined in the standard prelude, together with the operations such as
+  私は、標準的な演奏会で定義されている "int"と "float"という2つのタイプの存在が、
 
     intadd   : int -> int -> int
     intmul   : int -> int -> int
     intneg   : int -> int
 
-  and similarly for "float".
-  There is no overloading of constants: "1" has type "int", and "1.0" has type "float".
+  「フロート」についても同様です。
+  定数のオーバーロードはありません。 "1"は "int"型で、 "1.0"は "float"型です。
 
-  I will write "==" for computable equality, to distinguish it from denotational equality, which is written "=".
-  The difference is that "bottom == bottom" denotes bottom, while "bottom = bottom" denotes True.
-  Computable equality is used for tests performed at run-time, denotational equality for definitions.
+  私は計算可能な平等のために "=="を書いて、 "="と書かれた記号的な平等と区別します。
+  違いは、 "bottom == bottom"はbottomを意味し、 "bottom = bottom"はTrueを意味します。
+  計算可能な等価は、実行時に実行されるテスト、定義のための指数平等で使用されます。
 
 
-## 1. Simple overloading
+## 1. 単純なオーバーロード
 
-  An identifier is defined to be overloaded by giving one OVERLOAD declaration and several INSTANCE declarations.
+  識別子は、1つのOVERLOAD宣言といくつかのINSTANCE宣言を与えることによってオーバーロードされるように定義されています。
 
     OVERLOAD
       (+)        : \a. a -> a -> a
@@ -116,46 +116,46 @@
       (*)        = floatmul
       (PREFIX -) = floatneg
 
-  The OVERLOAD declaration specifies a type for each overloaded identifier.
-  Each INSTANCE declation specifies a binding of the identifier; the type of the bound value must be an instance of the corresponding type in the OVERLOAD declaration.
-  Every instance of an overloaded identifier must have a type disjoint from every other instance.
-  (Two types are disjoint iff they are not unifiable.)
+  OVERLOAD宣言では、オーバーロードされた各識別子の型を指定します。
+  各INSTANCEデクレーションは、識別子のバインディングを指定します。バインドされた値の型は、OVERLOAD宣言の対応する型のインスタンスでなければなりません。
+  オーバーロードされた識別子のすべてのインスタンスは、他のすべてのインスタンスと別の型を持たなければなりません。
+  （統一されていない場合、2つのタイプが分かれています。）
 
-  Any identifier may be overloaded.
-  Whether or not that identifier is also an operator (like infix + or prefix -) is an independent issue.
+  任意の識別子がオーバーロードされる可能性があります。
+  その識別子が演算子（接尾辞+や接頭辞 - など）であるかどうかは、独立した問題です。
 
-  Overloading is resolved at compile-time as follows.
-  First, type inference is performed, where the type of the overloaded identifier is taken to be the type given in the OVERLOAD declaration.
-  Second, after type inference each occurrence of an overloaded identifier is examined.
-  If its type matches that of an instance, then the identifier is replaced by the corresponding instance value.
-  If its type matches no instance, then the overloading cannot be resolved, and an error is declared.
+  オーバーロードは、次のようにコンパイル時に解決されます。
+  まず、型推論が実行されます。ここで、オーバーロードされた識別子の型は、OVERLOAD宣言で指定された型とみなされます。
+  第2に、型推論の後、オーバーロードされた識別子の各出現が検査される。
+  型がインスタンスの型と一致する場合、識別子は対応するインスタンス値に置き換えられます。
+  その型がインスタンスに一致しない場合、オーバーロードは解決されず、エラーが宣言されます。
 
-  For example, assume the standard prelude also declares
+  たとえば、標準的なプレリュードも宣言しているとします
 
     sqrt : float -> float
 
-  If we write
+  私たちが書くなら
 
     distance (x,y)  =  sqrt ((x*x) + (y*y))
 
-  then type inference dervies
+  推定推論をタイプしてください
 
     distance : (float,float) -> float
 
-  and the type assigned to "+" and "*" is "float -> float -> float", which matches one of the instance declarations, so "+" and "*" are instantiated as "floatadd" and "floatmul".
+  "+" と "*" に割り当てられた型は "float -> float -> float" であり、 "+" と "*" はインスタンス宣言の1つに一致し、 "floatadd" と "floatmul" としてインスタンス化されます。
 
-  On the other hand, if we write
+  一方、我々が書いた場合
 
     square x  =  x * x
 
-  then type inference derives
+  型推論が導出される
 
     square : \a. a -> a
 
-  and the type assigned to "*" is "\a. a -> a -> a", which matches no instance, so this definition is illegal.
+  "*" に割り当てられた型は "\a. a -> a -> a" であり、インスタンスには一致しないので、この定義は不正です。
 
-  One way around this is to further overload "square".
-  For example, we could define,
+  これを回避する方法の1つは、「正方形」にさらに負担をかけることです。
+  たとえば、
 
     OVERLOAD
       square : \a. a -> a
@@ -172,35 +172,35 @@
     squarefloat : float -> float
     squarefloat x  =  x * x
 
-  This demonstrates the same problem of potential blow-up mentioned earlier, although now the blow-up is explicit in the source code rather than implicit in the translation to a core language.
+  これは、コア言語への翻訳に暗黙のうちではなく、ソースコードにおいて明白であるが、以前に言及された潜在的なブローアップの同じ問題を示している。
 
 
-## 2. General overloading
+## 2. 一般的なオーバーロード
 
-  This part introduces a generalisation of the simple overloading just described.
-  It allows for "square" to be a true polymorphic function.
-  In addition, it allows for equality to be treated as an overloaded operator, without introducing a special polymorphic equality operation as is done in Miranda and Standard ML.
+  この部分では、今説明した単純なオーバーロードの一般化を紹介します。
+  これは、 "正方形"が真の多形関数であることを可能にする。
+  さらに、MirandaおよびStandard MLで行われているような特別な多態性等価操作を導入することなく、等価性を過負荷演算子として扱うことができます。
 
-  This part is organised as follows.
-  Section 2.1 presents the basic ideas.
-  Section 2.2 shows how to translate programs with overloading into equivalent programs without overloading.
-  Section 2.3 presents the definition of equality as an extended example.
-  Section 2.4 presents illustrates further points by means of a second example.
-  Section 2.5 discusses relationships between this form of overloading, object-oriented programming, and abstract data types.
+  この部分は次のように構成されています。
+  第2.1節では基本的なアイデアを提示する。
+  2.2節では、過負荷のプログラムを過負荷なしで同等のプログラムに変換する方法を示します。
+  2.3節では、等価の定義を拡張例として提示する。
+  セクション2.4の提示は、第2の例によるさらなるポイントを示す。
+  セクション2.5では、この形式のオーバーロード、オブジェクト指向プログラミング、および抽象データ型の関係について説明します。
 
 
-## 2.1  Introduction to general overloading
+## 2.1 一般的なオーバーロードの概要
 
-  The key idea is to introduce predicates over types, and to cluster related groups of overloaded identifiers together and associate them with a predicate.
-  This is done with a slight variant of the previous overload declaration:
+  重要なアイデアは、型の上に述語を導入し、過負荷の識別子の関連グループをまとめてそれらを述語に関連付けることです。
+  これは、前のオーバーロード宣言のわずかな変形で行われます。
 
     CLASS  num a
       (+)        : a -> a -> a
       (*)        : a -> a -> a
       (PREFIX -) : a -> a
 
-  This introduces the type predicate "num", and states that "a" is a numeric type if it has functions named (+), (*), and (PREFIX -), of the appropriate types, defined on it.
-  We declare instances in almost the same way as before:
+  これは型述語 "num"を導入し、適切な型の（+）、（*）、（PREFIX - ）という名前の関数が定義されている場合、 "a"は数値型です。
+  以前とほぼ同じ方法でインスタンスを宣言します。
 
     INSTANCE  num int
       (+)        = intadd
@@ -212,47 +212,47 @@
       (*)        = floatmul
       (PREFIX -) = floatneg
 
-  The first declaration asserts that "int" is a numeric type, and justifies this assertion by giving appropriate bindings for the relevant operators.
-  The second declaration does the same thing for "float".
+  最初の宣言では、 "int"は数値型であると主張し、関連する演算子に適切なバインディングを与えることによってこのアサーションを正当化します。
+  2番目の宣言は "float"と同じことをします。
 
-  Given these declarations, the definition of "distance" given before is still valid, and the overloading is resolved in the same way.
-  However, it is now also possible to write a polymorphic definition of "square:
+  これらの宣言が与えられると、前に与えられた「距離」の定義は依然として有効であり、過負荷は同じように解決されます。
+  しかし、 "square："の多形的な定義を書くことも可能になりました。
 
     square x  =  x * x
 
-  There exists a generalised version of the type inference algorithm that works with classes and type predicates.
-  It derives the type
+  クラスと型述語で動作する型推論アルゴリズムの一般化されたバージョンが存在します。
+  タイプを導出する
 
     double : \a. num a. a -> a
 
-  The phrase "\a.
-  num a." is read "for every a, such that a is a numeric type".
-  We can now write applications such as "double 1" and "double 2.0", and an appropriate type will be derived for each.
-  On the other hand, writing "double [3]" will yield a type error at run time, because "[int]" (the type "list of int") has not been asserted (via an instance declaration) to be a numeric type.
+  フレーズ "\ a。
+  num a。 "は" aが数値型であるように、すべてのaに対して "読み込まれます。
+  "double 1"や "double 2.0"などのアプリケーションを書くことができ、それぞれに適した型が導出されます。
+  一方、 "[int]"（型の "list of int"）が（インスタンス宣言を介して）アサートされていないため、実行時に "double [3]"を書くと型エラーが発生しますタイプ。
 
-  Just as all type quantifiers must come at the beginning of a type, so must all type predicates.
-  Thus, in general a type will always have the following form: zero or more type quantifiers, followed by zero or more type predicates, followed by a type term.
+  すべての型指定子は型の先頭に来なければならないのと同様に、すべての型述語もそうでなければなりません。
+  したがって、一般に、型は常に次の形式をとります：ゼロ以上の型の量指定子、0以上の型述語、その後に型の項が続きます。
 
 
-## 2.2  Translation of general overloading
+## 2.2 一般的なオーバーロードの翻訳
 
-  One feature of this form of overloading is that it is possible at compile-time to translate any program containing overloading to an equivalent program that does not.
+  この形式のオーバーロードの1つの特徴は、コンパイル時に、オーバーロードを含むプログラムをそうでないプログラムに変換することが可能であることです。
 
-  We will distinguish between overloadings of an operator that can be resolved at the point of occurrence (as with "+" and "*" in "distance") and those that cannot (as with "*" is "square").
-  The former will be called "resolvable", the latter "polymorphic".
+  「距離」の「+」と「*」のように）発生した時点で解決できる演算子の過負荷と、「*」が「正方形」のようにはできない演算子を区別します。
+  前者は「解決可能」と呼ばれ、後者は「多型」と呼ばれます。
 
-  For resolvable overloading the translation is straightforward: each occurrence of the overloaded identifier is replaced by the corresponding value bound in the relevant instance declaration.
-  For example, the definition of "distance" translates to
+  解決可能なオーバーロードの場合、変換は簡単です。オーバーロードされた識別子の各オカレンスは、関連するインスタンス宣言で対応する値に置き換えられます。
+  例えば、「距離」の定義は、
 
     distance (x,y)  =  sqrt (floatadd (floatmul x x) (floatmul y y))
 
 
-  For polymorphic overloading, we need to do a little more work.
-  First, for each class declaration we introduce a new type synonym.
+  多態的なオーバーロードのためには、もう少し作業が必要です。
+  まず、クラス宣言ごとに、新しい型シノニムを導入します。
 
     TYPE  num' a  =  (a -> a -> a, a -> a -> a, a -> a)
 
-  For each instance, one also declares an object of the corresponding type.
+  各インスタンスについて、対応する型のオブジェクトも宣言します。
 
     numint' : num' int
     numint' = (intadd, intmul, intneg)
@@ -260,34 +260,34 @@
     numfloat' : num' float
     numfloat'= (floatadd, floatmul, floatneg)
 
-  Type predicates correspond to parameters of the corresponding class type.
-  For example, here is the definition of "square" with its type:
+  型述語は、対応するクラス型のパラメータに対応する。
+  たとえば、次のような型の "square"の定義があります。
 
     square    :  \a. num a. a -> a
     square x=  x * x
 
-  This translates to
+  これは
 
     square' :  \a. num' a -> a -> a
     square' pkg x  =  mul x x
       WHERE
       (add, mul, neg) = pkg
 
-  Each application of "square" must be translated to pass in the appropriate extra parameter:
+  適切な余分なパラメータを渡すには、 "square"の各アプリケーションを変換する必要があります。
 
     square 1      -->    square' numint 1
     square 2.0    -->    square' numfloat 2.0
 
-  Note that square' is a perfectly valid function, and has a perfectly valid Hindley/Milner type.
-  Thus, we have translated functions with polymorphic overloading and types with predicates into functions without overloading and types without predicates.
+  Squareは完全に有効な関数であり、完全に有効なHindley / Milner型を持っていることに注意してください。
+  したがって、多態的な多重定義と型を持つ型を関数に変換し、述語を持たない型と型を持たない関数に変換しました。
 
 
-## 2.3  Example: Equality
+## 2.3 例：等価
 
-  This section shows, as an extended example, how to define equality using the overloading mechanism.
-  Overloaded equality has some advantages over polymorphic equality: it relies on the general overloading mechanism, rather than introducing special mechanisms such as equality types into the system; it is "lambda definable"; and it is possible for the user to define equality over abstract types.
+  このセクションでは、オーバーロード機構を使用して等価性を定義する方法の拡張例を示します。
+  オーバーロードされた等価性は、多態性の等価性よりもいくつかの利点があります。システムに等価型などの特殊なメカニズムを導入するのではなく、一般的なオーバーロードメカニズムに依存します。それは「ラムダ定義可能」です。ユーザーは抽象型に対して同等性を定義することができます。
 
-  We begin by defining a class for the overloaded equality operation, with "int" and "char" as simple instances:
+  まず、単純なインスタンスとして "int"と "char"を使って、オーバーロードされた等価演算のクラスを定義します。
 
     CLASS  eq a
       (==) : a -> a -> bool
@@ -298,21 +298,21 @@
     INSTANCE eq char
       (==)  =  charequal
 
-  We can now define the "member" operation in the usual way:
+  ここで、通常の方法で「メンバ」操作を定義できます。
 
     member :  \a. eq a. [a] -> a -> bool
     member [] y=  False
     member (x :: xs) y=  (x == y) \/ (member xs y)
 
-  The type of "member" need not be given explicitly, as it can be inferred.
-  We may now write terms such as
+  「メンバー」のタイプは、推論することができるので、明示的に指定する必要はありません。
+  ここでは、
 
     member [1,2,3] 2
     member "Haskell" 'k'
 
-  which both evaluate to True.
+  どちらもTrueと評価されます。
 
-  In just the same style as "member" we can define equality over lists:
+  "メンバ"と同じスタイルで、リストの上に平等を定義することができます：
 
     listequal   :  \a. eq a. [a] -> [a] -> bool
     listequal [] []   =  True
@@ -320,39 +320,39 @@
     ELSE
     listequal xs ys   =  False
 
-  Again, the type can be inferred from the definition.
-  We can use a natural extension of the instance mechanism to overload (==) to include equality over lists.
+  ここでも、タイプは定義から推論できます。
+  インスタンス・メカニズムの自然な拡張を使用して、オーバーロード（==）してリストに等しいことを含めることができます。
 
     INSTANCE  \a. eq a. eq [a]
       (==)  =  listequal
 
-  This declaration states that for every type "a" such that "a" is an equality type, "list of a" is also an equality type.
-  Now we may write terms such as
+  この宣言は、 "a"が等価型であるすべての型 "a"に対して "aのリスト"も等価型であると述べています。
+  ここでは、
 
     "hello" == "goodbye"
     [[1,2,3],[4,5,6]]  ==  []
     member ["Haskell", "Alonzo"] "Moses"
 
-  which all evaluate to False.
+  これらはすべてFalseと評価されます。
 
-  Similarly, if "gorp a b" is a user-defined abstract type, parameterised over types "a" and "b", and it has defined on it an operation
+  同様に、 "gorp a b"がユーザ定義の抽象型で、型 "a"と "b"にパラメータ化されていて、その上に操作
 
     gorpequal : \a b. eq a. eq b. gorp a b -> gorp a b -> bool
 
-  then we may write
+  それから我々は書くかもしれない
 
     INSTANCE  \a b. eq a. eq b. eq (gorp a b)
       (==)  =  gorpequal
 
-  So we may overload (==) with user-defined equality operations on abstract types, without needing to add any special mechanism to the language to accomplish this.
+  したがって、これを達成するために言語に特別な仕組みを追加する必要はなく、抽象型に対するユーザー定義の等価操作でオーバーロード（==）することがあります。
 
-  We now consider how the translation mechanism applies to this example.
-  First, we get a new type synonym:
+  ここでは、この例にどのように変換メカニズムを適用するかを検討します。
+  まず、新しい型の同義語を取得します。
 
     TYPE  eq' a  =  a -> a -> bool
 
-  In this case the tuple of functions has degenerated to a single function.
-  We can bind the classes as before:
+  この場合、関数のタプルは単一の関数に縮退しています。
+  前と同じようにクラスをバインドすることができます：
 
     inteq' : eq' int
     inteq' = intequal
@@ -360,19 +360,19 @@
     chareq' : eq' char
     chareq' = charequal
 
-  The member operation translates as:
+  メンバーの操作は次のように解釈されます。
 
     member':  \a. eq' a -> [a] -> a -> bool
     member' eql [] y=  False
     member' eql (x::xs) y=  (eql x y) \/ (member eql xs y)
 
-  Here are two terms and their translations:
+  ここには2つの用語とその翻訳があります：
 
     member [1,2,3] 2--> member' inteq' [1,2,3] 2
     member "Haskell" 'k'-->member' chareq' "Haskell" 'k'
 
 
-  Similarly, "listequal" translates as:
+  同様に、 "listequal"は次のように解釈されます。
 
     listequal':  \a. eq' a -> [a] -> [a] -> bool
     listequal' eql [] []=  True
@@ -380,23 +380,23 @@
     ELSE
     listequal' eql xs ys=  False
 
-  The translation of the instance declaration for list equality is a little trickier.
-  Recall that it reads:
+  リストの平等のためのインスタンス宣言の翻訳は少し難解です。
+  それが読まれることを思い出してください：
 
     INSTANCE  \a. eq a. eq [a]
       (==)  =  listequal
 
-  Applying the same translation method as before still leaves us with a type containing a type predicate:
+  前と同じ変換メソッドを適用すると、型述語を含む型が残っています。
 
     listeq' : \a. eq a. eq' [a]
     listeq' = listequal
 
-  However, a second translation step removes the type predicate:
+  ただし、2番目の変換ステップでは、型述語が削除されます。
 
     listeq' : eq' a -> eq' [a]
     listeq' = listequal'
 
-  Here are three terms and their translations:
+  ここに3つの用語とその翻訳があります：
 
     "hello" == "goodbye"
       -->  listequal' (listeq' chareq') "hello" "goodbye"
@@ -412,70 +412,70 @@
           "Moses"
 
 
-  Finally, observe that
+  最後に、
 
     gorpequal : \a b. eq a. eq b. gorp a b -> gorp a b -> bool
 
-  will translate into a function that takes two extra parameters, one providing equality over type "a", the other providing equality over type "b".
+  2つの追加パラメータを取る関数に変換されます.1つは型 "a"に対して等価を提供し、もう1つは型 "b"に対して等価を提供します。
 
-  It is worthwhile to compare the relative efficiency of overloaded and polymorphic equality.
-  The individual operations, such as "intequal" are slightly more efficient than polymorphic equality, because the type of the argument is known in advance.
-  On the other hand, operations such as "member" and "listequal" must explicitly pass an equality operation around, an overhead that polymorphic equality avoids.
+  多重定義された等価性の相対効率を比較することは有益です。
+  引数の型は事前に分かっているので、 "intequal"などの個々の演算は多態性の等価性よりも若干効率的です。
+  一方、 "member"や "listequal"のような操作では、多態性平等が回避するオーバーヘッドを明示的に等価演算に渡す必要があります。
 
-  This concludes the extended example.
-  It is hoped that this has served to illustrate the power of this overloading mechanism, and to show that it is possible to translate overloaded definitions into the core language in a systematic way.
+  これで拡張例が終わります。
+  これが、このオーバーロードメカニズムの力を説明し、過負荷の定義を体系的な方法でコア言語に翻訳することが可能であることを示すために役立つことが期待されます。
 
 
-## 2.4  Example: Collections
+## 2.4 例：コレクション
 
-  In general, a type predicate may have more than one argument.
-  We given an example of this by showing how to overload operations on collections, such as lists and sets.
-  (The example is intended purely for illustrative purposes; I don't mean to suggest that this should be included in the standard prelude.)
+  一般に、型述語は複数の引数を持つことができます。
+  例として、リストやセットなどのコレクションの操作をオーバーロードする方法を示します。
+  （例は純粋に説明のためのものであり、標準的な演奏会にこれを含めるべきではありません。
 
     CLASS  collection a b
       (.in)     : a -> b -> bool
       (.union)  : b -> b -> b
       singleton : a -> b
 
-  The predicate "collection a b" asserts that "b" is a collection with elements of type "a".
-  One implementation of a collection is a list:
+  述語 "コレクションa b"は、 "b"がタイプ "a"の要素を持つコレクションであることを主張します。
+  コレクションの実装の1つはリストです。
 
     INSTANCE  \a. eq a. collection a [a]
       x .in xs=  member xs x
       xs .union ys  =  xs ++ ys
       singleton x   =  [x]
 
-  Say that we have also defined the abstract type "set a" with the functions
+  関数で抽象型 "set a"を定義したとします
 
     setmember    : \a. eq a. set a -> a -> bool
     setunion     : \a. set a -> set a -> set a
     setsingleton : \a. a -> set a
 
-  Then a second instance is given by
+  次に、2番目のインスタンスは
 
     INSTANCE \a. eq a. collection a (set a)
       x .in xs=  setmember xs x
       (.union)=  setunion
       singleton=  setsingleton
 
-  Finally, say that we have defined operations to implement collections of integers using Godel numbering:
+  最後に、Godelナンバリングを使用して整数のコレクションを実装する操作を定義したとします。
 
   godelmember    : int -> int -> bool
   godelunion     : int -> int -> int
   godelsingleton : int -> int
 
-  (For instance, "godelsingleton n" should return 2 raised to the n'th power.)
-  Then a third instance is given by
+  （例えば、 "godelsingleton n"は2をn乗して返します。）
+  次に、3番目のインスタンスは次のように与えられます。
 
     INSTANCE  collection int int
       m .in n=  godelmember m n
       (.union)=  godelunion
       singleton=  godelsingleton
 
-  This final example, although a bit contrived, demonstrates why the "collection" predicate needs two parameters.
-  A parameterised type, like "set a" is not sufficiently general to capture all possible methods of implementing collections.
+  この最後の例は、少し考案されていますが、「コレクション」述部に2つのパラメーターが必要な理由を示しています。
+  "set a"のようなパラメータ化された型は、コレクションを実装するすべての可能なメソッドを取得するのに十分一般的ではありません。
 
-  Here are two examples of functions defined over collections:
+  コレクションに定義された関数の2つの例を次に示します。
 
     doublet : \a b. collection a b. a -> a -> b
     doublet x y  =  (singleton x) .union (singleton y)
@@ -483,22 +483,22 @@
     squarein : \a b. num a. collection a b. a -> b -> bool
     squarein x s  =  (square x) .in s
 
-  The second example demonstrates how different overloadings can be combined.
-  In both examples, the type need not be given explicitly, as it can be inferred.
+  2番目の例は、さまざまなオーバーロードをどのように組み合わせるかを示しています。
+  両方の例では、型を推論できるので、型を明示的に指定する必要はありません。
 
 
-## 2.5  Subclasses
+  ## 2.5 サブクラス
 
-  In the preceeding, "num" and "eq" were considered as completely separate classes.
-  If we want to use both numerical and equality operations, then these each appear in the type separately:
+  前の例では、 "num" と "eq" は完全に別のクラスとみなされていました。
+  数値演算と等価演算の両方を使用する場合、これらはそれぞれ型に別々に現れます：
 
     squaremember : \a. eq a. num a. [a] -> a -> bool
     squaremember xs x  =  member xs (square a)
 
-  As a practical matter, this seems a bit odd---we would expect every data type that has (+), (*), and (PREFIX -) defined on it to have (==) defined as well; but not the converse.
-  Thus it seems sensible to make "num" a subclass of "eq".
+  現実的には、これはちょっと奇妙に思えます。（+）、（*）、（PREFIX - ）が定義されているすべてのデータ型に（==）同様に定義されていると期待します。逆ではない。
+  したがって、 "num"を "eq"のサブクラスにすることは賢明です。
 
-  To allow this, the notation is extended so that one may include class names in the signature part of a class declaration:
+  これを可能にするために、表記法が拡張され、クラス宣言の署名部分にクラス名が含まれるようになります。
 
     CLASS  num a
       eq a
@@ -506,18 +506,18 @@
       (*)     : a -> a -> a
       (PREFIX -) : a -> a
 
-  This asserts that every type "a" satisfying the predicate "num a" must also satisfy the predicate "eq a".
-  In other words, "num" is a subclass of "eq", or, equivalently, "eq" is a superclass of "num".
-  The instance declarations remain the same as before---but the instance declaration "num int" is only valid if there is also an instance declaration "eq int" active within the same scope.
+  これは、述語 "num a"を満たすすべての型 "a"も述語 "eq a"を満たさなければならないと主張する。
+  言い換えれば、 "num"は "eq"のサブクラスであり、等価的に "eq"は "num"のスーパークラスです。
+  インスタンス宣言は以前と同じままですが、インスタンス宣言 "num int"は、同じスコープ内でインスタンス宣言 "eq int"がアクティブな場合にのみ有効です。
 
-  For the preceding definition of "squaremember" we would now infer the type
+  前述の「squaremember」の定義では、
 
     squaremember : \a. num a. [a] -> a -> bool
 
-  The type predicate "eq a" no longer needs to be mentioned, because it is implied by "num a".
+  型述語 "eq a"は、 "num a"によって暗示されるので、もはや言及する必要はない。
 
-  In translation terms, we simply add a component to the tuple representing an instance of "num" that stands for the corresponding instance of "eq".
-  Thus, we now have the translations:
+  変換用語では、 "eq"の対応するインスタンスを表す "num"のインスタンスを表すタプルにコンポーネントを追加するだけです。
+  したがって、我々は今翻訳を持っている：
 
     TYPE  eq' a   =  a -> a -> bool
     TYPE  num' a  =  (eq' a, a -> a -> a, a -> a -> a, a -> a)
@@ -538,10 +538,10 @@
       WHERE
       (eqpkg, add, mul, neg) = numpkg
 
-  And the translation of "member" is the same as before.
+  そして "メンバー"の翻訳は以前と同じです。
 
-  In general, each class may have any number of sub or superclasses.
-  Here is a contrived example:
+  一般に、各クラスは任意の数のサブクラスまたはスーパークラスを有することができる。
+  ここには工夫した例があります：
 
     CLASS top a
       fun1 : a -> a
@@ -560,7 +560,7 @@
       right a
       fun4 : a -> a
 
-  The relationships among these types can be diagrammed as follows:
+  これらのタイプ間の関係は、次のように図式化することができます。
 
             top
            /   \
@@ -570,49 +570,48 @@
            \   /
            bottom
 
-  Although multiple superclasses pose some problems for the usual means of implementing object-oriented languages, they pose no problems for the translation scheme outlined here.
+  複数のスーパークラスは、オブジェクト指向言語を実装する通常の手段にいくつかの問題を提起しますが、ここで概説する変換スキームには問題はありません。
 
-  At first glance, subclasses may appear to be very similar to subtypes, but there is an important difference.
-  Subtypes are "anti-monotonic" with regard to the function type constructor.
-  That is, if we write a <= b for "a is a subtype of b", then we have
+  一見すると、サブクラスはサブタイプと非常によく似ているように見えるかもしれませんが、重要な違いがあります。
+  サブタイプは、関数型コンストラクタに関して「反単調」です。
+  つまり、 "aがaのサブタイプである"のためにa = bを書くと、
 
     (a -> b) <= (a' -> b')   iff  a' <= a  and  b <= b'
 
-  This is anti-monotonic because we have written a' <= a, rather than the reverse.
-  Anti-monotonicity leads to some complications in theories involving subtypes.
+  私たちが書いたので、これは反単調です
 
-  Subclassing, on the other hand, is not anti-monotonic.
-  For example, the type predicate "num" is more specific than the type predicate "eq", and the type
+  一方、サブクラス化は反単調ではありません。
+  たとえば、型述語「num」は型述語「eq」よりも具体的であり、型
 
     \a. num a. a -> a
 
-  is more specific than the type
+  型よりも具体的です
 
     \a. eq a. a -> a
 
-  That is, any type matching the first also matches the second, but not the converse.
-  Anti-monotonicity is not a problem because type predicates can only come at the beginning of a type, and so cannot appear inside a type term built with the function type constructor.
+  つまり、最初のものと一致するものはどちらも2番目のものと一致しますが、逆のものは一致しません。
+  型の述語は型の先頭に来るだけであり、関数型のコンストラクタで構築された型の中には現れないので、反単調性は問題ではありません。
 
 
-## 2.6  Object-oriented programming, multiple implementations of abstract types, and assertions.
+  オブジェクト指向プログラミング、抽象型の複数の実装、およびアサーション
 
-  As the name "CLASS" suggests, there are some parallels between object-oriented programming and the ideas described here.
-  In object-oriented languages, a class groups together a related set of operations on a data-type.
-  The object carries these operations, or "methods" around with it at run-time.
-  Here the idea has been slightly generalised: a class declaration groups together operations on one or more related types, and the operations are passed separately, rather than with the objects.
+  「CLASS」という名前が示すように、オブジェクト指向プログラミングとここで説明されているアイデアとの間にはいくつかの類似点があります。
+  オブジェクト指向言語では、クラスはデータ型に関する関連する一連の操作をグループ化します。
+  オブジェクトは実行時に、これらの操作、つまり「メソッド」を持ちます。
+  ここでのアイデアは少し一般化されています。クラス宣言は、1つ以上の関連型の操作をグループ化し、その操作はオブジェクトではなく別々に渡されます。
 
-  In a way, the class mechanism provides for multiple implementations of abstract types.
-  Whenever the type of a function is such that a type predicate is applied only to type variables, then any instance of the class is a suitable argument to the function.
-  In the "collection" example in section 2.4, both "doublet" and "squarein" are polymorhic in this way.
-  Any function that requires only the operations ".in", ".union", and "singleton" on sets could be defined similarly.
-  In effect, the class specifies the signature of an abstract type, and the instances provide different implementations of this type.
-  We saw three possible implementations of set, and there could be any number of additional implementations (some based on concrete types, like lists, and others based on abstract types, using whatever abstraction mechanism the language defines).
+  ある意味では、クラスメカニズムは抽象型の複数の実装を提供します。
+  関数の型が、型述語が型変数にのみ適用されるようなものであるときはいつでも、そのクラスの任意のインスタンスが関数への適切な引数です。
+  セクション2.4の "コレクション"の例では、このように "ダブレット"と "スクエアイン"の両方が多様である。
+  セットに ".in"、 ".union"、 "singleton"の演算しか必要としない関数も同様に定義できます。
+  事実上、クラスは抽象型のシグネチャを指定し、インスタンスはこの型の異なる実装を提供します。
+  setの可能な実装は3つあり、リストのような具象型、抽象型に基づくもの、言語が定義する抽象化メカニズムを使用したものなど、いくつもの追加実装が可能です。
 
-  Even a concrete type, like list, is secure when passed to a function like "doublet" or ".squarein", because the type guarantees that the function can only apply the class operations, and no other operations on lists.
-  Further, the typing guarantees that the implementations match appropriately.
-  For example, "doublet" may be called when the arguments are both represented by lists, or both represented by Godel numbers, but not when one is a list, and one a Godel number.
+  リストのように具体的な型であっても、型がクラス操作のみを適用できることと、リストに対して他の操作を適用しないことを保証するので、 "doublet"や ".squarein"のような関数に渡すと安全です。
+  さらに、タイピングは、実装が適切に一致することを保証します。
+  たとえば、引数がリストで表されている場合、または両方がGodelの数値で表されていて、リストが1つの場合はGododの番号ではない場合は、doubletが呼び出されます。
 
-  It is also natural to think of adding assertions to the class declaration, specifying properties that each instance must satisfy:
+  各インスタンスが満たさなければならないプロパティを指定して、クラス宣言にアサーションを追加することも当然考えられます。
 
     CLASS  collection a b
       (.in)     : a -> b -> bool
@@ -622,34 +621,34 @@
       ;;   x .in (singleton x)
       ;;   x .in (s .union t)  <=>  x .in s \/ x .in t
 
-  It is valid for any proof to rely on these properties, so long as one proves that they hold for each instance declaration.
-  I have written the assertions as comments, because insisting on or verifying proofs of such properties is outside the scope of Haskell (though it would be interesting to consider an extension containing them).
+  どのインスタンスが各インスタンス宣言のために保持しているかを証明する限り、これらのプロパティに依存する任意の証明に対して有効です。
+  そのようなプロパティの証明を主張したり検証したりすることは、Haskellの範囲外です（それを含む拡張を検討するのは面白いでしょう）ので、私はその主張をコメントとして書いています。
 
 
-## 3. Conclusion
+## 3. 結論
 
-  The mechanism proposed in Section 1 seems straightforward, and I recommend that we adopt that as the approach to overloading.
+  セクション1で提案されたメカニズムは単純であるように思えます。私はオーバーロードのアプローチとしてこれを採用することをお勧めします。
 
-  Should we extend this to the mechanism in Section 2?  The advantage is a more powerful language: the "square" problem is solved.
-  Also a smaller language: instead of defining polymorphic equality as a new semantic primitive, we can define equality using the overloading mechanism.
-  (We still need to add a little to the language to support equality: each new algebraic type definition must also be taken to include an instance declaration for equality over that type.
-  But this is just syntactic sugar.)
-  Further, it is easy for the user to define equality over an abstract data type.
+  これをセクション2の仕組みに拡張する必要がありますか？利点は、より強力な言語です： "正方形"の問題が解決されます。
+  また、より小さな言語：新しい意味論的プリミティブとして多態性の等価性を定義する代わりに、オーバーロード機構を使用して等価性を定義することができます。
+  （等式をサポートするためには、言語に少し追加する必要があります。新しい代数型定義のそれぞれは、その型に対する等価性のインスタンス宣言も含める必要があります。
+  しかし、これは単なる構文的な砂糖です。）
+  さらに、ユーザが抽象データ型に対して同等性を定義することは容易である。
 
-  Another advantage is the ability to define overloaded operations such as
+  もう1つの利点は、以下のようなオーバーロードされた操作を定義できることです。
 
     show : a -> string
     read : string -> a
 
-  This seems a convenient thing to be able to do.
-  Note that Miranda defines "show" as a polymorphic operation (like equality), but defining "read" as a polymorphic operation poses problems of type security.
-  Overloading can define both in a type-secure way.
+  これは便利なことです。
+  Mirandaは "show" を（等価のような）多相演算として定義しますが、 "read" を多相演算として定義すると型のセキュリティの問題が発生します。
+  オーバーロードは、両方を型保証された方法で定義することができます。
 
-  On the negative side, the idea is still very new, and its implications are unclear.
-  There appears to be a suitable inference algorithm, but this still needs to be formally specified and proved sound.
-  (I hope to do this before the April meeting; Bob Harper has indicated he may be willing to help with this.)  It is also unclear whether in practice the inferred types will be cluttered with a large number of type predicates.
-  (Though the experience of Standard ML with equality types suggests that this may not be a problem.)  The natural method of implementing overloading requires that each predicate in a type corresponds to a tuple of operations to be passed at run-time.
-  Is the overhead in this acceptable?
+  負の面では、このアイデアはまだまだ新しいものであり、その意味は不明です。
+  適切な推論アルゴリズムがあるようですが、これは正式に指定され、健全であることが証明される必要があります。
+  （私は4月の会議の前にこれを行うことを望んでいる; Bob Harperは彼がこれを手助けしようとしているかもしれないと述べている）実際に推論された型が多数の型述語で詰まっているかどうかは不明である。
+  オーバーロードを実装する自然な方法では、ある型の各述語が、実行時に渡される操作のタプルに対応する必要があります。
+  このオーバーヘッドは受け入れられますか？
 
-  Comments are very welcome!
+  コメントは大歓迎です！
 
