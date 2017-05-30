@@ -55,7 +55,6 @@
   ----
 
   <a name="1"></a>[1](#r1) Miranda is a trademark of Research Software Limited.
-    -->
 
   ----
 
@@ -149,7 +148,6 @@
   where `a` is a type variable ranging over every type.
   The type of the `member` function is now
 
-
     member :: [a] -> a -> Bool
 
   (We write `[a]` for the type "list of a".)
@@ -165,8 +163,6 @@
   where a(==) is a type variable ranging only over types that admit equality.
   The type of the member function is now
 
-  `member` 関数の型は今
-
     member :: [a(==)] -> a(==)-> Bool
 
   Applying equality, or `member`, on a function type or abstract type is now a type error.
@@ -180,7 +176,7 @@
   To implement this, we would need to require that every object carry with it a pointer to a method, a procedure for performing the equality test.
   If we are to have more than One Operation with this property, then each object should carry with it a pointer to a dictionary of appropriate methods.
   This is exactly the approach used in object-oriented programming <a name="r_GR83"></a>[\[GR83\]](#GR83).
-  
+
   In the case of polymorphic equality, this means that both arguments of the equality function will contain a pointer to the same dictionary
   (since they are both of the same type).
   This suggests that perhaps dictionaries should be passed around independently of objects; now polymorphic equality would be passed one dictionary and two objects (minus dictionaries).
@@ -370,7 +366,6 @@
         MkSet xs == MkSet ys = and (map (member xs) ys)
                         & and (map (member ys) xs)
 
-
   Figure 3: Definition of equality
 
     data EqD a      = EqDict (a -> a -> Bool)
@@ -439,7 +434,8 @@
   which all evaluate to False.
 
   The final data declaration defines a new type constructor Set and a new value constructor MkSet.
-  If a module exports Set but hides MkSet, then outside of the module the representation of Set will not be accessible; this is the mechanism used in Haskell to define abstract data types.
+  If a module exports Set but hides MkSet, then outside of the module the representation of Set will not be accessible;
+  this is the mechanism used in Haskell to define abstract data types.
   The final instance defines equality over sets.
   The first line of this instance reads, "if equality is defined on a, then equality is defined on type 'set of a' ."
 
@@ -518,8 +514,7 @@
     memsq      :: Eq a, Num a => [a] -> a -> Bool
     memsq xs x =  member xs (square x)
 
-  As a practical matter, this seems a bit odd–we would expect every data type that has
-  (+), (*), and negate defined on it to have (==) defined as well; but not the converse.
+  As a practical matter, this seems a bit odd–we would expect every data type that has (+), (*), and negate defined on it to have (==) defined as well; but not the converse.
   Thus it seems sensible tO make Num a subclass of Eq.
 
   We can do this as follows:
