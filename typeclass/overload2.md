@@ -341,9 +341,10 @@
 
   We base our discussion on a simple functional language with overloaded identifiers.
   Figure 1 gives the syntax of terms and types.
-  We split the variable alphabet into subalphabets U for unique variables, ranged over by u, O for overloaded variables, ranged over by o, and K for data constructors, ranged over by k.
-  The letter x ranges over both unique and overloaded variables as well as constructors.
-  We assume that every non-overloaded variable u is bound at most once in a program.
+  We split the variable alphabet into subalphabets `U` for unique variables,
+  ranged over by `u`, `O` for overloaded variables, ranged over by `o`, and `K` for data constructors, ranged over by `k`.
+  The letter `x` ranges over both unique and overloaded variables as well as constructors.
+  We assume that every non-overloaded variable `u` is bound at most once in a program.
 
   The syntax of terms is identical to the language Exp in [Mil78].
   A program consists of a sequence of instance declarations and a term.
@@ -363,7 +364,7 @@
   Unlike with Hindley/Milner polymorphism, a quantified variable `α` comes with a constraint `πα`, which is a (possibly empty) set of bindings `o : α -> τ`.
   An overloaded variable `o` can appear at most once in a constraint.
   Constraints restrict the instance types of a type scheme by requiring that overloaded identifiers are defined at given types.
-  The Hindley/Milner type scheme `∀α.σ` is regarded as syntactic sugar for `∀α.() ⇒ σ`.
+  The Hindley/Milner type scheme `∀α.σ` is regarded as syntactic sugar for `∀α.()⇒σ`.
 
   Figure 2 defines the typing rules of System O.
   The type system is identical to the original Hindley/Milner system, as presented in in [DM82], except for two modifications.
@@ -374,34 +375,35 @@
   Note that this makes rules (∀I) and (∀E) symmetric to rules (->I) and (->E).
 
   - There is an additional rule (INST) for instance declarations.
-  The rule is similar to (LET), except that the overloaded variable `o` has an explicit type scheme `σT` and it is required that the type constructor `T` is different in each instantiation of a variable `o`.
+  The rule is similar to (LET), except that the overloaded variable `o` has an explicit type scheme `στ` and it is required that the type constructor `T` is different in each instantiation of a variable `o`.
 
   ----
 
-  We let `σT` range over closed type schemes that have `T` as outermost argument type constructor:
+  We let `στ` range over closed type schemes that have `T` as outermost argument type constructor:
 
-  σT = T ff1 ::: ffn -> τ (tv(τ )  fff1; : : : ; ffng) j ∀α:πα ) σ0 T (tv(πα)  tv(σ0 T )):
+    στ  = T α1 ... αn -> τ    (tv(τ) ⊆ {α1, ..., αn})
+        | ∀α.πα => στ'       (tv(πα) ⊆ tv(στ')) .
 
-  The explicit declaration of `σT` in rule (INST) is necessary to ensure that principal types always exist.
+  The explicit declaration of `στ` in rule (INST) is necessary to ensure that principal types always exist.
   Without it, one might declare an instance declaration such as
 
     inst o = λx.x in p
 
   where the type constructor on which `o` is overloaded cannot be determined uniquely.
 
-  The syntactic restrictions on type schemes `σT` enforce three properties: First, overloaded instances must work uniformly for all arguments of a given type constructor.
+  The syntactic restrictions on type schemes `στ` enforce three properties: First, overloaded instances must work uniformly for all arguments of a given type constructor.
   Second the argument type must determine the result type uniquely.
   Finally, all constraints must apply to component types of the argument.
   The restrictions are necessary to ensure termination of the type reconstruction algorithm.
   An example is given in Section 6.
 
-  The syntactic restrictions on type schemes `σT` also explain why the overloaded variables of a constraint `πα` must be pairwise different.
+  The syntactic restrictions on type schemes `στ` also explain why the overloaded variables of a constraint `πα` must be pairwise different.
   A monomorphic argument to an overloaded function completely determines the instance type of that function.
   Hence, for any argument type `τ` and overloaded variable `o`, there can be only one instance type of `o` on arguments of type `τ`.
   By embodying this rule in the form of type variable constraints we enforce it at the earliest possible time.
 
   **Example 2.1** The following program fragment gives instance declarations for the equality function `(==)`.
-  We adapt our notation to Haskell's conventions, writing `::` instead of : in a typing; writing `(o::a->t1)=>t2` instead of `∀α:(o : a -> τ1) ⇒ τ2;` and writing `inst o :: s; o = e` instead of `inst o : σ = e`.
+  We adapt our notation to Haskell's conventions, writing `::` instead of `:` in a typing; writing `(o::a->t1)=>t2` instead of `∀α:(o : a -> τ1) ⇒ τ2` and writing `inst o :: s; o = e` instead of `inst o : σ = e`.
 
     inst (==) :: Int -> Int -> Bool
          (==) = primEqInt
@@ -417,7 +419,7 @@
   An extension of System O to recursive instance declaration would be worthwhile but is omitted here for simplicity.
 
   **Example 2.2** The following example demonstrates an object-oriented style of programming, and shows where we are more expressive than Haskell's type classes.
-  We write instances of a polymorphic class Set, with a member test and operations to compute the union, intersection, and difference of two sets.
+  We write instances of a polymorphic class `Set`, with a member test and operations to compute the union, intersection, and difference of two sets.
   In Haskell, only sets of a fixed element type could be expressed.
   The example uses the record extension of Section 5; look there for an explanation of record syntax.
 
@@ -457,11 +459,12 @@
     V = W_⊥ + V -> V + Σ(k ∈ K) (k V1 ... V_{arity(k)})_⊥.
 
   Here, `(+)` and `Σ` denote coalesced sums <a name="r1"></a>[1](#1) and `V -> V` is the continuous function space.
-  The value `W` denotes a type error { it is often pronounced "wrong".
+  The value `W` denotes a type error - it is often pronounced "wrong".
   We will show that the meaning of a well-typed program is always different from "wrong".
 
   The meaning function `〚・〛` on terms is given in Figure 3.
-  It takes as arguments a term and an environment `η` and yields an element of `V`.The environment `η` maps unique variables to arbitrary elements of `V`, and it maps overloaded variables to strict functions:
+  It takes as arguments a term and an environment `η` and yields an element of `V`.
+  The environment `η` maps unique variables to arbitrary elements of `V`, and it maps overloaded variables to strict functions:
 
     η : U -> V ∪ O -> (V o-> V).
 
@@ -478,7 +481,7 @@
 
   ----
 
-  1 Injection and pro jection functions for sums will generally be left implicit to avoid clutter.
+   <a name="1"></a>[1](#r1) Injection and pro jection functions for sums will generally be left implicit to avoid clutter.
 
   ----
 
@@ -508,11 +511,11 @@
 
   ----
 
-  Following [Mil78 ] and [MPS86], we let monotypes denote ideals.
-  For our purposes, an ideal I is a set of values in V which does not contain W, is downward-closed and is limit-closed.
-  That is, y 2 I whenever y  x and x 2 I , and F X 2 I whenever x 2 I for all elements x of the directed set X.
+  Following [<a name="rMil78"></a>[Mil78](#Mil78)] and [<a name="rMPS86"></a>[MPS86](#MPS86)], we let monotypes denote ideals.
+  For our purposes, an ideal `I` is a set of values in `V` which does not contain `W`, is downward-closed and is limit-closed.
+  That is, `y ∈ I` whenever `y ≦ x` and `x ∈ I` , and `∐ X ∈ I` whenever `x ∈ I` for all elements `x` of the directed set `X`.
 
-  The meaning function [[]] takes a monotype μ to an ideal.
+  The meaning function `〚・〛`  takes a monotype `μ` to an ideal.
   It is defined as follows.
 
     〚D μ1 ... μm〛 =
@@ -521,19 +524,19 @@
     〚μ1 -> μ2〛 =
       {f ∈ V -> V | v ∈ 〚μ1〛 => f v ∈ 〚μ2〛}.
 
-  **Proposition 3.1** Let μ be a monotype. Then [[μ]] is an ideal.
+  **Proposition 3.1** Let `μ` be a monotype. Then `〚μ〛` is an ideal.
 
-  Proof: A straightforward induction on the structure of μ. □
+  Proof: A straightforward induction on the structure of `μ`. □
 
-  When trying to extend the meaning function to type schemes we encounter the diculty that instances of a constrained type scheme ∀α:πα ) σ depend on the overloaded instances in the environment.
+  When trying to extend the meaning function to type schemes we encounter the diculty that instances of a constrained type scheme `∀α.πα=>σ` depend on the overloaded instances in the environment.
   This is accounted for by indexing the meaning function for type schemes with an environment.
 
-  **Definition.** A monotype μ is a semantic instance of a type scheme σ in an environment η, written η j= μ μ σ, iff this can be derived from the two rules below.
+  **Definition.** A monotype `μ` is a semantic instance of a type scheme `σ` in an environment `η`, written `η ⊨ μ ≼ σ`, iff this can be derived from the two rules below.
 
-  (a) η j= μ μ μ.
+  (a) `η ⊨ μ ≼ μ`.
 
   (b) η j= μ μ (∀α:πα ) σ)
-  if there is a monotype μ0 such that η j= μ μ [μ0 =ff]σ and η(o) 2 [[[μ0 =ff]τ ]], for all o : τ 2 πα.
+  if there is a monotype `μ'` such that η j= μ μ [μ0 =ff]σ and η(o) 2 [[[μ0 =ff]τ ]], for all o : τ 2 πα.
 
   **Definition.** The meaning [[σ]]η of a closed type scheme σ is given by
 
@@ -734,38 +737,30 @@ It follows that η[o := f ] j= o : σT . Furthermore, since
 and
 contains by the premise of rule (INST) no
 binding o : σT , we have that η[o := f ] j= .
-Taken together,
-η[o := f ] j= ;
-o : σT . By the induction hypothesis, η[o :=
-f ] j= p
-0
-: σ, which implies the proposition. □
+Taken together, `η [o := 0 f] ⊨ Γ,o : στ` .
+By the induction hypothesis, `η [o := f] ⊨ p' : σ` , which implies the proposition. □
 
-A corollary of this theorem supports the slogan that \well
-typed programs do not go wrong".
+A corollary of this theorem supports the slogan that "well typed programs do not go wrong".
 
-Corollary 3.8 Let
-` p : σ be a valid closed typing judgement
-and let η be an environment. If η j=
-then [[p]]η 6= W.
+**Corollary 3.8** Let
+`Γ ⊢ p : σ` be a valid closed typing judgement
+and let `η` be an environment. If `η ⊨ Γ` then `〚p〛 η ≠ W` .
 
-Proof: Immediate from Theorem 3.7 and Proposition 3.4. 2
+Proof: Immediate from Theorem 3.7 and Proposition 3.4. □
 
 ## 4 Translation
 
-This section studies the \dictionary passing" transform from System O to the Hindley/Milner system.
-Its central idea is to convert a term of type ∀α:πα ) τ to a function that takes as arguments implementations of the overloaded variables in πα.
+This section studies the "dictionary passing" transform from System O to the Hindley/Milner system.
+Its central idea is to convert a term of type `∀α.πα=>τ` to a function that takes as arguments implementations of the overloaded variables in `πα`.
 These arguments are also called "dictionaries".
 
-The target language of the translation is the Hindley/Milner system, which is obtained from System O by eliminating overloaded variables o, instance declarations, and constraints πα in type schemes.
+The target language of the translation is the Hindley/Milner system, which is obtained from System O by eliminating overloaded variables `o`, instance declarations, and constraints `πα` in type schemes.
 The translation of terms is given in Figure 4.
-It is formulated as a function of type derivations, where we augment type judgements with an additional component e
+It is formulated as a function of type derivations, where we augment type judgements with an additional component `e*`
 that defines the translation of a term
-or program p, e.g.
-` p : σ  p
-. To ensure the coherence of
-the translation, we assume that the overloaded identifiers oi
-in a type variable constraint fo1 : ff -> τ1 ; : : : ; on : ff -> τng
+or program `p`, e.g. `Γ ⊢ p : σ ≻ p*`. To ensure the coherence of
+the translation, we assume that the overloaded identifiers `oi`
+in a type variable constraint `{o1 : α -> τ1, ..., on : α -> τn}`
 are always ordered lexicographically.
 
 Types and type schemes are translated as follows.
@@ -786,33 +781,26 @@ Bindings and typotheses are translated as follows.
                  (o : σ)* = u_{o,σ} : σ*.
     o1 : σ1, ..., on : σn = (o1 : σ1)*, ..., (on : σn)*.
 
-This translates an overloaded variable o to a new unique
-variable uo;σ , whose identity depends on both the name o
-and its type scheme, σ.
+This translates an overloaded variable `o` to a new unique
+variable `u_{o,σ}` , whose identity depends on both the name `o`
+and its type scheme, `σ`.
 
-Each derivation rule
-` p : σ in System O corresponds
+Each derivation rule `Γ ⊢ p : σ`  in System O corresponds
 to a derivation of translated typotheses, terms and type
 schemes in the Hindley/Milner system. One therefore has:
 
-**Proposition 4.1** If
-` p : σ  p
-is valid then
-` p
-: σ
-is valid in the Hindley/Milner system
+**Proposition 4.1** If `Γ ⊢ p : σ ≻ p*` is valid then
+`Γ* ⊢ p* : σ*` is valid in the Hindley/Milner system
 
 We believe that the translation preserves semantics in
 the following sense.
 
-**Conjecture** Let p be a program, μ be a monotype, and let
-η be an environment. Let
+**Conjecture** Let `p` be a program, `μ` be a monotype, and let
+`η` be an environment. Let
 be a typothesis which does not
 contain overloaded variables. If
-` p : μ  p
-and η j=
-then [[p]]η = [[p
-]]η.
+`Γ ⊢ p : μ ≻ p*`
+and `η ⊨ Γ` then `〚p〛 η = 〚p*〛 η` .
 
 Although the above claim seems clearly correct, its formal
 proof is not trivial. Note that coherence of the translation
@@ -829,9 +817,9 @@ with a simple polymorphic record calculus similar to Ohori's
 [Oho92]. Figure 5 details the extended calculus. We add to
 System O
 
-- record types fl1 : τ1; : : : ; ln : τng,
-- record expressions fl1 = e1 ; :::; ln = eng, and
-- selector functions #l.
+- record types `{l1:τ1、...、ln:τn}`,
+- record expressions `{l1 = e1、...、ln = en}`, and
+- selector functions `#l`.
 
 It would be easy to add record updates, as in the work
 of Ohori, but more dicult to handle record extension, as
@@ -841,6 +829,7 @@ records by extending unification to an AC theory for
 records and using (multi-parameter) type classes for stating
 the absence of fields in a record. Both updates and extensions
 are however omitted here for simplicity.
+
 Leaving open for the moment the type of selector functions,
 the system presented so far corresponds roughly to
 the way records are defined in Standard ML. Selectors are
@@ -848,30 +837,39 @@ treated in Standard ML as overloaded functions. As with
 all overloaded functions, the type of the argument of a selector
 has to be known statically; if it isn't, an overloading
 resolution error results.
+
 Our record extension also treats selectors as overloaded
 functions but uses the overloading concept of System O. The
 most general type scheme of a selector #l is
-∀fi :∀α:(ff  fl : fig) ) ff -> fi :
+
+    ∀β.∀α.(α ≦ {l : β}) => α -> β.
+
 This says that #l can be applied to records that have a field
 l : τ , in which case it will yield a value of type τ . The
 type scheme uses a subtype constraint ff  . Subtype constraints
 are validated using the subtyping rules in Figure 5.
 In all other respects, they behave just like overloading constraints
 o : ff -> τ .
+
 Example 5.1 The following program is typable in System
 O (where the typing of max is added for convenience).
-let max : ∀fi :((<) : fi -> fi -> bool) )
-∀α:(ff  fkey : fig) ) ff -> ff -> ff
-= λx:λy:if #key x < #key y then y else x
-in
-max fkey = 1; data = ag fkey = 2; data = bg
+
+      let max : ∀β.((<) : β -> β -> bool) =>
+                  ∀α. (α ≦ {key : β}) => α -> α -> α
+              = λx.λy. if #key x < #key y then y else x
+      in
+          max {key = 1, data = a} {key = 2, data = b}
+
 In Standard ML, the same program would not be typable
 since neither the argument type of the selector #key nor the
 argument type of the overloaded function (<) are statically
 known.
+
 Note that the bound variable in a subtype constraint can
 also appear in the constraining record type, as in
-∀α:(ff  fl : ff -> boolg) ) [ff]
+
+    ∀α.(α ≦ {l : α -> bool}) => [α]
+
 Hence, we have a limited form of F-bounded polymorphism
 [CCH+
 89] | limited since our calculus lacks the subsumption
@@ -881,6 +879,7 @@ our system is for modeling object-oriented programming.
 Some recent developments in object-oriented programming
 languages seem to go in the same direction, by restricting
 subtyping to abstract classes [SOM93].
+
 We now show that the record extension adds nothing
 essentially new to our language. We do this by presenting
 an encoding from System O with records to plain System O.
@@ -889,49 +888,62 @@ we assume that the labels l1 ; : : : ; ln of all record expressions
 fl1 = e1; :::; ln = eng in the source program are sorted lexicographically
 (if they are not, just rearrange fields). The
 details of the encoding are as follows.
+
 1. Every record-field label l in a program is represented by
 an overloaded variable, which is also called l.
+
 2. For every record expression fl1 = e1; :::; ln = eng in
 a program, we add a fresh n-ary datatype Rl1 :::ln with a
 constructor of the same name and selectors as given by the
 declaration
-data Rl1:::ln ff1 ::: ffn = Rl1:::ln ff1 ::: ffn:
+
+      data R_{l1...ln} α1 ...αn = R_{l1...ln} α1 ...αn.
+
 3. For every datatype Rl1:::ln created in Step 2 and every
 label li (i = 1; :::; n), we add an instance declaration
-inst li : ∀α1:::ffn:Rl1:::ln ff1 ::: ffn -> ffi
-= λ(Rl1 :::ln x1 ::: xn):xi
+
+        inst li : ∀_{α1...αn}.R_{l1...ln} α1 ...αn -> αi
+              = λ (R_{l1...ln} x1 ... xn) :xi
+
 (where the pattern notation in the formal parameter is used
 for convenience).
+
 4. A record expression fl1 = e1; :::; ln = eng now translates
 to Rl1:::ln e1 ::: en.
 5. A selector function #l translates to l.
 6. A record type fl1 : τ1; :::; ln : τng is translated to
 Rl1:::ln τ1 ::: τn.
 
-Additional Syntax
-Field labels l 2 L
-Terms e = : : : j #l j fl1 = e1; : : : ; ln = eng (n λ 0)
-Record types  = fl1 : τ1; : : : ; ln : τng (n λ 0, with l1 ; : : : ; ln distinct)
-Types τ = : : : j 
-Constraints on ff πα = : : : j ff  
-Typotheses
-= : : : j ff  
-Subtyping Rules
-(Taut) ;
-ff   ` ff  
-` fl1 : τ1; : : : ; ln : τn; ln+1 : τn+1; : : : ; ln+k : τn+k g (Rec)
- fl1 : τ1; : : : ; ln : τng
-Additional Typing Rules
-(f gI)
-` e1 : τ1 : : :
-` en : τn
+  ---
 
-` fl1 = e1; : : : ; ln = eng : fl1 : τ1; : : : ; ln : τng
+    Additional Syntax
+        Field labels        l  ∈ L
+        Terms               e  = ... | #l | {l1 = e1, ..., ln = en}  (n ≧ 0)
+        Record types        ρ  = {l1 : τ1, ..., ln : τn}             (n ≧ 0, with l1, ..., ln distinct)
+        Types               τ  = ... | ρ
+        Constraints on α    πα = ... | α ≦ ρ
+        Typotheses          Γ  = ... | α ≦ ρ
 
-` #l : ∀fi :∀α  fl : fig:ff -> fi (f gE)
-Figure 5: Extension with record types.
+    Subtyping Rules
+
+        Γ, α ≦ ρ ⊢ α ≦ ρ                                            (Taut)
+
+        Γ ⊢   {l1 : τ1, ..., ln : τn, ln+1 : τn+1, ..., ln+k : τn+k}
+             ≦ {l1 : τ1, ..., ln : τn}                                (Rec)
+
+    Additional Typing Rules
+
+        Γ ⊢ e1 : τ1   ...   Γ ⊢ en : τn
+        --------------------------------------------------------------({} I)
+        Γ ⊢ {l1 = e1, ..., ln = en} : {l1 : τ1, ..., ln : τn}
+
+        Γ ⊢ #l : ∀β: ∀α ≦ {l : β}.α -> β                            ({} E)
+
+Figure 5. Extension with record types.
+
 7. A subtype constraint ff  fl1 : τ1; :::; ln : τng becomes an
 overloading constraint l1 : ff -> τ1; : : : ; ln : ff -> τn:
+
 Let e
 y
 , σy
@@ -940,6 +952,7 @@ be the result of applying this translation
 to a term e, a type scheme σ, or a typothesis .
 Then one
 has:
+
 Proposition 5.2
 ` e : τ iff y
 ` e
@@ -947,45 +960,49 @@ y
 : τ
 y
 .
-Proposition 5.2 enables us to extend the type soundness and
+
+**Proposition 5.2** enables us to extend the type soundness and
 principal type properties of System O to its record extension
 without having to validate them again. It also points to an
 implementation scheme for records, given an implementation
 scheme for overloaded identifiers.
-Example 5.3 The program of Example 5.1 translates to
-inst data : ∀α∀fi :Rdata;key ff fi -> ff
-= λRdata;key x y: x in
-inst key : ∀α∀fi :Rdata;key ff fi -> fi
-= λRdata;key x y: y in
-let max : ∀fi :((<) : fi -> fi -> bool) )
-∀α:(key : ff -> fi) ) ff -> ff -> ff
-= λx:λy:if key x < key y then y else x
-in
-max (Rdata;key 1 a) (Rdata;key 2 b)
+
+**Example 5.3** The program of Example 5.1 translates to
+
+    inst data : ∀α∀β:R_{data,key} α β -> α
+              = λR_{data,key} x y. x in
+    inst key  : ∀α∀β:R_{data,key} α β -> β
+              = λR_{data,key} x y. y in
+    let max   : ∀β.((<) : β -> β -> bool) =>
+                ∀α.(key : α -> β)=> α -> α -> α
+              = λx.λy.if key x < key y then y else x
+    in
+          max (R_{data,key} 1 a) (R_{data,key} 2 b)
 
 Records can help to contain the number of overloaded identifiers in type signatures.
 The idea is to put related operations in a record which is constructed with a single overloaded identifier.
 The next example expresses shows how to model a simplified Num class in this way.
 In the Haskell-like syntax we use parentheses (...) instead of braces {...} for records.
 
-type Num a = (plus :: a -> a -> a,
-minus:: a -> a -> a,
-neg :: a -> a)
-over num
-inst num :: Int -> Num Int
-num = ...
-(+), (-) :: (num :: a -> Num a) => a -> a -> a
-neg :: (num :: a -> Num a) => a -> a
-(+) x y = #plus (num x) x y
-(-) x y = #minus (num x) x y
-neg x = #neg (num x) x
+    type Num a = (plus :: a -> a -> a,
+                  minus:: a -> a -> a,
+                  neg  :: a -> a)
+    over num
+    inst num :: Int -> Num Int
+        num = ...
+
+    (+), (-) :: (num :: a -> Num a) => a -> a -> a
+    neg      :: (num :: a -> Num a) => a -> a
+    (+) x y = #plus  (num x) x y
+    (-) x y = #minus (num x) x y
+    neg x   = #neg   (num x) x
 
 Note the similarity to dictionary passing.
 One shortcoming of this scheme with respect to Haskell's class declarations concerns subclassing.
 For instance, we could not pass a variable of type (num :: a -> Num a) => a to a function of type
 
-    (num :: a -> (plus :: a -> a -> Bool,
-    minus :: a -> a -> Bool)) => a -> b
+    (num :: a -> (plus  :: a -> a -> Bool,
+                  minus :: a -> a -> Bool)) => a -> b
 
 Even without introducing full subtyping on records it may be helpful to supplement our system with some way for dealing with this common case.
 Further experience will be required to determine this.
@@ -998,62 +1015,51 @@ Compared to Milner's algorithm W [Mil78] there are two extensions.
 - The case of binding a type variable in the unification algorithm is extended.
 To bind a type variable ff to a type τ the constraints of  have to be satisfied.
 The function mkinst ensures that type τ statisfies the constraints .
+
 - The function tp is extended with a branch for instance declarations inst o : σT = e in p.
 In this case it must be checked that the inferred type σ0 T for the overloading term e is less general then the given type σT .
+
 We now state soundness and completeness results for the algorithms unif y and tp.
 The proofs of these results are along the lines of [Che94]; they are omitted here.
+
 We use the following abbreviations:
 
- = fo : ff -> τ j o : ff -> τ 2 g
-A
-= [ff2A
+    Γα = {o : α -> τ | o : α -> τ ∈ Γ}
+    ΓA = ∪_{α ∈ A} Γα
 
 where A is a set of type variables.
-Definition. A configuration is a pair of a typothesis
+
+**Definition**.
+A configuration is a pair of a typothesis
 and
 a substitution S such that, for all ff 2 dom(S),
  = ;.
-9
-unif y : (τ ; τ ) -> (;
-S) -> (;
-S)
-unif y (τ1; τ2) (;
-S) = case (Sτ1; Sτ2 ) of
-(ff; ff) )
-(;
-S)
-(ff; τ ); (τ ; ff) where ff 62 tv(τ ) )
-f oldr mkinst (n
-; [τ =ff]  S)
 
-(T τ 1; T τ 2) )
-f oldr unif y (;
-S) (zip (τ 1; τ 2))
-mkinst : (o : ff -> τ ) -> (;
-S) -> (;
-S)
-mkinst (o : ff -> τ ) (;
-S) = case Sff of
-fi )
-if 9o : fi -> τ
-0
-2
-then unif y (τ ; τ 0
-) (;
-S)
-else (
-[ fo : fi -> [fi=ff]τ g; S)
-T τ )
-case fnewinst (σT ; ;
-S) j o : σT 2 g
-of
-f(τ1 ; 1;
-S1 )g ) unif y (ff -> τ ; τ1) (1;
-S1 )
+    unify : (τ,τ) -> (Γ,S) -> (Γ,S)
+    unify (τ1,τ2) (Γ,S) = case (S τ1,S τ2) of
+      (α,α) =>
+        (Γ,S)
+      (α,τ),(τ,α) where α ∉ tv(τ) =>
+        foldr mkinst (Γ \ Γα,[τ / α] o S) Γα
+      (T τ1s,T τ2s) =>
+        foldr unify (Γ,S) (zip(τ1s,τ2s))
+
+    mkinst : (o : α -> τ) -> (Γ,S) -> (Γ,S)
+    mkinst (o : α -> τ) (Γ,S) = case S α of
+      β =>
+        if ∃o : β -> τ' ∈ Γ
+        then unify (τ,τ') (Γ,S)
+        else (Γ ∪ {o : β -> [β / α] τ},S)
+      T τs =>
+        case {newinst(στ,Γ,S) | o : στ ∈ Γ} of
+          {(τ1,Γ1,S1)} => unify (α -> τ,τ1) (Γ1,S1)
+
 Figure 6: Algorithm for constrained unification
-Definition. The following defines a preorder μ on substitutions
+
+**Definition.** The following defines a preorder μ on substitutions
 and configurations and a preorder μ
 on type schemes.
+
 If X μ Y we say that Y is more general than X.
  S0
 μ S iff there is a substitution R such that S0
@@ -1074,16 +1080,16 @@ n dom(S0
  σ0
 μ
 σ iff, for all u 62 dom(),
-
 ` u : σ implies
-
 ` u : σ0
 .
-Definition. A constrained unification problem is a pair of
+
+**Definition.** A constrained unification problem is a pair of
 tuples (τ1; τ2)(;
 S) where τ1; τ2 are types and (;
 S) is a
 configuration.
+
 A configuration (0
 ; S0
 ) is called a unifying configuration
@@ -1094,6 +1100,7 @@ S) iff (0
 S) and S0
 τ1 = S0
 τ2 .
+
 The unifying configuration (0
 ; S0
 ) is most general iff
@@ -1103,11 +1110,13 @@ The unifying configuration (0
 ), for every other unifying configuration
 (00
 ; S00 ).
-Definition. A typing problem is a triple (p; ;
+
+**Definition.** A typing problem is a triple (p; ;
 S) where
 (;
 S) is a configuration and p is a term or program with
 fv(p)  dom().
+
 A typing solution of a typing problem (p; ;
 S) is a triple
 (σ; 0
@@ -1119,6 +1128,7 @@ S) and S0
 0
 ` p : S0
 σ.
+
 The typing solution (σ; 0
 ; S0
 ) is most general iff for every
@@ -1130,9 +1140,11 @@ other typing solution (σ00
 )
 and S00σ00 μS0000
 S00σ.
-Theorem 6.1 Let (τ1; τ2 )(;
+
+**Theorem 6.1** Let (τ1; τ2 )(;
 S) be a constrained unification
 problem
+
 (a) If unif y(τ1; τ2 )(;
 S) = (0
 ; S0
@@ -1141,12 +1153,15 @@ S) = (0
 ) is a most
 general unifying configuration for (τ1; τ2 )(;
 S).
+
 (b) If unif y(τ1 ; τ2)(;
 S) fails then there exists no unifying
 configuration for (τ1; τ2)(;
 S).
-Theorem 6.2 Let (p; ;
+
+**Theorem 6.2** Let (p; ;
 S) be a typing problem.
+
 (a) If tp (p; ;
 S) = (σ; 0
 ; S0
@@ -1155,54 +1170,57 @@ S) = (σ; 0
 ) is a most general
 solution of (p; ;
 S).
+
 (b) If tp (p; ;
 S) fails, then (p; ;
 S) has no solution.
+
 As a corollary of Theorem 6.2, we get that every typable
 program has a principal type, which is found by tp.
-Corollary 6.3 (Principal Types) Let (p; ;
+
+**Corollary 6.3** (Principal Types) Let (p; ;
 id) be a typing
 problem such that tv()
 = ;.
+
 (a) Assume gen (tp (p; ;
 id)) = (σ0
 ; 0
 ; S) and let σ =
 Sσ0
-. Then
-
-` p : σ and
-
-` p : σ00 ) σ00 μ
-σ; for all type schemes σ00
 .
-(b) If tp (p; ;
-id) fails then there is no type scheme σ such
-that
-` p : σ.
-The termination of unif y and mkinst critically depends on
-the form of overloaded type schemes σT :
-σT = T ff1 ::: ffn -> τ (tv(τ )  fff1; : : : ; ffng)
-j ∀α:πα ) σ0
-T (tv(πα)  tv(σ0
-T )):
-We show with an example why σT needs to be parametric
-in the arguments of T . Consider the following program,
-where k 2 KT .
-p = let (;) x y = y in
-inst o : ∀α:o : ff -> ff ) T (T ff) -> ff
-= λk(k x):o x
-in λx:λy:λf : o x ; o y ; f (k y) ; f x
-Then computation of tp(p; ;; id) leads to a call tp(f x; ;
-S)
-with x : ff; y : fi ; f : T fi ->  2 .
-This leads in turn to a call
-unif y(ff; T fi)(;
-S) where the following assumptions hold:
- σT = ∀α:o : ff -> ff ) T (T ff) -> ff
-
- fo : ff -> ff; o : fi -> fi ; o : σT g,
- S is a substitution with ff; fi 62 dom(S).
+
+ Then ` p : σ and
+` p : σ00 ) σ00 μ σ; for all type schemes `σ''`.
+
+(b) If `tp (p,Γ,id)`  fails then there is no type scheme `σ` such
+that `Γ ⊢ p : σ`.
+
+The termination of `unif` and `mkinst` critically depends on
+the form of overloaded type schemes `στ` :
+
+    στ = T α1 ... αn -> τ   (tv(τ) ⊆ {α1, ..., αn})
+       | ∀α.πα => στ'      (tv(πα) ⊆ tv(στ')).
+
+We show with an example why `σT` needs to be parametric
+in the arguments of `T`. Consider the following program,
+where  `k ∈ KT` .
+
+    p = let (;) x y = y in
+        inst o : ∀α.o : α -> α => T(Tα) -> α
+            = λk (k x).o x
+        in λx.λy.λf. o x; o y; f (k y); f x
+
+Then computation of `tp (p,∅,id)` leads to a call `tp (f x,Γ,S)`
+with `x : α, y : β, f : Tβ -> δ ∈ Γ`.
+This leads in turn to a call `unify (α,Tβ)(Γ,S)` where the following assumptions hold:
+
+  - `στ = ∀α.o : α -> α => T(Tα) -> α`
+  - `Γ ⊇ {o : α -> α,o : β -> β,o : στ}`,
+  - `S` is a substitution with  `α,β ∉ dom (S)`.
+
+  ----
+
 Unfolding unify gives mkinst(o : ff -> ff)(
 n
 ; S0
@@ -1210,6 +1228,7 @@ n
 S0
 = [T fi=ff]  S, which leads in turn to the following two
 calls:
+
 1. newinst(σT ;
 n
 ; S0
@@ -1219,9 +1238,13 @@ n
 where 0
  fo : fi -> fi ; o :  ->  ; o : σT g and  is a
 fresh type variable, and
+
 2. unif y(ff -> ff; T (T ) -> )(0
 ; S0
 ).
+
+  ----
+
 Since S0
 ff = T fi, unfolding of (2) results in an attempt
 to unify T fi and T (T )), which leads to the call
@@ -1241,12 +1264,66 @@ by extending unification to regular trees [Kae92].
 We have shown that a rather modest extension to the Hindley/Milner system is enough to support both overloading and polymorphic records with a limited form of F-bounded polymorphism.
 The resulting system stays firmly in the tradition of ML typing, with type soundness and principal type properties completely analogous to the Hindley/Milner system.
 
+    newinst     : (σ,Γ,S)  ->  (τ,Γ,S)
+    newinst(∀α.πα => σ,Γ,S)
+                = let β a new type variable
+                  in  newinst
+                  ([β/α] σ,Γ ∪ [β/α] πα,S)
+    newinst(τ,Γ,S)
+                = (τ,Γ,S)
+
+    skolemize   : (σ,Γ,S) -> (τ,Γ,S)
+    skolemize (∀α.πα => σ,Γ,S)
+                = let T a new 0-ary type constructor
+                  in  skolemize
+                      ([T/α] σ,Γ ∪ [T/α] πα,S)
+    skolemize (τ,Γ,S)
+                = (τ,Γ,S)
+
+    gen         : (τ,Γ,S) -> (σ,Γ,S)
+    gen (σ,Γ,S) = if ∃ α.α ∈ tv(Sσ) \ tv(S (Γ\Γα))
+                  then gen (∀α.Γα => σ,Γ\Γα,S)
+                  else (σ,Γ,S)
+
+    tp          : (p,Γ,S) -> (τ,Γ,S)
+    tp (u,Γ,S)  = if u : σ ∈ Γ
+                  then newinst (σ,Γ,S)
+
+    tp (o,Γ,S)  = newinst (∀β ∀α: (o : α -> β) => α -> β,Γ,S)
+
+    tp (λu.e,Γ,S)
+                = let α a new type variable
+                    (τ,Γ1,S1) = tp (e, Γ ∪ {u : α},S)
+                  in (α -> τ,Γ1,S1)
+
+    tp (e e',Γ,S)
+                = let (τ1,Γ1,S1) = tp (e,Γ,S)
+                      (τ2,Γ2,S2) = tp (e,Γ1,S1)
+                      α a new type variable
+                      (Γ3,S3) = unify (τ1,τ2 -> α) (Γ2,S2)
+                  in (α,Γ3,S3)
+
+    tp (let u = e in e',Γ,S)
+                = let (σ,Γ1,S1) = gen (tp (e,Γ,S))
+                  in tp (e,Γ1 ∪ {u : σ},S1)
+
+    tp (inst o : στ = e in p,Γ,S)
+                = let (στ',Γ1,S1) = gen (tp (e,Γ,S))
+                      (τ2,Γ2,S2) = skolemize (στ,Γ1,S1)
+                      (τ3,Γ3,S3) = newinst (στ',Γ2,S2)
+                  in if ∀o : στ' ∈ Γ . T ≠ T' ∧
+                        unify (τ2,τ3)(Γ3,S3) defined then
+                          tp (p, Γ1 ∪ {o : στ},S1)
+
 Figure 7: Type reconstruction algorithm for System O
 
 The encoding of a polymorphic record calculus in System O indicates that there might be some deeper relationships between F-bounded polymorphism and overloading.
 This is also suggested by the similarities between the dictionary transform for type classes and the Penn translation for bounded polymorphism [BTCGS91].
 A study of these relationships remains a topic for future work.
-Acknowledgments We are grateful to Kung Chen and John Maraist for valuable comments on previous drafts of this paper.
+
+## Acknowledgments
+
+We are grateful to Kung Chen and John Maraist for valuable comments on previous drafts of this paper.
 The section on records was motivated in part by a discussion led by Simon Peyton Jones, Mark Jones and others on the Haskell mailing list.
 Many other discussions with numerous participants have also contributed to this work.
 
@@ -1321,4 +1398,5 @@ Many other discussions with numerous participants have also contributed to this 
   [<a name="Wan87"></a>[Wan87](#rWan87)] Mitchell Wand. Complete type inference for simple objects. In Proc.IEEE Symposium on Logic in Computer Science, pages 37-44, June 1987.
 
   [<a name="WB89"></a>[WB89](#rWB89)] Philip Wadler and Stephen Blott. How to make ad-hoc polymorphism less ad-hoc. In Proc. 16th ACM Symposium on Principles of Programming Languages, pages 60-76, January 1989.
+
 
