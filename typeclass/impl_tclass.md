@@ -171,8 +171,7 @@
   The tag in this case is the equality function itself.
 
   In this example, we could evaluate member 2 [1,2,3] by rewriting it as member' primEqInt 2 [1,2,3] and evaluating that expression instead.
-  For a more interesting example,
-  if xs is a list of lists of integers, then we could evaluate member [1] xs in a similar way, rewriting it as member' (eqList primEqInt) [1] xs, where:
+  For a more interesting example, if xs is a list of lists of integers, then we could evaluate member [1] xs in a similar way, rewriting it as member' (eqList primEqInt) [1] xs, where:
 
     eqList :: (a -> a -> Bool) -> [a] -> [a] -> Bool
     eqList eq [] [] = True
@@ -606,7 +605,8 @@
 
   User supplied type signatures are a very necessary part of the type system.
   They can be used to avoid unwanted overloading and are essential for efficiency.
-  Unlike the ML type system, user supplied signatures have a significant impact on the generated code, possibly replacing higher order function calls (method selectors) with direct calls to instance functions.
+  Unlike the ML type system, user supplied signatures have a significant impact on the generated code,
+  possibly replacing higher order function calls (method selectors) with direct calls to instance functions.
 
   While there are numerous ways of implementing these signatures, our system does this in a very clean way using readonly type variables.
   Type variables in signatures are marked as read-only to prevent type instantiation from violating the signatures.
