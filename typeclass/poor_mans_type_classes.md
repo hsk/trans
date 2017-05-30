@@ -5,6 +5,7 @@ Martin Odersky
 EPFL
 
 IFIP WG2.8 working group meeting
+
 Boston, July 2006.
 
 1/15
@@ -20,11 +21,14 @@ Should we add type classes to OO-languages, specifically Scala?
 _Problem_ : Conceptual expense
 
 - We have already spent the keywords type and class!
+
 - Type classes are essentially implicitly passed dictionaries, and dictionaries are essentially objects.
+
 - Don't want to duplicate that.
 
 _Idea_: Concentrate on the delta between OO classes and type
-classes: implicits
+
+_classes_: implicits
 
 2/15
 
@@ -202,7 +206,7 @@ Example:
     implicit def int2orderd(x: Int) = new Orderd[Int] {
       def compare(y: Int) = if (x < y) -1 else if (x > y) 1 else 0
     }
-    def sort[a](xs: Array[a])(implicit c: a) Orderd[a]): Array[a] =
+    def sort[a](xs: Array[a])(implicit c: a => Orderd[a]): Array[a] =
       if (xs.length <= 1) xs
       else {
         val pivot = xs(xs.length / 2)
@@ -242,15 +246,20 @@ Example:
 An implicit conversion is applied to a term e if,
 
 - e is not compatible with its expected type:
+
       val x: Ordered[Int] = 1
       ==>
       val x: Ordered[Int] = int2ordered(1)
+
 - In a selection e.m, if e does not have a member m.
+
       x < (1)
       ==>
       int2ordered(x).<(1)
+
 - In an application e.m(a1;...;an), if e does not have a member
     m which can be applied to (a1;...;an):
+
     val x = Bi}Int(10);
     1 + x
     ==>
