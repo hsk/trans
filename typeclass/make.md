@@ -596,7 +596,6 @@
     instance Coerce Int Float where
       coerce = convertIntToFloat
 
-      -->
   In this case, the assertion Coerce a b might be taken as equivalent to the assertion that a is a subtype of b.
   This suggests a relation between this work and work on bounded quantification and on subtypes (see [<a name="r_CW85"></a>[CW85](#CW85), <a name="r_Rey85"></a>[Rey85](#Rey85)] for excellent surveys of work in this area, and [<a name="r_Wan87"></a>[Wan87](#Wan87), <a name="r_Car88"></a>[Car88](#Car88)] for more recent work).
 
@@ -895,14 +894,15 @@
   The valid sets of assumptions are inductively defined as follows:
 
   - Empty. The empty assumption set, {}, is valid.
+
   - Normal identifier. If A is a valid assumption set,
     x is an identifier that does not appear in A, and
     σ is a type scheme, then
-  
+
         A, (x :: σ \ x)
 
     is a valid assumption set.
-  
+
   - Overloaded identifier.
 
     If A is a valid assumption set, x is an identifier that does not appear in A,
