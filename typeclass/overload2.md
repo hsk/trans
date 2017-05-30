@@ -341,12 +341,13 @@
 
   We base our discussion on a simple functional language with overloaded identifiers.
   Figure 1 gives the syntax of terms and types.
+
   We split the variable alphabet into subalphabets `U` for unique variables,
   ranged over by `u`, `O` for overloaded variables, ranged over by `o`, and `K` for data constructors, ranged over by `k`.
   The letter `x` ranges over both unique and overloaded variables as well as constructors.
   We assume that every non-overloaded variable `u` is bound at most once in a program.
 
-  The syntax of terms is identical to the language Exp in [Mil78].
+  The syntax of terms is identical to the language Exp in [<a name="rMil78"></a>[Mil78](#Mil78)].
   A program consists of a sequence of instance declarations and a term.
   An instance declaration (`inst o:στ = e in p`) overloads the meaning of the identifier `o` with the function given by `e` on all arguments that are constructed from the type constructor `T`.
 
@@ -367,7 +368,7 @@
   The Hindley/Milner type scheme `∀α.σ` is regarded as syntactic sugar for `∀α.()⇒σ`.
 
   Figure 2 defines the typing rules of System O.
-  The type system is identical to the original Hindley/Milner system, as presented in in [DM82], except for two modifications.
+  The type system is identical to the original Hindley/Milner system, as presented in in [<a name="rDM82"></a>[DM82](#DM82)], except for two modifications.
 
   - In rule (∀I), the constraint πα on the introduced bound variable ff is traded between typothesis and type scheme.
   Rule (∀E) has as a premise an instantiation of the eliminated constraint.
@@ -470,7 +471,7 @@
 
   The notation `η[x := v]` stands for extension of the environment `η` by the binding of `x` to `v`.
 
-  Note that our semantics is more "lazy" in detecting wrong terms than Milner's semantics [Mil78].
+  Note that our semantics is more "lazy" in detecting wrong terms than Milner's semantics [<a name="rMil78"></a>[Mil78](#Mil78)].
   Milner's semantics always maps a function application `f W` to `W` whereas in our semantics `f W = W` only if `f` is strict.
   Our semantics correspond better to the dynamic type checking which would in practice be performed when an argument is evaluated.
   We anticipate no change in our results if Milner's stricter error checking is adopted.
@@ -535,36 +536,37 @@
 
   (a) `η ⊨ μ ≼ μ`.
 
-  (b) η j= μ μ (∀α:πα ) σ)
-  if there is a monotype `μ'` such that η j= μ μ [μ0 =ff]σ and η(o) 2 [[[μ0 =ff]τ ]], for all o : τ 2 πα.
+  (b) `η ⊨ μ ≼ (∀α.πα => σ)`
+  if there is a monotype `μ'` such that `η ⊨ μ ≼ [μ'/α] σ` and `η(o) ∈ 〚 [μ'/α] τ〛`, for all `o : τ ∈ πα`.
 
-  **Definition.** The meaning [[σ]]η of a closed type scheme σ is given by
+  **Definition.** The meaning `〚σ〛_η` of a closed type scheme  `σ` is given by
 
     〚σ〛 η = ∩{〚μ〛 | η ⊨ μ ≼ σ}.
 
-  **Definition.** η j= e1 : σ1; : : : ; en : σn iff [[ei]]η 2 [[σi]]η, for i = 1; : : : ; n.
+  **Definition.** `η ⊨ e1 : σ1, ..., en : σn` iff `〚ei〛 η ∈ 〚σi〛 η` , for `i = 1, ..., n`.
 
   The meaning of type schemes is compatible with the meaning of types:
 
-  **Proposition 3.2** Let μ be a monotype, and let η be an environment.　Then [[μ]]η = [[μ]].
+  **Proposition 3.2** Let `μ` be a monotype, and let `η` be an environment.　Then `〚μ〛 η = 〚μ〛`.
 
-  Proof: Direct from the definitions of [[σ]]η and μ. □
+  Proof: Direct from the definitions of `〚σ〛 η` and `≼`. □
 
   We now show that type schemes denote ideals.
-  The proof needs two facts about the bottom type ? .
+  The proof needs two facts about the bottom type `⫫`.
 
   **Lemma 3.3** Let η be an environment.
 
-  (a) η j= o : ?? -> μ, for any variable o, monotype μ.
+  (a) `η ⊨ o : ⫫ -> μ`, for any variable `o`, monotype `μ`.
 
-  (b) Let σ = ∀α1 :πα 1 ) : : : ∀αn:πα n ) τ be a type scheme.
-  Then η j= [? =ff1; : : : ; ? =ffn]τ μ σ.
+  >> TODO
+  (b) Let `σ = ∀α1 :πα1 => ... ∀αn :παn => τ` be a type scheme.
+  Then `η ⊨ [⫫/α1, ..., ⫫/αn] τ ≼ σ`.
 
-  Proof: (a) Assume v 2 [[? ]].
-  Since ? does not have any constructors, [[? ]] = f?g, hence v = ?.
-  Since η(o) is a strict function, η(o)v = ?, which is an element of every monotype.
+  Proof: (a) Assume  `v∈ 〚⫫〛` .
+  Since `⫫` does not have any constructors, `〚⫫〛 = {⊥}`, hence  `v = ⊥`.
+  Since `η(o)` is a strict function, `η(o)v = ⊥`, which is an element of every monotype.
 
-  (b) Follows from the definition of μ and (a). □
+  (b) Follows from the definition of `≼` and (a). □
 
   **Proposition 3.4** Let σ be a type scheme and let η be an environment.
   Then [[σ]]η is an ideal.
@@ -737,6 +739,7 @@ It follows that η[o := f ] j= o : σT . Furthermore, since
 and
 contains by the premise of rule (INST) no
 binding o : σT , we have that η[o := f ] j= .
+TODO ^^^^^^^^
 Taken together, `η [o := 0 f] ⊨ Γ,o : στ` .
 By the induction hypothesis, `η [o := f] ⊨ p' : σ` , which implies the proposition. □
 
@@ -746,13 +749,13 @@ A corollary of this theorem supports the slogan that "well typed programs do not
 `Γ ⊢ p : σ` be a valid closed typing judgement
 and let `η` be an environment. If `η ⊨ Γ` then `〚p〛 η ≠ W` .
 
-Proof: Immediate from Theorem 3.7 and Proposition 3.4. □
+  Proof: Immediate from Theorem 3.7 and Proposition 3.4. □
 
 ## 4 Translation
 
-This section studies the "dictionary passing" transform from System O to the Hindley/Milner system.
-Its central idea is to convert a term of type `∀α.πα=>τ` to a function that takes as arguments implementations of the overloaded variables in `πα`.
-These arguments are also called "dictionaries".
+  This section studies the "dictionary passing" transform from System O to the Hindley/Milner system.
+  Its central idea is to convert a term of type `∀α.πα=>τ` to a function that takes as arguments implementations of the overloaded variables in `πα`.
+  These arguments are also called "dictionaries".
 
 The target language of the translation is the Hindley/Milner system, which is obtained from System O by eliminating overloaded variables `o`, instance declarations, and constraints `πα` in type schemes.
 The translation of terms is given in Figure 4.
