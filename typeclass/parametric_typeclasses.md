@@ -1,5 +1,7 @@
 # Parametric Type Classes
 
+<!-- TODO>>> ∀∪⊎∈∉≠⊆<⊢⊦⊦≼≥>⇒`Γ`Δ`α`β`γ`σ`τ`λ`κ`≃ -->
+
 (Extended Abstract)
 
 Kung Chen, Paul Hudak, Martin Odersky
@@ -56,7 +58,7 @@ N00014-90-C-0024 and N00014-91-J-4043.
 
 ----
 
-tradeooff in choosing one of these representations: lists sup-
+tradeoff in choosing one of these representations: lists sup-
 port the efficient addition of new elements, whereas vectors
 support efficient random (including parallel) access. Cur-
 rently the choice between representations is made at the pro-
@@ -81,18 +83,18 @@ declarations:
 
     class Sequence a s
     where cons :: a -> s -> s
-          nth  :: s -> Int -> a
-          len  :: s -> Int
+        nth  :: s -> Int -> a
+        len  :: s -> Int
 
     instance Sequence a (List a)
     where cons = (:)
-          nth  = (!)
-          len  = (#)
+        nth  = (!)
+        len  = (#)
 
     instance Sequence a (Vector a)
     where cons = vecCons
-          nth  = vecNth
-          len  = vecLen
+        nth  = vecNth
+        len  = vecLen
 
 This defines the overloaded constructor cons, overloaded in-
 dexing selector nth, and a length function len. (Note the
@@ -106,11 +108,7 @@ strain only one type, thus ruling out a declaration such as
 overloaded constructors and selectors to be monomorphic
 (which makes them fairly useless).
 
------
-
-page 2
-
------
+<!-- page 2 -->
 
 Even if this restriction did not exist, there is another prob-
 lem with the current type class mechanism, which can be
@@ -138,7 +136,7 @@ hension" notation came from. However, a problem becomes
 evident as soon as we attempt to give a type for map.
 
     map: (Sequence a sa, Sequence b sb)
-         => (a -> b) -> sa -> sb.
+        => (a -> b) -> sa -> sb.
 
 This type is too general, since it would admit also imple-
 mentations that take one sequence type (e.g. a list) and
@@ -186,7 +184,7 @@ Haskell's type system: If all classes are parameterless,
 the two systems are equivalent.
 
 4. We prove that our system is decidable, and provide an
-eoffective type inference algorithm.
+effective type inference algorithm.
 
 5. As a concrete demonstration of the power and practi-
 cality of the system, we formulate classes monad and
@@ -243,11 +241,7 @@ proaches lies in our use of normal forms (Jones does not ad-
 dress this issue) and our distinction between constrained and
 dependent variables. This distinction allows us to solve the
 
------
-
-page 3
-
------
+<!-- page 3 -->
 
 ambiguity problems previously encountered in definitions of
 container classes.
@@ -299,7 +293,7 @@ would violate the first restriction, and
     inst List Int :: Sequence Int
     inst List Char :: Sequence Char
 
-would violate the second restriction. Eoffectively, these re-
+would violate the second restriction. Effectively, these re-
 strictions ensure that in a proof of an instance relationship
 every step is determined by the class name and the type
 in placeholder position. The class parameter types, on the
@@ -376,12 +370,7 @@ the instance relation depends on the instance declarations
 `D`s in a program. We let these declarations generate a theory
 whose sentences are instance judgments of the form `C ⊦⊦ τ::γ`.
 
------
-
-page 4
-
------
-
+<!-- page 4 -->
 
     Type variables     α
     Type constructors  κ
@@ -390,21 +379,20 @@ page 4
     Type schemes       σ ::= ∀α::Γ.σ | τ
     Type classes       γ ::= c τ
     Class sets         Γ ::= {c1 τ1,..., cn τn}       (n ≥ 0,ci pairwise disjoint)
-    Contexts           C ::= f α 1 ::; 1,: : :,α n ::; n g (n ≥ 0)
-    Expressions        e ::= x | e e | λx : e | let x = e' in e
-    Programs           p ::= class α :: where x : σ in p
-                          |  inst C ⇒ τ::γ where x = e in p
-                          |  e
+    Contexts           C ::= {α1::Γ1, ..., αn::Γn} (n ≥ 0)
+
+    Expressions        e ::= x | e e' | λx : e | let x = e' in e
+    Programs           p ::= class α::γ where x : σ in p
+                        |  inst C ⇒ τ::γ where x = e in p
+                        |  e
     
 Figure 1: Abstract Syntax of Mini-Haskell+
 
-    C ⊦⊦ α :: γ     (α::{... γ ...} ∈ C)
+    C ⊦⊦ α :: γ     (α::{...γ...} ∈ C)
 
     C ⊦⊦ C'
-    ---------    ((inst C' ⇒ τ::γ) ∈ Ds)
+    ---------    ("inst C' ⇒ τ::γ" ∈ Ds)
     C ⊦⊦ τ::γ
-
-
 
     C ⊦⊦ τ::γ1   ...   C ⊦⊦ τ::γn
     -----------------------------    (n ≥ 0)
@@ -421,27 +409,28 @@ deduced using the inference rules in Figure 2.
 
 ## Context
 
-TODO>>>
 
 In these rules the context `C` is a set of instance assumptions
 `α :: Γ` (all `α`'s in `C` are disjoint). Where convenient, we will
 also regard a context as a finite mapping from type variables
-to class sets, i.e. `C α = Γ` iff `α :: Γ ∈ C`. Thus the domain of
+to class sets, i.e. `Cα = Γ` iff `α :: Γ ∈ C`. Thus the domain of
 `C`, `dom(C)`, is defined as the set of type variables `α` such
 that `α :: Γ ∈ C`. As type classes can now contain parameters,
 we define the region of a context `C`,
 
-    reg(C) = ∪(α ∈ dom(C)) fv(C)
+    reg(C) = ∪_{α ∈ dom(C)} fv(C)
 
 and the closure of `C` over a set of type variables, `Δ`, written
 `C*(Δ)`, as the least fixpoint of the equation
 
     C*(Δ) = Δ ∪ C(C* (Δ)).
 
-We say `C1` is contained in `C2`, written `C1 ≼ C2`, if `dom(C1) ⊆ dom(C2)` and `C1α ⊆ C2α` for each `α ∈ dom(C1)`. We write
-`C1 ⊎ C2` for the disjoint union of two contexts and `C\n` for
+
+We say `C1` is contained in `C2`, written `C1 ≼ C2`, if `dom(C1) ⊆ dom(C2)`
+and `C1α ⊆ C2α` for each `α ∈ dom(C1)`. We write
+`C1 ⊎ C2` for the disjoint union of two contexts and `C\α` for
 restriction of a context `C` to all type variables in its domain
-other than `α`. A context `C` is called closed if `C(dom(C)) =
+other than `α`. A context `C` is called closed if `C*(dom(C)) =
 dom(C)`, or, equivalently, `reg(C) ⊆ dom(C)`. A context `C`
 is called acyclic if all the type variables `α`, `α ∈ dom(C)`,
 
@@ -450,7 +439,6 @@ can be topologically sorted according to the order: `α < β` if
 acyclic contexts in the remainder of the paper.
 
 ## Constrained Substitution
-
 
 In the following, we will apply variable substitutions not
 only to types, but also to (sets of) classes and (sets of) in-
@@ -470,21 +458,17 @@ set. We use the following definitions:
 `S` is a substitution and `C` is a context such that `C = SC`.
 
 **Definition.** A constrained substitution `(S,C)` preserves a
-constrained substitution `(S0,C0)` if there is a substitution R
+constrained substitution `(S0,C0)` if there is a substitution `R`
 such that `S = R o S0` and `C ⊦⊦ RC0`. We write in this case
 `(S,C) ≼ (S0,C0)`.
 
-----
-
-page 5
-
-----
+<!-- page 5 -->
 
 It is easy to show that `≼` is a preorder.
 
 **Definition.** A constrained substitution `(S,C)` is most gen-
 eral among those constrained substitutions that satisfy some
-requirement `R` if `(S,C)` satisfies `R`, and, for any `(S,C)`
+requirement `R` if `(S,C)` satisfies `R`, and, for any `(S',C')`
 that satisfies `R`, `(S',C') ≼ (S',C')`.
 
 **Definition.** A constrained substitution `(S,C)` is a normal-
@@ -492,17 +476,17 @@ izer of an instance predicate set `P` if `C ⊦⊦ SP`.
 
 To ensure the principal type property of our type system
 with parametric classes, we have to place the following re-
-quirements on the entailment relation `⊦⊦` :
+quirements on the entailment relation `⊦⊦`:
 
-- monotonicity: for any contexts `C` and `C'` , if `C' ≼ C`
+- **monotonicity:** for any contexts `C` and `C'` , if `C' ≼ C`
 then `C ⊦⊦ C'`.
 
-- transitivity under substitution: for any substitu-
-tion `S`, contexts `C` and `C'`, predicate set `P`, if `C' ⊦⊦ SC`
+- **transitivity under substitution:** for any substitu-
+tion `S`, contexts `C` and `C'`, predicate set `P`, if `C' ⊦⊦ SC'`
 and `C' ⊦⊦ P` then `C ⊦⊦ SP`.
 
-- most general normalizers: If a predicate set `P` has
-  a normalizer then it has a most general normalizer.
+- **most general normalizers:** If a predicate set `P` has
+a normalizer then it has a most general normalizer.
 
 
 From the viewpoint of type reconstruction, the first two re-
@@ -536,8 +520,8 @@ general normalizers.
 
 Given an entailment relation `⊦⊦` between contexts and in-
 stance predicates, we now formalize a theory of typing judg-
-ments. Typing judgments are of the form A, `C ⊢ e : σ`,
-where A is an assumption set of type predicates `x : σ` (all
+ments. Typing judgments are of the form `A, C ⊢ e : σ`,
+where `A` is an assumption set of type predicates `x : σ` (all
 `x` disjoint), `C` is a context, and `e` is an expression or a pro-
 gram. A typing judgment `A,C ⊢ e : σ` holds in the theory
 iff it can be deduced using the inference rules in Figures 3
@@ -550,14 +534,14 @@ ley/Milner system [DM82]. One notable difference between
 this system and the standard Hindley/Milner system is that
 the bound variable in a type scheme `∀α ::Γ.σ` can be instan-
 tiated to a type `τ` only if we know from the context that
-`τ::Γ` (rule `∀ = elim`). The second difference concerns rule
-(`∀ = intro`), where the instance predicate on the generalized
+`τ::Γ` (rule ∀-elim). The second difference concerns rule
+(∀-intro), where the instance predicate on the generalized
 variable `α` is "discharged" from the context and moved into
-the type scheme `∀α ::Γ.σ`.
+the type scheme `∀α::Γ.σ`.
 
 The rules in Figure 4 extend this system from expressions
-to programs. In rule (`class`), the overloaded identifier `x`
-is added to the assumption set. Rule (`inst`) expresses a
+to programs. In rule (class), the overloaded identifier `x`
+is added to the assumption set. Rule (inst) expresses a
 compatibility requirement between an overloaded identifier
 and its instance expressions. These rules have to be taken
 in conjunction with the requirements (a), (b) on instance
@@ -591,7 +575,7 @@ set of type schemes.
 The following property is a direct consequence of the defini-
 tion.
 
-Lemma 3.2 If `σ' ≼C σ` and `C ≼ C'` then `σ ≼C' σ`.
+Lemma 3.2 If `σ' ≼C σ` and `C ≼ C'` then `σ' ≼C' σ`.
 
 The next lemma shows that the ordering on type schemes is
 preserved by constrained substitutions.
@@ -604,7 +588,7 @@ fine the notion of principal type schemes in our system.
 
 **Definition.** Given `A`, `C`, and `e`, we call `σ` a principal type
 scheme for `e` under `A` and `C` iff `A,C ⊢ e : σ`, and for every
-`σ`, if `A,C ⊢ e : σ'` then `σ' ≼C σ`.
+`σ'`, if `A,C ⊢ e : σ'` then `σ' ≼C σ`.
 
 We shall develop an algorithm to compute principal type
 schemes in the following sections.
@@ -614,46 +598,39 @@ schemes in the following sections.
 We present a deterministic type inference system in this sec-
 tion. Compared to the typing rules in Section 3, the rules
 
-----
+<!-- page 6 -->
 
-page 6
+    (var)       A,C ⊢ x : σ    (x : σ ∈ A)
 
-----
+                A,C ⊢ e : ∀α::Γ.σ    C ⊦⊦ τ::Γ
+    (∀-elim)   --------------------------------
+                A,C ⊢ e : [α -> τ] σ
 
-`∀∈⊆<`Γ`α`β`γ`σ`≼⊦⊦⇒⊢`τ`⊎
-
-    ( var )    A,C ` x : [    ( x : [ ∈ A )
-
-                A,C ` e : 8 α ::; :[    C ``,::;
-    ( 8; elim ) --------------------------------
-                A,C ` e : [ α 7!,] [
-
-                A,C :α ::; ` e : [
-    ( 8; intro )------------------------ ( α 62 fv A     reg C )
-                A,C ` e : 8 α ::; :[
+                A,C.α::Γ ⊢ e : σ
+    (∀-intro)  ------------------------ (α ∉ fv A ∪ reg C)
+                A,C ⊢ e : ∀α::Γ.σ
     
-                A,C ` e :,! fi    A,C ` e : fi
-    ( ; elim ) --------------------------------
-                A,C ` e e : fi
+                A,C ⊢ e :τ' -> τ    A,C ⊢ e' : τ'
+    (λ-elim)    --------------------------------
+                A,C ⊢ e e' : τ
 
-                A : x :,fi C ` e : fi
-    ( ; intro ) --------------------------------
-                A,C `x : e :,! fi
+                A.x:τ',C ⊢ e : τ
+    (λ-intro)   --------------------------------
+                A,C ⊢ λx.e :τ' -> τ
 
-
-            A,C ` e : [    A : x : [fi C ` e : fi
-    ( let ) --------------------------------------
-            A,C ` let x = e in e : fi
+                A,C ⊢ e' : σ    A.x : σ,C ⊢ e : τ
+    (let)       --------------------------------------
+                A,C ⊢ let x = e' in e : τ
 
 Figure 3: Typing Rules for Expressions
 
-                A : x : 8 fv,8 α :: f g :[fi C ` p : fi
-    ( class )  -------------------------------------------
-                A,C ` class α :: where x : [ in p : fi
+                A.x : ∀_{fvγ} ∀α :: {γ}.σ, C ⊢ p : τ
+    (class)     -------------------------------------------
+                A,C ⊢ class α :: γ　where x : σ in p : τ
 
-            A,C ` x : 8 α :: f g :[    A,C ` e :[ α 7!,] [    A,C ` p : fi
-    ( inst )----------------------------------------------------------
-            A,C ` inst C ),:: where x = e in p : fi
+                A,C ⊢ x : ∀α :: {γ} :σ    A,C ⊢ e :[α ->τ'] σ    A,C ⊢ p : τ
+    (inst)      --------------------------------------------------------------
+                A,C ⊢ inst C' ⇒ τ'::γ where x = e in p : τ
 
 Figure 4: Typing Rules for Declarations
 
@@ -668,8 +645,8 @@ reconstruction algorithm.
 ## Deterministic Typing Rules
 
 The typings rules for the deterministic system are given in
-Figure 5. The rules `8; intro` and `8; elim` have been removed
-and typing judgements are now of the form `A,C ` e : fi`
+Figure 5. The rules `∀-intro` and `∀-elim` have been removed
+and typing judgements are now of the form `A,C ⊢ e : τ`
 where,ranges over the set of type expressions as opposed to
 type schemes in the typing judgements of Section 3. Other
 major differences are that rule `(var')` instantiates a type
@@ -681,15 +658,14 @@ The function gen takes as arguments a type scheme, an as-
 sumption set, and a context, and returns a generalized type
 scheme and a discharged context. It is defined by
 
-    gen ( [fi A,C ) =
-        if 9 α ∈ dom(C) n ( fv A reg C ) then
-            gen ( 8 α :: C α:[fi A,C n )
-    else ( [fi C )
+    gen (σ,A,C) =
+        if ∃α ∈ dom(C) \ (fv A ∪ reg C) then
+            gen (∀α :: C α.σ,A,C\α)
+        else (σ,C)
 
 In other words, instance assumptions in the given context,
 except those constraining type variables in the assumption
 set, are discharged and moved to form a more general type
-
 
 scheme in an order so that type variables are properly quan-
 tified.
@@ -702,8 +678,8 @@ lishing the congruence of the two type systems, but also in
 investigating the relation between the type system and the
 type reconstruction algorithm.
 
-**Lemma 4.1** (Substitution lemma) If `A,C ` e :,` and
-`C'' `` SC` then `SA,C' `' e : S,`.
+**Lemma 4.1** (Substitution lemma) If `A,C ⊢' e :τ` and
+`C' ⊦⊦ SC` then `SA,C' ⊢' e : Sτ`.
 
 This result assures us that typing derivations are preserved
 under constrained substitution.
@@ -712,43 +688,38 @@ The next two lemmas express a form of monotonicity of
 typing derivations with respect to the context and the as-
 sumption set.
 
-**Lemma 4.2** If `A,C ` e :,` and `C ≼ C'` then `A,C' `' e :,`.
+**Lemma 4.2** If `A,C ⊢ e :τ` and `C ≼ C'` then `A,C' ⊢' e :τ`.
 
-**Lemma 4.3** If `A : x : [fi C ` e :,` and `[ ≼C ['` then
- `A : x : [,C ` e :,`.
+**Lemma 4.3** If `A.x : σ,C ⊢ e :τ` and `σ ≼C σ'` then
+`A.x : σ',C ⊢ e :τ`.
 
-Now we can show that the deterministic system `'` is equiv-
-alent to the non-deterministic system `` in the following
+Now we can show that the deterministic system `⊢'` is equiv-
+alent to the non-deterministic system `⊢` in the following
 sense.
 
+**Theorem 4.4** If `A,C ⊢' e :τ` then `A,C ⊢ e :τ`.
 
-**Theorem 4.4** If `A,C ` e :,` then `A,C ` e :,`.
+<!-- page 7 -->
 
-----
+    (var')      A,C ⊢' x : τ    (x : σ ∈ A, τ ≼C σ)
 
-page 7
+                A,C ⊢' e : τ' -> τ    A,C ⊢' e' : τ'
+    (∀-elim')  ------------------------------
+                A,C ⊢' e e' : τ
 
-----
-
-    (var')    A,C ` x :,( x : [ ∈ A,fi ≼C [ )
-
-                A,C ` e :,! fi    A,C ` e : fi
-    (;-elim')   ------------------------------
-                A,C ` e e : fi
-
-                A : x :,fi C ` e : fi
-    (;-intro')  -----------------------
-                A,C `  x : e :,! fi
+                A.x : τ', C ⊢' e : τ
+    (∀-intro') -----------------------
+                A,C ⊢' λx.e : τ' -> τ
     
-            A,C ` e : fi    A : x : [fi C ` e : fi
-    (let')  -------------------------------------- ( [fi C ) = gen (,fi A,C ),C ≼C
-            A,C ` let x = e in e : fi
+                A,C ⊢' e' : τ'    A.x : σ,C ⊢' e : τ
+    (let')      ---------------------------------------- (σ, C'') = gen(τ',A,C'), C'' ≼ C
+                A,C ⊢' let x = e' in e : τ
 
 Figure 5: Determinstic Typing Rules for Expressions
 
-**Theorem 4.5** If `A,C ` e : [` then there is a context `C'`,
-and a type,such that `C ≼C'` , `A,C ` e :,` and `[ ≼C [`
-where `( [,C ) = gen ( fifi A,C )`.
+**Theorem 4.5** If `A,C ⊢ e : σ` then there is a context `C'`,
+and a type,such that `C ≼ C'`, `A,C' ⊢' e :τ` and `σ ≼C σ'`
+where `(σ',C'') = gen (τ,A,C')`.
 
 ## 5 Unification and Type Reconstruction
 
@@ -769,7 +740,7 @@ tion parts of our prior Haskell compiler.
 ## Context-Preserving Unification
 
 Type reconstruction usually relies on unification to compute
-most general types. One consequence of rule (8-elim) is that
+most general types. One consequence of rule (∀-elim) is that
 the well-known syntactic unification algorithm of Robinson
 [Rob65] cannot be used since not every substitution of vari-
 ables to types satisfies the given instance constraints. Nip-
@@ -781,26 +752,26 @@ in Figure 6, yields the most general context-preserving uni-
 fier of two types.
 
 Function mgu takes two types and returns a transformer on
-constrained substitutions. The application `mgu,1,2 (S0,C0)`
+constrained substitutions. The application `mgu τ1 τ2 (S0,C0)`
 returns a most general constrained substitution that unifies
-the types `,1` and `,2` and preserves `(S0,C0)`, if such a substitu-
+the types `τ1` and `τ2` and preserves `(S0,C0)`, if such a substitu-
 tion exists. The algorithm is similar to the one of Robinson,
-except for the case `mgu α , (S0,C0)`, where `α` may be sub-
-stituted to,only if,can be shown to be an instance of `C0 α`.
+except for the case `mgu α τ (S0,C0)`, where `α` may be sub-
+stituted to `τ` only if `τ` can be shown to be an instance of `C0 α`.
 This constraint translates to an application of the subsidary
-function mgn to `,` and `C α`. The call `mgn , ; ( S 0,C 0 )` com-
-putes a most general normalizer of `C0  {,:: ; }`, provided
+function mgn to `τ` and `C α`. The call `mgn τ Γ (S0,C0)` com-
+putes a most general normalizer of `C0 ∪ {τ::Γ}`, provided
 one exists.
 
-**Theorem 5.1** Given a constrained substitution `( S 0,C 0 )` and
-types,1 ,,2 , if there is a `( S 0,C 0 )`-preserving unifier of,1 and
-`,2` then `mgu,1,2 ( S 0,C 0 )` returns a most general such uni-
-fier. If there is no such unifier then `mgu ,1 ,2 ( S 0,C 0 )` fails
+**Theorem 5.1** Given a constrained substitution `(S0,C0)` and
+types `τ1`, `τ2`, if there is a `(S0,C0)`-preserving unifier of `τ1` and
+`τ2` then `mgu τ1 τ2 (S0,C0)` returns a most general such uni-
+fier. If there is no such unifier then `mgu τ1 τ2 (S0,C0)` fails
 in a finite number of steps.
 
 ## Type Reconstruction
 
-An algorithm for type reconstruction is shown in Figure 7. 1
+An algorithm for type reconstruction is shown in Figure 7. [1](#1)
 Function `tp` takes as arguments an expression, an assump-
 tion set, and an initial constrained substitution, and returns
 a type and a final constrained substitution. The function is
@@ -810,16 +781,16 @@ the type system of Section 4 and, thereby, that of Section 3.
 
 We need the following lemmas to establish the soundness
 and completeness of our algorithm. We begin by showing
-that tp is indeed a constrained substitution transformer.
+that `tp` is indeed a constrained substitution transformer.
 
 **Lemma 5.2** Let `(S,C)` be a constrained substitution and
-`(,, S',C') = tp (e,A,S,C)`, then `(S',C')` is a constrained
+`(τ,S',C') = tp (e,A,S,C)`, then `(S',C')` is a constrained
 substitution.
 
 Hence we will omit the requirement of constrained substitu-
 tion from now on.
 
-**Lemma 5.3** If `tp ( e,A,S,C ) = ( fifi S,C )` then `(S,C)  (S,C)`.
+**Lemma 5.3** If `tp (e,A,S,C) = (τ,S,C)` then `(S,C) ≼ (S,C)`.
 
 This result can be established by a straightforward induc-
 tion except in the **let**-case. Recall the typing rule (let')
@@ -845,95 +816,83 @@ omit it here for simplicity.
 
 ----
 
-page 8
+<!-- page 8 -->
 
-----
+    mgu : τ -> τ -> S * C -> S * C
+    mgn : τ -> Γ -> S * C -> S * C
 
-    mgu :,!,! S,C ! S,C
-    mgn :,! ; ! S,C ! S,C
+    mgu τ1 τ2 (S,C)           = mgu' (Sτ1) (Sτ2) (S,C)
 
-    mgu,1,2 (S,C)    =
-    mgu' α α          =
-    mgu α,(S,C) | α 6∈ fv (,) =
-    mgu,α (S,C)    =
-    mgu () ()    =
-    mgu ,,(S,C)    =
-    mgu (,1,fi 2 ) (,1,fi 2 )    =
-    mgu (,1 !,2 ) (,1 !,2 )    =
-    mgn,fg    =
-    mgn,f g (S,C)    =
-    mgn,(; 1     ; 2 )    =
-    mgn α c,(S,C)    =
-    mgu ( S,1 ) ( S,2 ) (S,C)
-    id S C
-    mgn,( C α ) ([ α 7!,] ffi S,[ α 7!,] C n )
-    mgu α,(S,C)
-    id S C
-    mgu,fi (S,C)
-    ( mgu,1,1 ) ffi ( mgu,2,2 )
-    ( mgu,1,1 ) ffi ( mgu,2,2 )
-    id S C
-    mgn ( S,) ( S ) (S,C)
-    ( mgn,; 1 ) ffi ( mgn,; 2 )
-    if 9,: ( c,2 C α ) then mgu,fi (S,C)
-    else ( S,C [ α 7! C α 
-    f c,g ])
-    mgn ,c,(S,C) j 9 inst C ) ,~ :: c,~ 2 Ds
-    = let S = match,~ fi
-    (S,C) = mgu,( S,~ ) (S,C)
-    f,1 ::; 1,: : :,fi n ::; n g = S C
-    in ( mgn,1 ; 1 ( : : : ( mgn,n ; n (S,C))))
-    (and similarly for ! ,,, ())
+    mgu' α α                  = id_{S*C}
+    mgu' α,(S,C) | α ∉ fv (τ) = mgn τ (Cα) ([α->τ] o S,[α->τ] C\α)
+    mgu' ,α (S,C)             = mgu α (S,C)
+    mgu' () ()                = id S C
+    mgu' κ τ κ τ' (S,C)       = mgu τ τ' (S,C)
+    mgu' (τ1,τ2) (τ1,τ2)      = (mgu τ1 τ1') o ( mgu τ2 τ2')
+    mgu' (τ1->τ2) (τ1->τ2)    = (mgu τ1 τ1') o ( mgu τ2 τ2')
+
+    mgn τ {}                  = id_{S*C}
+    mgn τ {γ} (S,C)           = mgn' (Sτ) (Sγ) (S,C)
+    mgn τ (Γ1 ∪ Γ2)          = (mgn τ Γ1) o (mgn τ Γ2)
+
+    mgn' α c τ (S,C)          = if ∃τ: (c,2 C α) then mgu,fi (S,C)
+                                else ( S,C [ α 7-> C α f c,g ])
+    mgn' κ τ' c τ (S,C) | ∃ "inst C => κ ~τ' :: c,~τ" ∈ Ds
+                                = let S' = match ~τ' τ'
+                                    (S'',C'') = mgu τ (S' ~τ) (S,C)
+                                    {τ1 :: Γ1, ...,τn :: Γn} = S'C'
+                                in (mgn τ1 Γ1 (... (mgn τn Γn (S'',C''))))
+
+    (and similarly for ->, *, ())
 
 Figure 6: Unification and Normalization Algorithms
 
 To avoid such overgeneralization, we need to confine the do-
 main of generalization to only those instance assumptions
 generated while reconstructing the type of the let-definition.
-We define a new generalization function, tpgen , which, com-
-pared to gen , takes an extra context parameter, C , whose
+We define a new generalization function, `tpgen`, which, com-
+pared to `gen`, takes an extra context parameter, `C'`, whose
 instance assumptions will be excluded from generalization.
 Then in the algorithm, when doing generalization, we pass
-the initial context to tpgen as the second context argument
+the initial context to `tpgen` as the second context argument
 to restrict the domain of generalization. Thus only those
 newly generated instance assumptions will be generalized.
 
 Now we can proceed to state the soundness of our algorithm.
 
-**Theorem 5.4** If `tp ( e,A,S,C ) = ( fifi S,C )` then `S A,C `
-e :,`.
-
-**Corollary 5.5** (Soundness of `tp`) If `tp ( e,A,S,C ) = ( fifi S,C )` 
-then `S A,C ` e :,`.
-
-Ultimately, we will state the principal typing result.
+**Theorem 5.4** If `tp(e,A,S,C) = (τ,S,C)` then `S'A,C' ⊢' e :τ`.
 
 Together with Theorem 4.4, we have the following soundness
 result.
 
-**Theorem 5.6** Suppose that `S A,C ` e :,` and `(S,C) 
-( S 0,C 0 )`. Then `tp ( e,A,S 0,C 0 )` succeeds with `( fifi S,C )`, and
-there is a substitution R such that
+**Corollary 5.5** (Soundness of `tp`) If `tp(e,A,S,C) = (τ,S',C')` 
+then `S'A,C' ⊢ e : τ`.
 
-    S A = RSA,C `` RC,and,= R fi.
+Ultimately, we will state the principal typing result.
+
+**Theorem 5.6** Suppose that `S'A,C' ⊢' e : τ'` and `(S',C') ≼
+(S0,C0)`. Then `tp(e,A,S0,C0)` succeeds with `(τ,S,C)`, and
+there is a substitution `R` such that
+
+    S'A = RSA,   C' ⊦⊦ RC,   and,   τ'= Rτ.
 
 Together with Theorem 4.5, we have the completeness re-
 sult.
 
-**Corollary 5.7** (Completeness of `tp`) Suppose that `S A,C `
-e : [ and (S,C) ≼( S 0,C 0 )`. Then `tp ( e,A,S 0,C 0 )` succeeds
-with `( fifi S,C )`, and there is a substitution R such that
+**Corollary 5.7** (Completeness of `tp`) Suppose that `S'A,C' ⊢
+e : σ'` and `(S',C') ≼ (S0,C0)`. Then `tp(e,A,S0,C0)` succeeds
+with `(τ,S,C)`, and there is a substitution R such that
 
-    S A = RSA,and [ ≼C 0 R [
+    S'A = RSA,   and    σ' ≼C' Rσ
 
-where `( [fi C ~ ) = gen ( fifi SA,C )`.
+where `(σ, ~C) = gen(τ,SA,C)`.
 
 As a corollary, we have the following result for principal type
 schemes.
 
-**Corollary 5.8** Suppose that `tp ( e,A,S 0,C 0 ) = ( fifi S,C )` and
-`gen ( fifi SA,C ) = ( [fi C )`. Then [ is a principal type scheme
-for `e` under `SA` and `C`.
+**Corollary 5.8** Suppose that `tp(e,A,S0,C0) = (τ,S,C)` and
+`gen(τ,SA,C) = (σ,C')`. Then `σ` is a principal type scheme
+for `e` under `SA` and `C'`.
 
 ## 6 Ambiguity Revisited
 
@@ -941,45 +900,42 @@ As we have seen in the introduction, parametric type classes
 share with standard type classes the problem that type
 schemes might be ambiguous.
 
-**Definition.** Given a type scheme `σ = 8 α i ::; i :fi`, `let C α =
-{α i ::; i }` be the generic context of `[`.
+**Definition.** Given a type scheme `σ = ∀αi ::Γi.τ`, `let Cσ =
+{αi :: Γi}` be the generic context of `σ`.
 
 **Definition.** A generic type variable α in a type scheme `σ =
-8 α i :: ; i :fi` is (weakly) ambiguous if (1) `C α α 6 =  `, and (2)
-`α 62 C α ( fv,)`.
+∀αi :: Γi .τ` is (weakly) ambiguous if (1) `Cσ α ≠ ∅`, and (2)
+`α ∉ Cσ* (fv τ)`.
 
 Ambiguous type variables pose an implementation prob-
 lem. The usual approach to implement overloading poly-
 morphism is to pass extra dictionary arguments for every
 type class in the context of a function signature. Since the
 
-----
+<!-- page 9 -->
 
-page 9
+    tp (x,A,S,C)                = inst (S(Ax),S,C)
+    tp (e1 e 2,A,S,C)           = let (τ1,S1,C1) = tp (e1,A,S,C)
+                                        (τ2,S2,C2) = tp (e2,A,S1,C1)
+                                        α a fresh type variable
+                                        (S3,C3) = mgu τ1 (τ2->α) (S2,C2.α :: {})
+                                    in (S3 α, S3,C3)
+    tp (λx.e,A,S,C)             = let α a fresh type variable
+                                        (τ1,S1,C1) = tp (e1,A.x:α,S,C.α :: {})
+                                    in (S1 α ->τ1,S1,C1)
+    tp (let x = e1 in e2,A,S,C) = let (τ1,S1,C1) = tp (e1,A,S,C)
+                                        (σ,C2)     = tpgen (τ1,S1 A,C1,C)
+                                    in tp (e2,A.x:σ,S1,C2)
 
-----
-
-    tp ( x,A,S,C )    = inst ( S ( Ax ),S,C )
-    tp ( e 1 e 2,A,S,C )    = let (,1,S 1,C 1 ) = tp ( e 1,A,S,C )
-                                (,2,S 2,C 2 ) = tp ( e 2,A,S 1,C 1 )
-                                α a fresh type variable
-                                ( S 3,C 3 ) = mgu,1 (,2 ! α ) ( S 2,C 2 :α :: fg )
-                            in ( S 3 αfi S 3,C 3 )
-    tp (  x : e,A,S,C )    = let α a fresh type variable
-                                (,1,S 1,C 1 ) = tp ( e 1,A : x : αfi S,C :α :: fg )
-                            in ( S 1 α !,1,S 1,C 1 )
-    tp ( let x = e 1 in e 2,A,S,C ) = let (,1,S 1,C 1 ) = tp ( e 1,A,S,C )
-                                            ( [fi C 2 ) = tpgen (,1,S 1 A,C 1,C )
-                                    in tp ( e 2,A : x : [fi S 1,C 2 )
     where
-    inst ( 8 α ::; :[fi S,C )    = let β a fresh type variable
-                                    in inst ([ α 7! β ] [fi S,C :β ::;)
 
-    inst ( fifi S,C )           = ( fifi S,C )
+    inst (∀α :: Γ.σ,S,C)        = let β a fresh type variable
+                                    in inst ([α -> β] σ,S,C.β :: Γ)
+    inst (τ,S,C)                 = (τ,S,C)
 
-    tpgen ( [fi A,C,C )         = if 9 α 2 dom(C) n ( fv (A) reg (C)  dom(C)) then
-                                    tpgen ( 8 α :: C α:[fi A,C n,C )
-                                else ( [fi C )
+    tpgen (σ,A,C,C)              = if ∃α ∈ dom(C)\(fv(A) ∪ reg(C) ∪ dom(C)) then
+                                        tpgen(∀α :: C α.σ,A,C\α,C')
+                                    else (σ, C)
 
 Figure 7: Type Reconstruction Algorithm
 
@@ -1020,7 +976,6 @@ of the following observation: Because of restriction (b) in
 Section 3, the top-level type constructor of a type uniquely
 determines the dictionary that needs to be passed. Hence,
 if two types have the same top-level type constructor (but
-
 possibly different type arguments), their dictionaries share
 the same data constructor (but have possibly different pa-
 rameters). We can recognize equality of top-level type con-
@@ -1029,47 +984,42 @@ structors statically, using the following technique:
 We introduce a special "root" class `TC`, with one type pa-
 rameter but no operations. Every type is an instance of `TC`
 by virtue of the following instance declaration (which can be
-thought of being implicitely generated for every type ` ,`).
+thought of being implicitely generated for every type `κ τ`).
 
-    inst ,:: TC (  ())
+    inst κ τ:: TC (κ ())
 
-Eoffectively, `TC` is used to "isolate" the top-level type con-
+Effectively, `TC` is used to "isolate" the top-level type con-
 structor of a type. That is, if two types are related by a `TC`
 constraint, we know that they have the same top-level type
-constructor. The two types are then called similar :
+constructor. The two types are then called similar:
 
 **Definition.** Given a context `C`, let similarity in `C`, `(~C)`,
 be the smallest transitive and symmetric relation such that
-`C ``,1 :: TC,2` implies `,1 ; C ,2` .
+`C ⊦⊦ τ1 :: TC τ2` implies `τ1 ~C τ2` .
 
 `TC` is treated like every other type class during type re-construction. It is treated specially in the ambiguity check,
 allowing us to strengthen the ambiguity criterion:
 
-**Definition.** A generic type variable α in a type scheme `[` is
+**Definition.** A generic type variable α in a type scheme `σ` is
+strongly ambiguous if `α` is weakly ambiguous in `σ`, and, for
+every type `τ, α ~ Cσ` implies that `τ` is a strongly ambiguous
+type variable in `σ` .
 
-strongly ambiguous if `α` is weakly ambiguous in `[`, and, for
-every type `,, α ; C,` implies that `,` is a strongly ambiguous
-type variable in  `[` .
+The `TC` technique enables us to type map precisely [2](#2)
 
-The `TC` technique enables us to type map precisely [2]()
+    map : ∀a.∀b.∀t.
 
-
-    map : 8 a : 8 b : 8 t :
-
-        8 sa :: f Sequence a,TC t g :
-        8 sb :: f Sequence b,TC t g : ( a ! b ) ! sa ! sb
+        ∀sa :: {Sequence a,TC t}.
+        ∀sb :: {Sequence b,TC t}.(a -> b) -> sa -> sb
 
 ----
 
-2 Previously, it has been conjectured that this required second-
+<a name="2"></a>2 Previously, it has been conjectured that this required second-
 order unification.
 
 ----
 
-page 10
-
-----
-
+<!-- page 10 -->
 
 This states that `sa` and `sb` are instance types of Sequence
 with element types `a` and `b`, and that `sa` and `sb` share the
@@ -1080,33 +1030,33 @@ tor is initially on the meta-level, derived from the form of the
 compiler-generated instance declarations. We can formalize
 it in the type system as follows:
 
-Definition. A type scheme `σ = 8 α i :: ; i :fi` is in reduced
-form if none of the `; i` contains a `class TC ( ,)`, for arbitrary
-constructor `` and type `,`. We use `[ R` for type schemes in
+**Definition.** A type scheme `σ = ∀αi :: Γi.τ'` is in reduced
+form if none of the `Γi` contains a `class TC (κ τ)`, for arbitrary
+constructor `κ` and type `τ`. We use `σR` for type schemes in
 reduced form.
 
-Definition. Two type schemes `[1`, `[2` are equivalent under
-a context `C`, `[1 ' C [2`, iff for all reduced type schemes
-`[R`,
+**Definition.** Two type schemes `σ1`, `σ2` are equivalent under
+a context `C`, `σ1 ≃C σ2`, iff for all reduced type schemes
+`σR`,
 
-    [ R    ≼C [ 1 ,    [ R    ≼C [ 2 :
+    σR ≼C σ1    ⇔    σR ≼C σ2.
 
 We extend the definition of generic instance to include equiv-
-alence: A type scheme `[1` is a generic instance of a type
-scheme `[2` under a context C if there is a type scheme [
-s.t. `[1 ' C [`, and `[ ≼C [2` according to the definition of
+alence: A type scheme `σ1` is a generic instance of a type
+scheme `σ2` under a context `C` if there is a type scheme `σ'`
+s.t. `σ1 ≃C σ'`, and `σ' ≼C σ2` according to the definition of
 `≼C` in Section 3. This stronger notion of generic instance is
 important to check user-defined type signatures.
 
 **Example:** After substituting `List a` for `sa` , the type signa-
 ture of map would become:
 
-    8 sb :: f Sequence b,TC ( List ()) g : ( a ! b ) ! List a ! sb
+    ∀sb :: {Sequence b,TC (List())} : (a -> b) -> List a -> sb
 
 The usual definition of map for lists, on the other hand,
 would have type:
 
-    ( a ! b ) ! List a ! List b
+    (a -> b) -> List a -> List b
 
 Equivalence is necessesary to verify that the first type is an
 instance of the second.
@@ -1114,7 +1064,6 @@ instance of the second.
 To keep contexts short, we will use in the next section the
 similarity relation `(~)` directly, instead of its definition in
 terms of `TC`.
-
 
 ## 7 From Monads to Lists
 
@@ -1129,11 +1078,11 @@ context[Wad90]; hence it makes sense to have "Monad" and
 lowing enumeration shows on which levels in the hierarchy
 some familiar list operations are defined.
 
-    Monad: unit, join, map , monad comprehensions.
+**Monad:** unit, join, map, monad comprehensions.
 
-    Monad0: nil, filter , comprehensions with filters.
+**Monad0:** nil, filter, comprehensions with filters.
 
-    Sequence: cons, hd, tl, reverse, foldl, foldr, (++) .
+**Sequence:** cons, hd, tl, reverse, foldl, foldr, (++).
 
 The use of monads in functional programming was explored
 in [Wad90, Wad91]; for a motivation of the concept we refer
@@ -1158,7 +1107,7 @@ We formulate class Monad as follows:
         join :: (mma :: Monad ma, mma ~ ma)
                 => mma -> ma
     -- Default definitions:
-        map f xs  = xs `bind (unit . f)
+        map f xs  = xs `bind` (unit . f)
         join xss  = xss `bind` id
         bind xs f = join (map f xs)
 
@@ -1168,8 +1117,8 @@ and join. The default definitions in the class express one
 formulation in terms of the other; hence instances can al-
 ternatively define bind or map and join. To qualify for a
 monad, an instance has to satisfy three laws, which are not
-enforced by the type system. bind must be associative, with
-unit as left and right unit:
+enforced by the type system. `bind` must be associative, with
+`unit` as left and right unit:
 
     (m `bind` f) `bind` g = m `bind` \x -> f x `bind` g
     \x -> unit x `bind` f = f
@@ -1179,13 +1128,13 @@ Lists form a monad, as witnessed by the following instance
 declaration, and a check that monad laws hold:
 
     inst List a :: Monad a where
-        unit x          = flx]
-        map f fl] xs    = fl]
+        unit x          = [x]
+        map f [] xs     = []
         map f (x:xs)    = f x : map f xs
-        join fl]        = fl]
-        join (xs::xss) = xs ++ join xss
+        join []         = []
+        join (xs::xss)  = xs ++ join xss
 
-Another example of a monad are \reply"-types, as witnessed
+Another example of a monad are "reply"-types, as witnessed
 by:
 
     data Maybe a = Some a | None
@@ -1199,18 +1148,14 @@ As a consequence, code can now be written that works on
 lists as well as on reply types or any other monad instance.
 In particular, we can use the list comprehension notation
 
-----
+<!-- page 11 -->
 
-page 11
+in each case, by applying the standard translation to `unit`,
+`map` and `join`:
 
-----
-
-in each case, by applying the standard translation to unit ,
-map and join :
-
-    [ t ]           = ^ unit t
-    [ t j g 1,g 2 ] = ^ join [ [ t j g 2 ] j g 1 ]
-    [ t j x  e ]   = ^ map ( x : t ) e
+    [t]           ≙ unit t
+    [t | g1,g2]   ≙ join [[t | g2] | g1]
+    [t | x <- e]  ≙ map (x : t) e
 
 Here, `t` and `e` are terms, `x` is `a` variable, and `g1` and `g2` are
 generators `x <- e`.
@@ -1227,17 +1172,17 @@ list comprehensions with filters can be defined. The stan-
 dard translation functions are (`p` is a filter, i.e. a Boolean
 term):
 
-    []      = ^ nil
-    [t | p] = ^ filter p (unit t)
+    []      ≙ nil
+    [t | p] ≙ filter p (unit t)
 
 Lists and reply types both have zeros, as witnessed by:
 
     instance List a :: Monad0 a where
-        nil             = fl]
-        filter p fl]    = fl]
-        filter p (x:xs) = if p x then
-                            x : filter p xs
-                          else filter p xs
+        nil               = []
+        filter p []       = []
+        filter p (x:xs)   = if p x then
+                                x : filter p xs
+                            else filter p xs
 
     instance Maybe a : Monad0 a where
         nil               = None
@@ -1265,18 +1210,18 @@ form themselves a monad with zero, as witnessed by the
 following instance declarations.
 
     inst Parser a :: Monad a where
-        unit x      = P (\i -> fl(x, i)])
+        unit x      = P (\i -> [(x, i)])
         map f (P p) = P (\i ->
-                        fl(f x, i') | (x, i') <- p i])
+                            [(f x, i') | (x, i') <- p i])
         join (P pp) = P (\i ->
-                        fl(x, i'') | (P p, i') <- pp i,
-                                    (x, i'') <- p i'])
+                            [(x, i'') | (P p, i') <- pp i,
+                                        (x, i'') <- p i'])
 
     inst Parser a :: Monad0 a where
-        nil             = P (\i -> fl])
+        nil             = P (\i -> [])
         filter b (P p)  = P (\i ->
-                                fl(x, i') | (x, i') <- p i,
-                                    b x])
+                                [(x, i') | (x, i') <- p i,
+                                        b x])
 
 Note that we have overloaded the comprehension notation.
 The monad comprehensions in the previous two instance
@@ -1287,31 +1232,32 @@ nator:
 
     sym         :: Parser Char
     sym         = P p
-                  where p Nil         = fl]
-                        p (Cons c cs) = fl(c, cs)]
+                    where p Nil         = []
+                        p (Cons c cs) = [(c, cs)]
 
     lookahead   :: Parser Char
     lookahead   = P p
-                  where p Nil = fl]
-                        p cs  = fl(hd cs, cs)]
+                    where p Nil = []
+                        p cs  = [(hd cs, cs)]
 
     (|||)       :: Parser a -> Parser a -> Parser a
     P p ||| P q = P (\i -> case p i of
-                              None   => q i
+                                None   => q i
                             | Some x => Some x)
 
 A deterministic parser for lambda terms can then be written
 as follows:
 
     data Term = Lambda Term Term
-              | Apply Term Term
-              | Id Char
-              | Error
+                | Apply Term Term
+                | Id Char
+                | Error
 
     term     :: Parser Term
     term     =  [Lambda x y | '\' <- sym,
-                              x <- ident, y <- term]
+                                x <- ident, y <- term]
             ||| fly | x <- aterm, y <- aterms x]
+
     aterm    :: Parser Term
     aterm    = [x | '(' <- sym, x <- aterm']
             ||| ident
@@ -1322,9 +1268,9 @@ as follows:
 
     aterms   :: Term -> Parser Term
     aterms x =  [z | c <- lookahead,
-                     'a' <= c && c <= 'z' || c = '(',
-                     y <- aterm,
-                     z <- aterms (Apply x y)]
+                    'a' <= c && c <= 'z' || c = '(',
+                    y <- aterm,
+                    z <- aterms (Apply x y)]
             ||| [x]
 
     ident    :: Parser Term
@@ -1335,11 +1281,7 @@ The defined parser is determinstic; it never backtracks.
 Therefore, parse failure has to be treated differently accord-
 ing to whether it occurs at the start of a production, or in
 
-----
-
-page 12
-
-----
+<!-- page 12 -->
 
 the middle. If failure occurs at the start of a production,
 it signals that another alternative should be tried. Failure
@@ -1357,7 +1299,6 @@ interface between parsing and abstract tree generation. The
 resulting parser resembles an attribute grammar with both
 synthesized and inherited attributes (see the definition of
 aterm).
-
 
 ## 8 Conclusion
 
@@ -1392,7 +1333,7 @@ optimization techniques can be used [CU90].
 
 ## References
 
-[CCH+89] P. Canning, W. Cook, W. Hill, W. Olthoff, and
+[CCH+89] P. Canning, W. Cook, W. Hill, W. Olthff, and
 J. Mitchell. F-bounded polymorphism for object-
 oriented programming. In Proc. ACM Conf. Func-
 tional Programming Languages and Computer Archi-
@@ -1466,7 +1407,7 @@ enteenth Annual ACM Symp. on Principles of Pro-
 gramming Languages, pages 355-366, San Franscico,
 CA, January 1990.
 
-[VS91] Dennis M. Volpano and Geoffery S. Smith. On the
+[VS91] Dennis M. Volpano and Geffery S. Smith. On the
 complexity of ML typability and overloading. In
 J. Hughes, editor, Proceedings of Functional Pro-
 gramming and Computer Architecture, pages 15-28.
