@@ -689,8 +689,7 @@ The `TC` technique enables us to type map precisely [2](#2)
 
 ----
 
-<a name="2"></a>2 Previously, it has been conjectured that this required second-
-order unification.
+<a name="2"></a>2 Previously, it has been conjectured that this required second-order unification.
 
 ----
 
