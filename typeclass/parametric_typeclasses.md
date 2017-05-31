@@ -1,57 +1,57 @@
-# Parametric Type Classes
+# パラメトリック型クラス
 
 <!-- TODO>>> ∀∪⊎∈∉≠⊆<⊢⊦⊦≼≥>⇒`Γ`Δ`α`β`γ`σ`τ`λ`κ`≃ -->
 
-(Extended Abstract)
+（拡大要約）
 
-Kung Chen, Paul Hudak, Martin Odersky
+カン・チェン、ポール・フダク、マーティン・オデスキー
 
-Yale University, Department of Computer Science,
+イェール大学、コンピュータサイエンス学科、
 
-Box 2158 Yale Station, New Haven, CT 06520
+Box 2158 Yale Station、New Haven、CT 06520
 
-ACM Conf. on LISP and Functional Programming, June 1992
+ACM Conf. LISPと関数型プログラミング、1992年6月
 
-## Abstract
+## 要約
 
-We propose a generalization to Haskell's type classes where a class can have type parameters besides the placeholder variable.
-We show that this generalization is essential to represent container classes with overloaded data constructor and selector operations.
-We also show that the resulting type system has principal types and present unification and type reconstruction algorithms.
+我々は、クラスがプレースホルダ変数の他に型パラメータを持つことができる Haskell の型クラスへの一般化を提案する。
+オーバーロードされたデータコンストラクタとセレクタ操作でコンテナクラスを表すには、この一般化が不可欠であることを示します。
+また、得られた型システムには主要型と現在の統一型再構成アルゴリズムがあります。
 
-## 1 Introduction
+## 1 はじめに
 
-Haskell's type classes provide a structured way to introduce overloaded functions, and are perhaps the most innovative (and somewhat controversial) aspect of the language design [HJW91].
-Type classes permit the definition of overloaded operators in a rigorous and (fairly) general manner that integrates well with the underlying Hindley-Milner type system.
-As a result, operators that are monomorphic in other typed languages can be given a more general type.
-Examples include the numeric operators, reading and writing of arbitrary datatypes, and comparison operators such as equality, ordering, etc.
+Haskellの型クラスは、オーバーロードされた関数を導入するための構造化された方法を提供し、おそらく言語設計[HJW91]の最も画期的な（やや議論の多い）側面です。
+型クラスは、オーバーロードされた演算子の定義を、基本的なHindley-Milner型システムと完全に統合された、厳密かつ（かなり）一般的な方法で行うことを可能にします。
+その結果、他の型付き言語で単相性の演算子には、より一般的な型を与えることができます。
+例には、数値演算子、任意のデータ型の読み書き、および等価、順序付けなどの比較演算子が含まれます。
 
-Haskell's type classes have proven to be quite useful.
-Most notably missing, however, are overloaded functions for data selection and construction.
-Such overloaded functions are quite useful, but the current Haskell type system is not expressive enough to support them (of course, no other language that we know if is capable of supporting them in a type-safe way either).
-
-----
-
-\* This research was supported by DARPA through ONR contracts
-N00014-90-C-0024 and N00014-91-J-4043.
+Haskellの型クラスは非常に有用であることが証明されています。
+しかし、特に欠けているのは、データの選択と構築のためにオーバーロードされた機能です。
+このようなオーバーロードされた関数は非常に便利ですが、現在のHaskell型システムは、それらをサポートするのに十分な表現力ではありません（もちろん、タイプセーフな方法でそれらをサポートできるかどうかわかっている他の言語はありません）。
 
 ----
 
-## A Motivating Example
+\* この研究は、DARPAとONRの契約によって支援されました
+N00014-90-C-0024およびN00014-91-J-4043である。
 
-As a simple example, consider the concept of a sequence :
-a linearly ordered collection of elements, all of the same type.
-There are at least two reasonable implementations of sequences, linked lists and vectors.
-There is an efficiency tradeoff in choosing one of these representations:
-lists support the efficient addition of new elements, whereas vectors support efficient random (including parallel) access.
-Currently the choice between representations is made at the programming language level.
-Most functional languages provide lists as the "core" data structure (often with special syntax to support them), relegating arrays to somewhat of a second-class status.
-Other languages, such as Sisal and Nial, reverse this choice and provide special syntax for arrays instead of lists (this often reflects their bias toward parallel and/or scientific computation).
+----
 
-Of course, it is possible to design a language which places equal emphasis on both "container structures".
-However, a naive approach faces the problem that every function on sequences has to be implemented twice, once for lists and once for arrays.
-The obvious cure for this name-space pollution and duplicated code is overloading.
-In our context, that means specifying the notion of a sequence as a type class with (at least) lists and vectors as instance types.
-Using Haskell-like notation, this would amount to the following declarations:
+## 動機づけの例
+
+簡単な例として、シーケンスの概念を考えてみましょう。
+すべて同じ型の要素の線形に順序付けられたコレクションです。
+シーケンス、リンクリスト、およびベクトルの少なくとも2つの合理的な実装があります。
+これらの表現の1つを選択する際の効率のトレードオフがあります。
+リストは新しい要素の効率的な追加をサポートし、ベクトルは効率的なランダム（並列）アクセスをサポートします。
+現在、表現の選択はプログラミング言語レベルで行われています。
+ほとんどの関数型言語はリストを「コア」データ構造体（しばしばそれらをサポートする特殊な構文）として提供し、配列をやや第二級の状態にします。
+SisalやNialなどの他の言語では、この選択を逆にし、リストの代わりに配列の特殊な構文を提供します（これは、並列および/または科学計算への偏見を反映することが多い）。
+
+もちろん、両方の "コンテナ構造"に等しく重点を置く言語を設計することは可能です。
+しかし、単純なアプローチでは、シーケンスのすべての関数をリストのために1回、配列のために1回、2回実装しなければならないという問題に直面しています。
+この名前空間汚染と重複したコードの明白な治療法は、過負荷です。
+我々の文脈では、シーケンスの概念を（少なくとも）リストとベクトルをインスタンス型として持つ型クラスとして指定することを意味します。
+Haskellのような表記を使用すると、これは次の宣言になります。
 
     class Sequence a s
     where cons :: a -> s -> s
@@ -68,179 +68,179 @@ Using Haskell-like notation, this would amount to the following declarations:
         nth  = vecNth
         len  = vecLen
 
-This defines the overloaded constructor cons, overloaded indexing selector nth, and a length function len.
-(Note the resemblance to a "container class" in object-oriented programming.)
+これは、オーバーロードされたコンストラクタcons、オーバーロードされたインデックスセレクタnth、およびlength関数lenを定義します。
+（オブジェクト指向プログラミングの "コンテナクラス"と似ていることに注意してください）。
 
-The only problem with this code is that it is not valid Haskell, since Haskell's type classes are permitted to constrain only one type, thus ruling out a declaration such as "class Sequence a s".
-In essence, this restriction forces overloaded constructors and selectors to be monomorphic
-(which makes them fairly useless).
+このコードの唯一の問題は、Haskellの型クラスが1つの型だけを制約することが許されているため、 "class Sequence a s"のような宣言を排除するため、Haskellが有効でないことです。
+本質的には、この制限により、オーバーロードされたコンストラクタとセレクタは強制的に単調
+（それは彼らをかなり無駄にする）。
 
 <!-- page 2 -->
 
-Even if this restriction did not exist, there is another problem with the current type class mechanism, which can be demonstrated through the typing of len :
+この制限が存在しない場合でも、現在の型クラスのメカニズムには別の問題があります。これは、lenの型指定によって示されます。
 
     Sequence a s => s -> Int
 
-Even if multi-argument type classes were allowed, this qualified type would still not be valid Haskell since it is ambiguous :
-Type variable a occurs in the context (Sequence a s), but not in the type-part proper (s->Int).
-Ambiguous types need to be rejected, since they have several, possibly conflicting, implementations.
+複数引数型のクラスが許されていても、この修飾された型はあいまいなのでHaskellでは有効ではありません：
+型変数aはコンテキスト（Sequence a s）で出現しますが、型部分固有ではありません（s→Int）。
+あいまいな型は、矛盾する可能性がある実装が複数あるため、拒否する必要があります。
 
-A related, but harder, problem arises if we extend our example to include an overloaded map function.
-Having such a function is attractive, since together with join and filter, it allows us to generalize (i.e. overload) the notion of a "list comprehension" to include all instances of Sequence, not just lists.
-In Section 7 we elaborate on this, extending it further to comprehensions for arbitrary instances of class monad, such as bags and lists.
-This seems quite natural since, after all, the domain of sets is where the "comprehension" notation came from.
-However, a problem becomes evident as soon as we attempt to give a type for map.
+オーバーロードされたマップ関数を含むように例を拡張すると、関連するがより困難な問題が発生します。
+このような関数を持つことは、結合およびフィルタと共に、リストだけでなくシーケンスのすべてのインスタンスを含むように「リストの理解」の概念を一般化（すなわち過負荷）することを可能にするので、魅力的である。
+第7節では、これを詳しく説明し、バッグやリストなどのクラスモナドの任意のインスタンスについての理解にさらに拡張します。
+結局のところ、セットの領域は「理解」表記がどこから来たかということから、これはかなり自然なようです。
+しかし、マップの型を指定しようとするとすぐに問題が明らかになります。
 
     map: (Sequence a sa, Sequence b sb)
         => (a -> b) -> sa -> sb.
 
-This type is too general, since it would admit also implementations that take one sequence type (e.g. a list) and return another (e.g. a vector).
-Generality is costly in this context since it again leads to ambiguity.
-For instance, the function composition `(map f . map g)` would be ambiguous; the type of `map g`, which does not appear in the type of the enclosing expression, can be either a list or a vector.
+このタイプはあまりにも一般的です。これは、1つのシーケンスタイプ（例えばリスト）を取り、別のシーケンス（例えばベクトル）を返す実装も認められるためです。
+一般性は、この文脈では再び曖昧さにつながるため、費用がかかる。
+例えば、関数のコンポジション `（map f。map g）`はあいまいです。囲み式の型に現れない `map g`の型は、リストかベクトルのどちらかです。
 
-What is needed is some way to specify that map returns the same kind of sequence as its argument, but with a possibly different element type.
-A nice way to notate this type would be:
+必要なのは、そのマップが引数と同じ種類のシーケンスを返しますが、要素の型が異なる可能性があることを指定する方法です。
+このタイプを通知する良い方法は次のとおりです：
 
     map: Sequence (s a) => (a -> b) -> s a -> s b
 
-where s is a variable which ranges over type constructors instead of types.
-To accommodate this, Sequence should now be viewed as a type constructor class instead of a type class.
-However, because the instance relationships are now expressed at the functor-level, there is the danger (as has been conjectured in [Lil91]) that second order unification is needed to reconstruct types, thus rendering the system undecidable.
+sは型の代わりに型のコンストラクタに渡る変数です。
+これに対応するために、Sequenceは型クラスの代わりに型コンストラクタクラスとして表示されるようになりました。
+しかし、インスタンスの関係はファンクタレベルで表現されるため、タイプを再構築するために二次統一が必要であり、システムを決定不能にする危険性がある（Lil91で推測されているように）。
 
-## Our Contributions
+## 私たちの貢献
 
-To solve these problems, we introduce the notion of parametric type classes as a significant generalization of Haskell's type classes.
-Our contributions can be summarized as follows:
+これらの問題を解決するために、Haskellの型クラスの重要な一般化としてパラメトリック型クラスの概念を導入する。
+私たちの貢献は以下のように要約できます：
 
-1. Parametric type classes can have type arguments in addition to the constrained type variable, and thus are able to express classes such as Sequence defined earlier.
+1.パラメトリック型クラスは、制約付き型変数に加えて型引数を持つことができるため、先に定義したSequenceなどのクラスを表現することができます。
 
-2. Through a simple encoding scheme, we show that parametric type classes are able to capture the notion of "type constructor variables," thus permitting the definition of overloaded operators such as map.
+単純な符号化スキームを介して、パラメトリック型のクラスは "型コンストラクタ変数"という概念を取り込めるため、マップなどのオーバーロードされた演算子を定義できることを示しています。
 
-3. Parametric type classes are a conservative extension of Haskell's type system:
-    If all classes are parameterless, the two systems are equivalent.
+3.パラメトリック型クラスは、Haskellの型システムを控えめに拡張したものです。
+     すべてのクラスにパラメータがない場合、2つのシステムは同等です。
 
-4. We prove that our system is decidable, and provide an effective type inference algorithm.
+4.我々のシステムは決定可能であると証明し、有効な型推論アルゴリズムを提供する。
 
-5. As a concrete demonstration of the power and practicality of the system, we formulate classes monad and monad0 that allow us to generalize the concept of list comprehensions to monads.
-    This is done using the standard translation rules for list comprehensions; no special syntax is needed.
+5.システムのパワーと実用性の具体的なデモンストレーションとして、モナドへのリストの理解の概念を一般化することを可能にするクラスのモナドとモナドを定式化する。
+     これは、リスト内包表記の標準翻訳ルールを使用して行われます。 特殊な構文は必要ありません。
 
-## Related Work
+## 関連作業
 
-Wadler and Blott [WB89] introduced type classes and presented an extension of the Hindley-Milner type system that incorporates them.
-They proposed a new form of type, called a predicated type, to specify the types of overloaded functions.
-A quite similar notion was used under the name of category in the Scratchpad II system for symbolic computation [JT81].
-Also related are Kaes' work on parametric overloading [Kae88], F-bounded polymorphism in objectoriented programming [CCH+89], and [Rou90].
-The type class idea was quickly taken up in the design of Haskell.
-Its theoretical foundation, however, took some time to develop.
-The initial approach of [WB89] encoded Haskell's sourcelevel syntax in a type system that was more powerful than Haskell itself, since it could accommodate classes over multiple types.
-This increased expressiveness can, however, lead to undecidability, as has been investigated by Volpano and Smith [VS91].
-Indeed, the system published in [WB89] is apparently undecidable.
+WadlerとBlott [WB89]は型クラスを導入し、それらを組み込んだHindley-Milner型システムの拡張を示しました。
+彼らは、過負荷関数の型を指定するために、述語型と呼ばれる新しい型の型を提案しました。
+シンボリック計算のためのScratchpad IIシステムのカテゴリの名前の下で全く同じ概念が使用された[JT81]。
+パラメトリックオーバーロード[Kae88]、オブジェクト指向プログラミング[CCH + 89]、および[Rou90]におけるF境界限定多形性に関するKaesの作業も関連しています。
+タイプクラスの考え方は、ハスケルの設計ですぐに取り上げられました。
+しかし、その理論的基盤は発展するのに時間がかかりました。
+[WB89]の最初のアプローチは、Haskell自体よりも強力な型システムにおけるHaskellのソースレベル構文をコード化しました。これは、複数の型にまたがるクラスを収容できるからです。
+しかし、この表現力の向上は、VolpanoとSmith [VS91]によって検討されているように、決定不能につながる可能性がある。
+確かに、[WB89]に掲載されたシステムは明らかに決めることができない。
 
-The source-level syntax of Haskell, on the other hand, has a sufficient number of static constraints to guarantee decidability.
-This was shown in [NS91], where Nipkow and Snelting modeled type classes in a three-level system of values, types, and partially ordered sorts.
-In their system, classes correspond to sorts and types are sorted according the class hierarchy.
-Order-sorted unification [MGS89] is used to resolve overloading in type reconstruction.
-The use of an order-sorted approach is mathematically elegant, yet we argue that the ordering relation between classes is a syntactic mechanism and thus not necessary for developing a type system for type classes.
-Furthermore, it is not obvious how to extend their system to incorporate our proposed extensions.
+一方、Haskellのソースレベルの構文には、デシジョン可能性を保証するのに十分な数の静的制約があります。
+これは[NS91]に示されています.NipkowとSneltingは、3レベルの値、型、および部分的に順序付けされたソートの型クラスをモデル化しました。
+それらのシステムでは、クラスはソートに対応し、型はクラス階層に従ってソートされます。
+順序のソートされた統合[MGS89]は、型の再構築時のオーバーロードを解決するために使用されます。
+順序ソート手法の使用は数学的にはエレガントですが、クラス間の順序関係は構文メカニズムであり、タイプクラスの型システムを開発するためには必要ではないと主張しています。
+さらに、提案された拡張を組み込むためにシステムを拡張する方法は明らかではない。
 
-Work was also done to extend the type class concept to predicates over multiple types.
-Volpano and Smith [VS91] looked into modifications of the original system in [WB89] to ensure decidability of type reconstruction and to get a sharper notion of well-typed expressions.
-Jones [Jon91, Jon92b] gave a general framework for qualified types.
-His use of predicate sets is at first sight quite similar to our context-constrained instance theory.
-The main difference between the two approaches lies in our use of normal forms (Jones does not address this issue) and our distinction between constrained and dependent variables.
-This distinction allows us to solve the ambiguity problems previously encountered in definitions of container classes.
+タイプ・クラスの概念を複数のタイプにわたる述語に拡張する作業も行われました。
+VolpanoとSmith [VS91]は、タイプ再構成の決定可能性を保証し、よくタイプされた表現のシャープな概念を得るために、[WB89]の元のシステムの修正を検討しました。
+Jones [Jon91、Jon92b]は、修飾型の一般的なフレームワークを提供しました。
+彼の述語セットの使用は、私たちの文脈制約型インスタンス理論に非常によく似ています。
+2つのアプローチの主な違いは、通常のフォーム（ジョーンズはこの問題に対処していない）と制約付き変数と従属変数の区別です。
+この違いにより、コンテナクラスの定義で以前に遭遇したあいまい性の問題を解決できます。
 
 <!-- page 3 -->
 
-The rest of this paper is organized as follows: Section 2 introduces parametric type classes.
-Section 3 presents them formally, in a non-deterministic type system.
-Section 4 presents an equivalent syntax-directed system that bridges the gap between the non-deterministic system and a type reconstruction algorithm.
-Section 5 discusses type reconstruction and unification.
-Section 6 explains when a type scheme is ambiguous.
-Section 7 applies our system in defining monads as parametric classes.
-Section 8 conclues.
+本論文の残りの部分は以下のように構成されている。第2節ではパラメトリック型のクラスを紹介する。
+第3節では、非決定論的な型のシステムにおいて正式にそれらを提示する。
+セクション4は、非決定論的システムとタイプ再構成アルゴリズムとの間のギャップを埋める同等の構文指向システムを提示する。
+5章では、型の再構成と統一について述べる。
+第6章では、タイプスキームがあいまいであるときについて説明します。
+第7節では、モナドをパラメトリッククラスとして定義する際にシステムを適用する。
+セクション8は結論づけられる。
 
-## 2 Parametric Type Classes
+## 2 パラメトリック型クラス
 
-A parametric type class is a class that has type parameters in addition to the placeholder variable which is always present in a class declaration.
-To distinguish between placeholder and type parameters, we write the placeholder in front of the class, separated by an infix (::).
-For instance:
+パラメトリック型クラスは、クラス宣言に常に存在するプレースホルダ変数に加えて型パラメータを持つクラスです。
+プレースホルダと型パラメータを区別するために、クラスの前にプレースホルダを挿入（:)で区切って記述します。
+例えば：
 
     class t :: Eq where
     class s :: Sequence a where
 
-The first definition introduces a class without parameters; in Haskell this would be written class `Eq t`.
-The second definition defines a type class Sequence with one parameter; this cannot be expressed in standard Haskell.
-The infix `(::)` notation is also used in instance declarations and contexts.
+最初の定義では、パラメータを持たないクラスが導入されています。ハスケルではこれはクラス `Eq t`と書かれます。
+2番目の定義は、1つのパラメータを持つ型クラスSequenceを定義します。これは標準のHaskellでは表現できません。
+中置の `（：:)`表記は、インスタンスの宣言と文脈でも使われます。
 
-The two instance declarations of Sequence presented in the last section would now be written:
+最後のセクションで提示されたSequenceの2つのインスタンス宣言は次のようになります。
 
     inst List a   :: Sequence a where ...
     inst Vector a :: Sequence a where ...
 
-In an instance declaration, of form `T :: Sequence a`, say, the type `T` must not be a variable.
-Furthermore, if two types `T1` and `T2` are both declared to be instances of Sequence, then their top-level type constructors must be different.
-Thus, the instance declarations given above are both valid.
-On the other hand,
+`T :: Sequence a`という形式のインスタンス宣言では、` T`型は変数であってはなりません。
+さらに、「T1」と「T2」の2つの型が両方ともSequenceのインスタンスとして宣言されている場合、その最上位型のコンストラクタは異なる必要があります。
+したがって、上記のインスタンス宣言は両方とも有効です。
+一方、
 
     inst a :: Sequence (List a)
 
-would violate the first restriction, and
+最初の制限に違反し、
 
     inst List Int :: Sequence Int
     inst List Char :: Sequence Char
 
-would violate the second restriction.
-Effectively, these restrictions ensure that in a proof of an instance relationship every step is determined by the class name and the type in placeholder position.
-The class parameter types, on the other hand, depend on the placeholder type.
+2番目の制限に違反します。
+効果的には、これらの制約により、インスタンス関係の証明では、すべてのステップがクラス名とプレースホルダ位置の型によって決まることが保証されます。
+一方、クラスパラメータ型は、プレースホルダ型によって異なります。
 
-One consequence of these restrictions is that there is at most one way to deduce that a type is an instance of a class.
-This is necessary to guarantee _coherence_.
-It is not sufficient, since types might be ambiguous; see Section 6 for a discussion.
-Another consequence is that sets of instance predicates are now subject to a _consistency_ criterion: If we have both `T :: Sequence a` and `T :: Sequence b` then we must have `a = b`.
-That is, `a = b` is a logical consequence of the two instance predicates and the restrictions on instance declarations.
-The type reconstruction algorithm enforces consistency in this situation by unifying `a` and `b`.
+これらの制限の1つの結果は、型がクラスのインスタンスであることを推論する方法が1つしかないということです。
+これは_coherence_を保証するために必要です。
+タイプがあいまいなので十分ではありません。 6章を参照してください。
+もう一つの結果は、インスタンス述語のセットが現在_consistency_ criterionの対象になっているということです： `T :: Sequence a`と` T :: Sequence b`の両方を持つ場合、 `a = b`を持たなければなりません。
+つまり、 `a = b`は2つのインスタンス述語の論理的帰結であり、インスタンス宣言に対する制限です。
+型再構築アルゴリズムは、この状況において、「a」と「b」を統一することによって一貫性を強制する。
 
-Enforcing consistency early helps in keeping types small.
-Otherwise, we could get many superfluous instance constraints in types.
-As an example, consider the composition `(tl . tl)`, where tl is typed `(s :: Sequence a) => s -> s`.
-Without the consistency requirement, the most general type for the composition would be (`s :: Sequence a, s :: Sequence b) => s -> s`.
-Composing `tl n` times would yield a type with `n` Sequence constraints, all but one being superfluous.
+整合性を早期に適用すると、タイプを小さく保つのに役立ちます。
+さもなければ、タイプに多くの余分なインスタンス制約を与えることができます。
+例として、 `（tl。tl）`という構成を考えてみましょう。ここで、tlは `（s :: Sequence a）=> s - > s`です。
+一貫性の要求がなければ、コンポジションの最も一般的な型は（ `s :: Sequence a、s :: Sequence b）=> s - > s`です。
+`tl n '回合成すると、` n`個のシーケンス制約を持つ型が生成されます。
 
-## 3 The Type System of Parametric Classes
+## 3 パラメトリッククラスの型システム
 
-This section presents our type system formally.
-We first define the abstract syntax of classes and types in the context of a small example language.
-We then explain formally what it means for a type to be an instance of a class.
-Based on these definitions, we define a non-deterministic type system with the same six rules as in [DM82], but with parametric type classes added.
-We claim that, in spite of its added generality, the system is actually simpler than previously published type systems for standard Haskell.
+このセクションでは、正式にタイプシステムを紹介します。
+最初に、小さなサンプル言語のコンテキストで、クラスと型の抽象構文を定義します。
+次に、型がクラスのインスタンスであることを正式に説明します。
+これらの定義に基づいて、我々は[DM82]と同じ6つの規則を持つ非決定論的型システムを定義するが、パラメトリック型クラスを追加する。
+一般性が増したにもかかわらず、システムは実際には標準のHaskellの以前に公開されたタイプのシステムよりも単純であると主張する。
 
-For lack of space, we refer the reader to [COH92] for detailed proofs of the results presented in this and the following sections.
+スペースが不足しているため、このセクションと次のセクションで示されている結果の詳細な証明については、読者に[COH92]を参照してください。
 
-### Syntax
+### 構文
 
-The example language is a variant of Mini-Haskell [NS91], augmented with parameterized type classes.
-Its abstract syntax and types are shown in Figure 1.
-A parametric type class `γ` in this syntax has the form `c τ`, where `c` is a class constructor, corresponding to a class in Haskell, and `τ` is a type.
-Classes with several parameters are encoded using tuple types, e.g.
-`c (α,β)`.
-Parameterless classes are encoded using the unit type, e.g.
-`Eq()`.
-The instance relationship between a type and a type class is denoted by an `infix (::);` the predicate `τ' :: c τ` reads `τ'` is an instance of `c τ`.
+サンプル言語は、パラメータ化された型クラスで補完されたMini-Haskell [NS91]の変種です。
+その抽象構文とタイプを図1に示します。
+この構文におけるパラメトリック型クラス「γ」は、「cτ」の形式を有し、ここで「c」はハスケルのクラスに対応するクラスコンストラクタであり、「τ」は型である。
+いくつかのパラメータを持つクラスはタプル型を使用してエンコードされます。
+`c（α、β）`である。
+パラメータのないクラスは、ユニットタイプを使用して符号化される。
+`Eq（）`
+型と型クラスとの間のインスタンス関係は `inix（：:);述語`τ ':: cτは ``τ``が `cτ`のインスタンスです。
 
-One simplification with respect to standard Haskell concerns the absence of a hierarchy on classes.
-The subclass/superclass relationship is instead modeled by class sets `Γ`.
-Consider for instance the class `Eq ()` of equality types in Haskell and its subclass `Ord()` of ordered types.
-We can always represent `Ord()` as a set of two classes, `{Eq (),Ord ()}`, where `Ord'` contains only operations `(<,≤)`, which are defined in `Ord` but not in `Eq`.
-Translating all classes in a program in this way, we end up with sets over a flat domain of classes.
-This shows that we can without loss of generality disregard class hierarchy in the abstract syntax.
+標準的なHaskellに関する1つの単純化は、クラスに階層がないことに関係しています。
+代わりに、サブクラス/スーパークラスの関係は、クラスセット「Γ」によってモデル化される。
+たとえば、Haskellの等価型クラス `Eq（）`と、順序付けられた型の `Ord（）`というサブクラスを考えてみましょう。
+`Ord（）`は `Ord（）`で定義された `（<、≤）`演算のみを含む `{Eq（）、Ord `Eq`ではなく。
+このようにしてプログラム内のすべてのクラスを翻訳すると、クラスのフラットなドメイン上のセットで終わります。
+これは、一般性を失うことなく、抽象構文でクラス階層を無視できることを示しています。
 
-### Instance Theories
+### インスタンス理論
 
-In this section, we make precise when a type `τ` is an instance of a class set `Γ`, a fact which we will express `τ::Γ`.
-Clearly, the instance relation depends on the instance declarations `D`s in a program.
-We let these declarations generate a theory whose sentences are instance judgments of the form `C ⊦⊦ τ::γ`.
-An instance judgment is true in the theory iff it can be deduced using the inference rules in Figure 2.
+このセクションでは、型 `τ`がクラス集合`Γ`のインスタンスであるときに、 `τ::Γ`を表現するという事実を正確にします。
+明らかに、インスタンス関係は、プログラム中のインスタンス宣言 `D 'に依存する。
+これらの宣言は、文が `C⊦⊦τ::γ`のインスタンス判定であるという理論を生成させます。
+インスタンスの判断は、図2の推論ルールを使用して推論することができる場合には、理論に当てはまります。
 
 <!-- page 4 -->
 
@@ -258,7 +258,7 @@ An instance judgment is true in the theory iff it can be deduced using the infer
                         |  inst C ⇒ τ::γ where x = e in p
                         |  e
     
-Figure 1: Abstract Syntax of Mini-Haskell+
+図1: Mini-Haskell+ の抽象構文
 
     C ⊦⊦ α :: γ     (α::{...γ...} ∈ C)
 
@@ -274,121 +274,121 @@ Figure 1: Abstract Syntax of Mini-Haskell+
     ------------------------------------ (n ≥ 0)
     C ⊦⊦ {τ1::Γ1,  ...  ,fτn::Γn}
 
-Figure 2: Inference Rules for Entailment.
+図2: 拘束の推論規則
 
 ## Context
 
-In these rules the context `C` is a set of instance assumptions `α :: Γ` (all `α`'s in `C` are disjoint).
-Where convenient, we will also regard a context as a finite mapping from type variables to class sets, i.e. `Cα = Γ` iff `α :: Γ ∈ C`.
-Thus the domain of `C`, `dom(C)`, is defined as the set of type variables `α` such that `α :: Γ ∈ C`.
-As type classes can now contain parameters, we define the region of a context `C`,
+これらの規則では、文脈「C」は、インスタンス仮定「α::Γ」のセットである（全て「C」の「α」は互いに素である）。
+便利な場合には、コンテキストを型変数からクラスセットへの有限写像、すなわち `α::Γ∈C`なら`Cα=Γ`とみなす。
+したがって、 `C`、` dom（C） 'の領域は、 `α::Γ∈C`となるような型変数`α`の集合として定義されます。
+型クラスはパラメータを含むことができるので、コンテキスト `C`の領域を定義します。
 
     reg(C) = ∪_{α ∈ dom(C)} fv(C)
 
-and the closure of `C` over a set of type variables, `Δ`, written `C*(Δ)`, as the least fixpoint of the equation
+方程式の最小固定点として、「C *（Δ）」と書かれたタイプ変数の集合「Δ」に対する「C」の閉鎖
 
     C*(Δ) = Δ ∪ C(C* (Δ)).
 
-We say `C1` is contained in `C2`, written `C1 ≼ C2`, if `dom(C1) ⊆ dom(C2)` and `C1α ⊆ C2α` for each `α ∈ dom(C1)`.
-We write `C1 ⊎ C2` for the disjoint union of two contexts and `C\α` for restriction of a context `C` to all type variables in its domain other than `α`.
-A context `C` is called closed if `C*(dom(C)) = dom(C)`, or, equivalently, `reg(C) ⊆ dom(C)`.
-A context `C` is called acyclic if all the type variables `α`, `α ∈ dom(C)`, can be topologically sorted according to the order: `α < β` if `α ∈ fv (C β)`.
-We shall restrict our discussion to only closed acyclic contexts in the remainder of the paper.
+それぞれC1、C2、C1α⊆C2αならば、C1≼C2と書かれている。
+我々は、2つのコンテキストの互いに素な結合のための `C1 C2 C2`と`α '以外のすべてのタイプ変数へのコンテキスト `C`の制限のための` C \α`を書きます。
+文脈Cは `C *（dom（C））= dom（C）`ならば閉じられ、等価的には `reg（C）⊆dom（C）`と呼ばれます。
+全ての型変数「α」、「α∈dom（C）」を次の順序に従ってトポロジ的にソートすることができれば、コンテキスト「C」は非循環と呼ばれる：α∈fv（Cβ） 。
+我々は、この論文の残りの部分では、閉鎖非環式文脈のみに限定して説明する。
 
-## Constrained Substitution
+## 制約付き置換
 
-In the following, we will apply variable substitutions not only to types, but also to (sets of) classes and (sets of) instance predicates.
-On all of these, substitution is defined pointwise, i.e.
-it is a homomorphism on sets, class constructor application and `(::)`.
-Since a context is a special form of an instance predicate set, substitutions can be applied to contexts.
-However, the result of such a substitution is in general not a context, as the left hand side `α` of an instance predicate `α::Γ` can be mapped to a non-variable type.
-Our typing rules, on the other hand, require contexts instead of general predicate sets.
-Thus, we need a means to find a context that is a conservative approximation to a predicate set.
-We use the following definitions:
+以下では、型だけでなく、（セットの）クラスおよび（セットの）インスタンス述語にも変数置換を適用します。
+これらの全てにおいて、置換は点単位で定義される。
+集合、クラスコンストラクタアプリケーション、 `（：:)`の準同型性です。
+コンテキストはインスタンス述語セットの特別な形式なので、置換はコンテキストに適用できます。
+しかしながら、インスタンス述語「α::Γ」の左側の「α」は非可変型に写像できるので、そのような置換の結果は一般に文脈ではない。
+一方、我々のタイピング規則は、一般述語集合の代わりに文脈を必要とする。
+したがって、述語集合に対する控えめな近似である文脈を見つける手段が必要である。
+以下の定義を使用します。
 
-**Definition.** A constrained substitution is a pair `(S,C)` where `S` is a substitution and `C` is a context such that `C = SC`.
+**定義** 制約付き置換は `（S、C）`の対であり、 `S 'は置換であり、` C'は `C = SC`のようなコンテキストです。
 
-**Definition.** A constrained substitution `(S,C)` preserves a constrained substitution `(S0,C0)` if there is a substitution `R` such that `S = R o S0` and `C ⊦⊦ RC0`.
-We write in this case `(S,C) ≼ (S0,C0)`.
+（S、C）は、S = R 0 S0とC C RC0のような置換Rがある場合、制約付き置換 `（S0、C0）`を保存する。 `。
+この場合、 `（S、C）≼（S0、C0）`と書く。
 
 <!-- page 5 -->
 
-It is easy to show that `≼` is a preorder.
+「≼」が予約注文であることを示すのは簡単です。
 
-**Definition.** A constrained substitution `(S,C)` is most general among those constrained substitutions that satisfy some requirement `R` if `(S,C)` satisfies `R`, and, for any `(S',C')` that satisfies `R`, `(S',C') ≼ (S',C')`.
+**（S、C）が `R 'を満たしていれば何らかの要件Rを満たす制約付き置換の中で最も一般的なものであり、任意の`（S、C） '、'（S '、C'）≼（S '、C'） `を満たす、
 
-**Definition.** A constrained substitution `(S,C)` is a normalizer of an instance predicate set `P` if `C ⊦⊦ SP`.
+**定義** 制約付き代入（S、C）は、インスタンス述語セットの正規化子で、 `C∈SP`ならば` P`です。
 
-To ensure the principal type property of our type system with parametric classes, we have to place the following requirements on the entailment relation `⊦⊦`:
+パラメトリッククラスを持つ型システムの主要な型プロパティを保証するために、含意関係 `⊦⊦`に以下の要件を課す必要があります。
 
-- **monotonicity:** for any contexts `C` and `C'` , if `C' ≼ C` then `C ⊦⊦ C'`.
+- **単調性：** 任意のコンテキスト 'C'と 'C'の場合、 `C '` `C` `` C `C` `。
 
-- **transitivity under substitution:** for any substitution `S`, contexts `C` and `C'`, predicate set `P`, if `C' ⊦⊦ SC'` and `C' ⊦⊦ P` then `C ⊦⊦ SP`.
+- **置換の下での推移性：**任意の置換「S」、文脈「C」および「C」、述語セット「P」、「C 'SC」および「C' `C⊦⊦SP`。
 
-- **most general normalizers:** If a predicate set `P` has a normalizer then it has a most general normalizer.
-
-
-From the viewpoint of type reconstruction, the first two requirements are needed to ensure that once established entailments are not falsified by later substitutions or additions to contexts.
-They follow directly from the inference rules in Figure 2.
-The last requirement ensures that there is a most general solution to an entailment constraint.
-To establish existence of most general normalizers, we have to place two restrictions on the instance declarations in a program:
-
-(a) There is no instance declaration of the form `inst C ⇒ α :: c τ`.
-
-(b) For every pair of type and class constructor `(κ, c)`, there is at most one instance declaration of the form `inst C ⇒ κ τ':: c τ`: Furthermore, `τ'` must be the unit type, or a possible empty tuple of distinct type variables and both `dom(C)` and `fv(τ)` are contained in `fv(τ')`.
-
-Restriction (a) is part of current Haskell, and restriction (b) is a direct generalization of current Haskell's restriction to incorporate parametric type classes.
-
-**Theorem 3.1** If the instance declarations `Ds` of a program satisfy the restrictions (a) and (b), then `⊦⊦` admits most general normalizers.
-
-### Typing Rules
-
-Given an entailment relation `⊦⊦` between contexts and instance predicates, we now formalize a theory of typing judgments.
-Typing judgments are of the form `A, C ⊢ e : σ`, where `A` is an assumption set of type predicates `x : σ` (all `x` disjoint), `C` is a context, and `e` is an expression or a program.
-A typing judgment `A,C ⊢ e : σ` holds in the theory iff it can be deduced using the inference rules in Figures 3 and 4.
-
-The rules in Figure 3 form a non-deterministic type system for expressions, along the lines of of the standard Hindley/Milner system [DM82].
-One notable difference between this system and the standard Hindley/Milner system is that the bound variable in a type scheme `∀α ::Γ.σ` can be instantiated to a type `τ` only if we know from the context that `τ::Γ` (rule ∀-elim).
-The second difference concerns rule (∀-intro), where the instance predicate on the generalized variable `α` is "discharged" from the context and moved into the type scheme `∀α::Γ.σ`.
-
-The rules in Figure 4 extend this system from expressions to programs.
-In rule (class), the overloaded identifier `x` is added to the assumption set.
-Rule (inst) expresses a compatibility requirement between an overloaded identifier and its instance expressions.
-These rules have to be taken in conjunction with the requirements (a), (b) on instance declarations listed in the last subsection.
-We say a program `p = Ds e` has type scheme `σ`, iff `Ds` satisfies these requirements and generates an entailment relation `⊦⊦`, and `A0,{} ⊢ p : σ`, for some given closed initial assumption set `A0`.
-
-## The Instance Relation and Principal Type Schemes
-
-A useful fact about Hindley/Milner type system is that when an expression `e` has a type, there is a principal type scheme which captures the set of all other types derivable for `e` thruogh the notion of generic instances.
-The remainder of this section introduces the definitions of generic instance and principal type schemes in our system.
-
-**Definition.** A type scheme `σ' = ∀αj' :: Γj'.τ'` is a generic instance of a type scheme `σ = ∀αi::Γi.τ` under a context `C`, if there exists a substitution `S` on `{αi}`, such that `Sτ = τ'`, `αj'` is not free in `σ`, and `C ⊎ {αj' :: Γj'} ⊦⊦ Sαi :: SΓi`.
-We write in this case, `σ' ≼C σ`.
-
-The definiton of `≼C` is an extension of the ordering relation defined in [DM82].
-The only new requirement on instance entailment is needed for the extension with parametric type classes.
-It is easy to see that `≼C` defines a preorder on the set of type schemes.
-
-The following property is a direct consequence of the definition.
-
-Lemma 3.2 If `σ' ≼C σ` and `C ≼ C'` then `σ' ≼C' σ`.
-
-The next lemma shows that the ordering on type schemes is preserved by constrained substitutions.
-
-Lemma 3.3 If `σ' ≼C σ` and `C' ⊦⊦ SC` then `Sσ' ≼C' Sσ`.
-
-With the definiton of ordering on type schemes, we can define the notion of principal type schemes in our system.
+** **最も一般的なノーマライザ** **述語セット `P`がノーマライザを持つ場合、それは最も一般的なノーマライザを持ちます。
 
 
-**Definition.** Given `A`, `C`, and `e`, we call `σ` a principal type scheme for `e` under `A` and `C` iff `A,C ⊢ e : σ`, and for every `σ'`, if `A,C ⊢ e : σ'` then `σ' ≼C σ`.
+型の再構築の観点からは、いったん確立された同義語が後の文脈への置換または追加によって改竄されないようにするために、最初の2つの要件が必要である。
+彼らは図2の推論規則に直接従います。
+最後の要件は、含意制約に対する最も一般的な解決策が存在することを保証する。
+最も一般的なノーマライザの存在を証明するためには、プログラムのインスタンス宣言に2つの制限を設ける必要があります。
 
-We shall develop an algorithm to compute principal type schemes in the following sections.
+（a） `inst C⇒α:: cτ`という形式のインスタンス宣言はありません。
 
-## 4 A Deterministic Type Inference System
+（b）型とクラスのコンストラクタ `（κ、c）`のすべての対に対して、 `inst C⇒κτ ':: cτ`という形式のインスタンス宣言が最大で1つあります。さらに、`τ``はユニット型、または異なる型変数と `dom（C）`と `fv（τ）`の両方の可能な空のタプルは `fv（τ '）`に含まれています。
 
-We present a deterministic type inference system in this section.
-Compared to the typing rules in Section 3, the rules here are so formulated that the typing derivation for a given term `e` is uniquely detrmined by the syntactic structure of `e`, and hence are better suited to use in a type inference algorithm.
-We show that the system is equivalent to the previous one in terms of expressiveness and, in addition, has all the nice properties toward the construction of a type reconstruction algorithm.
+制限（a）は現在のハスケルの一部であり、制約（b）はパラメトリック型クラスを組み込むための現在のハスケルの制限の直接的な一般化です。
+
+**定理3.1 **プログラムのインスタンス宣言 `Ds 'が制約（a）と（b）を満たす場合、`⊦⊦`は最も一般的な正規化を認めます。
+
+### タイピング規則
+
+文脈とインスタンス述語との間に付随関係「⊦⊦」があると仮定して、今我々はタイピング判定の理論を公式化する。
+タイプ判定は、「A、C⊢e：σ」という形であり、「A」は述語「x：σ」（すべて「x」は互いに素）の仮定集合であり、「C」は文脈であり、「e `は式またはプログラムです。
+図3と図4の推論規則を用いて推論することができるならば、タイピング判定「A、C⊢e：σ」が理論に保持される。
+
+図3の規則は、標準のHindley / Milnerシステム[DM82]の行に沿って、式のための非決定論的型システムを形成します。
+このシステムと標準的なHindley / Milnerシステムとの間の注目すべき違いは、タイプスキーム `∀α::Γ.σ`の束縛された変数は、文脈から`τ ::Γ`（ルール∀-エリム）。
+2番目の違いはルール（∀-intro）であり、一般化された変数「α」のインスタンス述語は文脈から「排出」され、型スキーム「∀α::Γ.σ`」に移動します。
+
+図4の規則は、このシステムを式からプログラムまで拡張しています。
+ルール（クラス）では、オーバーロードされた識別子「x」が仮定セットに追加されます。
+Rule（inst）は、オーバーロードされた識別子とそのインスタンス式の間の互換性要件を表します。
+これらのルールは、最後のサブセクションにリストされているインスタンス宣言についての要件（a）、（b）と関連して取られなければならない。
+プログラム `p = Ds e`は、` Ds`がこれらの条件を満たす場合に種別スキーム `σ`を持ち、包含関係`⊦⊦`、 `A0、{}⊢p：σ`を生成する初期仮定は「A0」に設定される。
+
+## インスタンス関係とプリンシパルタイプスキーム
+
+Hindley/Milner型システムについての有益な事実は、式eが型を持つとき、汎用インスタンスの概念を通したeに導き出せる他のすべての型の集合を取り込む主型の方式があるということです。
+このセクションの残りの部分では、我々のシステムにおける一般的なインスタンスとプリンシパルタイプのスキームの定義を紹介します。
+
+**定義。**タイプスキーム `σ '=∀αj' ::Γj'.τ'`は、コンテキスト` C`の下でのタイプスキーム `σ=∀αi::Γi.τ`の一般的なインスタンスです。 Sτ=τ'`のような `{αi} 'に置換Sが存在する場合、`αj'は `σ`では自由ではなく、` Cj {αj '::Γj'}⊦⊦ Sαi::SΓi`。
+この場合、「σ '≼Cσ`」と書く。
+
+`` C``の定義は[DM82]で定義された順序関係の拡張です。
+パラメトリック・タイプ・クラスを持つ拡張では、インスタンスの含意に関する唯一の新しい要件が必要です。
+`≼C`がタイプスキームのセットのプリオーダを定義することは容易に分かります。
+
+次のプロパティは、定義の直接の結果です。
+
+補題3.2 `σ '≼Cσ`と` C≼C``の場合、 `σ'≼C 'σ`です。
+
+次の補題は、タイプスキームの順序付けが制約のある置換によって保持されることを示しています。
+
+補題3.3 'σ'≼Cσ`と `C '⊦⊦SC`の場合、`Sσ'≼C 'Sσ`です。
+
+タイプスキームの順序付けの定義によって、我々のシステムにおけるプリンシパルタイプスキームの概念を定義することができる。
+
+
+**定義** `A`、` C`、 `e`が与えられたとき、` A`の `e`と` `C``の` `、` `σ` `、` `σ ''ならば` `σ ''、` `
+
+次のセクションでは、プリンシパルタイプスキームを計算するアルゴリズムを開発します。
+
+## 4 決定論的型推論システム
+
+この節では、決定論的型推論システムを提示する。
+セクション3のタイピング規則と比較して、ここでの規則は、与えられた用語「e」の型推論が「e」の構文構造によって一意的に打ち切られ、したがって型推論アルゴリズム。
+システムは、表現力の面で前のものと同等であり、さらに、タイプ再構成アルゴリズムの構築に向けて優れた特性を有することを示している。
 
 <!-- page 6 -->
 
@@ -414,7 +414,7 @@ We show that the system is equivalent to the previous one in terms of expressive
     (let)       --------------------------------------
                 A,C ⊢ let x = e' in e : τ
 
-Figure 3: Typing Rules for Expressions
+図3: 式の入力規則
 
                 A.x : ∀_{fvγ} ∀α :: {γ}.σ, C ⊢ p : τ
     (class)     -------------------------------------------
@@ -424,46 +424,46 @@ Figure 3: Typing Rules for Expressions
     (inst)      --------------------------------------------------------------
                 A,C ⊢ inst C' ⇒ τ'::γ where x = e in p : τ
 
-Figure 4: Typing Rules for Declarations
+図4: 宣言の入力規則
 
-## Deterministic Typing Rules
+## 確定的タイピング規則
 
-The typings rules for the deterministic system are given in Figure 5.
-The rules `∀-intro` and `∀-elim` have been removed and typing judgements are now of the form `A,C ⊢ e : τ` where,ranges over the set of type expressions as opposed to type schemes in the typing judgements of Section 3.
-Other major differences are that rule `(var')` instantiates a type scheme to a type according to the definition of generic instance and rule `(let')` use the generalization function, `gen`, to introduce type schemes.
+決定論的システムの入力規則は図5に示されています。
+``∀-intro``と ``∀-elim``ルールは削除され、型判定は `A、C⊢e：τ`の形式になりました。ここで、型定義の型スキームセクション3の判断。
+他の主な違いは、 `（var '）`ルールはジェネリックインスタンスの定義に従って型スキームをインスタンス化し、 `（let'）`型スキームを導入するために汎化関数 `gen`を使用することです。
 
-The function gen takes as arguments a type scheme, an assumption set, and a context, and returns a generalized type scheme and a discharged context.
-It is defined by
+関数genは、型スキーム、仮説セット、およびコンテキストを引数として取り、一般化された型スキームと排出されたコンテキストを返します。
+それは
 
     gen (σ,A,C) =
         if ∃α ∈ dom(C) \ (fv A ∪ reg C) then
             gen (∀α :: C α.σ,A,C\α)
         else (σ,C)
 
-In other words, instance assumptions in the given context, except those constraining type variables in the assumption set, are discharged and moved to form a more general type scheme in an order so that type variables are properly quantified.
+換言すれば、仮説セット内の制約型変数を除いて、与えられた文脈におけるインスタンス仮定は、型変数が適切に定量化されるように、より一般的な型式スキームを形成するために放電され、移動される。
 
-## Equivalence of the two Systems
+## 2つのシステムの等価性
 
-We now present a number of useful properties of the deterministic type system.
-They are useful not only in establishing the congruence of the two type systems, but also in investigating the relation between the type system and the type reconstruction algorithm.
+ここで、決定論型システムの多くの有用な特性を提示する。
+それらは、2つのタイプのシステムの合同性を確立するだけでなく、タイプシステムとタイプ再構成アルゴリズムとの間の関係を調べる際にも有用である。
 
-**Lemma 4.1** (Substitution lemma) If `A,C ⊢' e :τ` and
-`C' ⊦⊦ SC` then `SA,C' ⊢' e : Sτ`.
+**補題4.1**（代用補題）もし `A、C⊢ 'e：τ`と
+`C '⊦⊦SC`、` SA、C'⊢ 'e：Sτ`のようになります。
 
-This result assures us that typing derivations are preserved under constrained substitution.
+この結果は、制約のある置換のもとで型の導出が保持されることを保証する。
 
-The next two lemmas express a form of monotonicity of typing derivations with respect to the context and the assumption set.
+次の2つの補題は、コンテキストと仮説セットに関する型付け導出の単調性の形を表す。
 
-**Lemma 4.2** If `A,C ⊢ e :τ` and `C ≼ C'` then `A,C' ⊢' e :τ`.
+**補題4.2** もし `A、C⊢e：τ`と` C≼C'`なら `A、C '⊢' e：τ`。
 
-**Lemma 4.3** If `A.x : σ,C ⊢ e :τ` and `σ ≼C σ'` then
-`A.x : σ',C ⊢ e :τ`.
+**補題4.3** もし `A.x：σ、C⊢e：τ`と`σ≼Cσ'`
+`A.x：σ '、C⊢e：τ`である。
 
-Now we can show that the deterministic system `⊢'` is equivalent to the non-deterministic system `⊢` in the following sense.
+ここで、決定論的システム「⊢」は、以下の意味での非決定論的システム「⊢」と同等であることを示すことができる。
 
-**Theorem 4.4** If `A,C ⊢' e :τ` then `A,C ⊢ e :τ`.
+**定理4.4 ** `A、C⊢ 'e：τ`なら` A、C⊢e：τ`。
 
-**Theorem 4.5** If `A,C ⊢ e : σ` then there is a context `C'`, and a type,such that `C ≼ C'`, `A,C' ⊢' e :τ` and `σ ≼C σ'` where `(σ',C'') = gen (τ,A,C')`.
+**定理4.5 ** `A、C⊢e：σ`ならば、文脈Cと文脈C ^ C、文A、文C、文e：τ （σ '、C' '）= gen（τ、A、C'） `である。
 
 <!-- page 7 -->
 
@@ -481,61 +481,61 @@ Now we can show that the deterministic system `⊢'` is equivalent to the non-de
     (let')      ---------------------------------------- (σ, C'') = gen(τ',A,C'), C'' ≼ C
                 A,C ⊢' let x = e' in e : τ
 
-Figure 5: Determinstic Typing Rules for Expressions
+図5: 式の決定タイピング規則
 
-## 5 Unification and Type Reconstruction
+## 5 統一と型の再構築
 
-This section discusses type reconstruction.
-As usual, type reconstruction relies on unification, and we will first work out what kind of unification is needed for parametric type classes.
-We then go on to present a type reconstruction algorithm, and state its soundness and completeness with respect to the inference rules given in Section 3 using those rules in the last section and the equivalence result established therein.
-As a corollary of these results, we obtain a prinicpal type scheme property of our system analogous to the one in [DM82].
-The type reconstruction algorithm has been implemented in the Yale Haskell compiler.
-Its size and complexity compare favorably to the type reconstruction parts of our prior Haskell compiler.
+このセクションでは、型の再構成について説明します。
+いつものように、型の再構成は統一に依存します。まず、パラメトリック型クラスにはどのような統一が必要かを考えます。
+次に、タイプ再構成アルゴリズムを提示し、最後のセクションのルールとそこに確立された等価結果を使用して、セクション3で与えられた推論ルールに関してその健全性と完全性を述べる。
+これらの結果の結果として、私たちは[DM82]のものと類似の我々のシステムのprinicpal型スキーム特性を得る。
+タイプ再構築アルゴリズムはYale Haskellコンパイラで実装されています。
+そのサイズと複雑さは、以前のHaskellコンパイラの型再構築部分と比較して優れています。
 
-## Context-Preserving Unification
+## 文脈保存統一
 
-Type reconstruction usually relies on unification to compute most general types.
-One consequence of rule (∀-elim) is that the well-known syntactic unification algorithm of Robinson [Rob65] cannot be used since not every substitution of variables to types satisfies the given instance constraints.
-Nipkow and Snelting have shown that order-sorted unification can be used for reconstructing of types in Haskell [NS91], but it is not clear how to extend their result to parametric type classes.
-We show in this section that algorithm mgu , shown in Figure 6, yields the most general context-preserving unifier of two types.
+型の再構築は、通常、最も一般的な型を計算するために統一に依存します。
+ルール（∀-elim）の結果の1つは、型への変数の置換がすべて、与えられたインスタンス制約を満たすわけではないので、Robinson [Rob65]のよく知られている構文統一アルゴリズムを使うことができないということです。
+NipkowとSneltingは、Haskell [NS91]で型の再構成に順序ソートされた統一を使用できることを示していますが、その結果をパラメトリック型クラスに拡張する方法は明確ではありません。
+このセクションでは、図6に示すアルゴリズムmguが2つのタイプの最も一般的なコンテキスト保存ユニファイナを生成することを示します。
 
-Function mgu takes two types and returns a transformer on constrained substitutions.
-The application `mgu τ1 τ2 (S0,C0)` returns a most general constrained substitution that unifies the types `τ1` and `τ2` and preserves `(S0,C0)`, if such a substitution exists.
-The algorithm is similar to the one of Robinson, except for the case `mgu α τ (S0,C0)`, where `α` may be substituted to `τ` only if `τ` can be shown to be an instance of `C0 α`.
-This constraint translates to an application of the subsidary function mgn to `τ` and `C α`.
-The call `mgn τ Γ (S0,C0)` computes a most general normalizer of `C0 ∪ {τ::Γ}`, provided one exists.
+関数mguは2つの型をとり、制約付き置換で変換器を返します。
+アプリケーション `mguτ1τ2（S0、C0）`は、型 `τ1`と`τ2`を統一し、そのような置換があれば `（S0、C0）`を保存する最も一般的な制約付き置換を返します。
+アルゴリズムはRobinsonのものと同様であるが、 `mguατ（S0、C0） 'の場合を除き、`τ`が ` C0α 'である。
+この制約は、 `τ`と`Cα`に補助関数mgnを適用することに変換されます。
+コール `mgnτΓ（S0、C0）`は、存在するならば、C0∪{τ::Γ}の最も一般的な正規化を計算します。
 
-**Theorem 5.1** Given a constrained substitution `(S0,C0)` and types `τ1`, `τ2`, if there is a `(S0,C0)`-preserving unifier of `τ1` and `τ2` then `mgu τ1 τ2 (S0,C0)` returns a most general such unifier.
-If there is no such unifier then `mgu τ1 τ2 (S0,C0)` fails in a finite number of steps.
+**定理5.1 **拘束された置換 `（S0、C0）`と型 `τ1`、`τ2`が与えられ、 'τ1`と `τ2`の`（S0、C0） `mguτ1τ2（S0、C0）`は、最も一般的なそのようなユニファイアーを返します。
+そのようなユニファイアがない場合、 `mguτ1τ2（S0、C0）`は有限個のステップで失敗する。
 
-## Type Reconstruction
+## タイプの再構築
 
-An algorithm for type reconstruction is shown in Figure 7.
-[1](#1) Function `tp` takes as arguments an expression, an assumption set, and an initial constrained substitution, and returns a type and a final constrained substitution.
-The function is straightforwardly extended to programs.
-The remainder of this section establishes the correspondence between `tp` and the type system of Section 4 and, thereby, that of Section 3.
+タイプ再構成のアルゴリズムを図7に示します。
+[1]（＃1）関数 `tp`は、式として式、仮定集合、初期制約付き置換を引数とし、型と最終制約付き置換を返します。
+この機能はプログラムに直接拡張されています。
+このセクションの残りの部分は、 `tp`とセクション4の型システム、それによってセクション3の型システムとの間の対応関係を確立します。
 
-We need the following lemmas to establish the soundness and completeness of our algorithm.
-We begin by showing that `tp` is indeed a constrained substitution transformer.
+我々のアルゴリズムの健全性と完全性を確立するためには、以下の補題が必要である。
+最初に、 `tp`が本当に制約のある置換変圧器であることを示すことから始めます。
 
-**Lemma 5.2** Let `(S,C)` be a constrained substitution and `(τ,S',C') = tp (e,A,S,C)`, then `(S',C')` is a constrained substitution.
+**補題5.2**（S、C）は制約付き置換であり、（τ、S '、C'）= tp（e、A、S、C） ） `は拘束された置換である。
 
-Hence we will omit the requirement of constrained substitution from now on.
+したがって、私たちは今から制約付き置換の要件を省略します。
 
-**Lemma 5.3** If `tp (e,A,S,C) = (τ,S,C)` then `(S,C) ≼ (S,C)`.
+**補題5.3** もし `tp（e、A、S、C）=（τ、S、C）なら`（S、C）≼（S、C） `。
 
-This result can be established by a straightforward induction except in the **let**-case.
-Recall the typing rule (let') presented in Section 4.
-There are two contexts used in the antecedent part of that rule : one for deriving the type of the let-definition and one for the type of the let-body.
-But only the second one appears in the conclusion part and it is those instance assumptions contained in the first one that are generalized by the gen function.
-While in `tp`, we maintain a single context and pass it through the whole algorithm.
-If we were to use the gen function in the **let**-case in `tp` we would overgeneralize those instance assumptions generated in the previous stages and passed to `tp` as part of the initial context.
+この結果は、** let ** - ケースを除いて直接的な誘導によって確立することができます。
+セクション4で提示されたタイピングルール（let '）を思い出してください。
+この規則の前件部には、let-definitionの型を導出するためのものとlet-bodyの型のためのものの2つのコンテキストがあります。
+しかし、第2のものだけが結論部分に現れ、第1のものに含まれ、gen関数によって一般化されるそれらのインスタンス仮定である。
+`tp`では、単一のコンテキストを維持し、それをアルゴリズム全体に渡します。
+tpの** let ** - ケースでgen関数を使用する場合は、前のステージで生成されたインスタンスの仮定を過大化し、初期コンテキストの一部として `tp 'に渡します。
 
 ----
 
-1 This is actually a simplification of the real algorithm becuase we can get a cyclic context after the call to unification function and thus violate our restriction on contexts.
-So what is missing here is a cliquedetection algorithm, which is simply a variant of occur checking.
-We omit it here for simplicity.
+1 これは実際には、統一関数の呼び出しの後に循環的なコンテキストを得ることができるため、コンテキストに対する私たちの制限に違反するので、実際のアルゴリズムの単純化です。
+ここで欠けているのは、cliquedetectionアルゴリズムです。これは、単に検査のバリエーションです。
+わかりやすくするために、ここでは省略します。
 
 ----
 
@@ -568,55 +568,55 @@ We omit it here for simplicity.
 
     (and similarly for ->, *, ())
 
-Figure 6: Unification and Normalization Algorithms
+図6: 統一アルゴリズムと正規化アルゴリズム
 
-To avoid such overgeneralization, we need to confine the domain of generalization to only those instance assumptions generated while reconstructing the type of the let-definition.
-We define a new generalization function, `tpgen`, which, compared to `gen`, takes an extra context parameter, `C'`, whose instance assumptions will be excluded from generalization.
-Then in the algorithm, when doing generalization, we pass the initial context to `tpgen` as the second context argument to restrict the domain of generalization.
-Thus only those newly generated instance assumptions will be generalized.
+このような過大化を避けるためには、let-definitionのタイプを再構築する際に生成されるインスタンスの仮定のみに一般化のドメインを限定する必要があります。
+新しい汎化関数 `tpgen`を定義します。これは、` gen`と比較して、インスタンスの仮定が一般化から除外される余分なコンテキストパラメータ `C`を取ります。
+アルゴリズムでは、一般化を行うときに、一般化のドメインを制限するために、最初のコンテキストを2番目のコンテキスト引数として `tpgen`に渡します。
+したがって、新たに生成されたインスタンスの仮定のみが一般化される。
 
-Now we can proceed to state the soundness of our algorithm.
+今度はアルゴリズムの健全性を述べることができます。
 
-**Theorem 5.4** If `tp(e,A,S,C) = (τ,S,C)` then `S'A,C' ⊢' e :τ`.
+**定理5.4** `tp（e、A、S、C）=（τ、S、C）ならば` S'A、C '⊢' e：τ`。
 
-Together with Theorem 4.4, we have the following soundness result.
+定理4.4と合わせて、我々は以下の健全性の結果を得る。
 
-**Corollary 5.5** (Soundness of `tp`) If `tp(e,A,S,C) = (τ,S',C')` then `S'A,C' ⊢ e : τ`.
+** t（e、A、S、C）=（τ、S '、C'）なら `S'A、C '⊢e：τ`。
 
-Ultimately, we will state the principal typing result.
+最終的には、主要なタイピング結果を述べます。
 
-**Theorem 5.6** Suppose that `S'A,C' ⊢' e : τ'` and `(S',C') ≼ (S0,C0)`.
-Then `tp(e,A,S0,C0)` succeeds with `(τ,S,C)`, and there is a substitution `R` such that
+**定理5.6** `S'A、C'⊢'e：τ'`と`（S'、C'）≼（S0、C0） `とする。
+それで `tp（e、A、S0、C0）`は `（τ、S、C）`で成功し、
 
-    S'A = RSA,   C' ⊦⊦ RC,   and,   τ'= Rτ.
+    S'A = RSA、C'∈RC、およびτ '=Rτである。
 
-Together with Theorem 4.5, we have the completeness result.
+定理4.5と一緒に、我々は完全性の結果を得た。
 
-**Corollary 5.7** (Completeness of `tp`) Suppose that `S'A,C' ⊢ e : σ'` and `(S',C') ≼ (S0,C0)`.
-Then `tp(e,A,S0,C0)` succeeds with `(τ,S,C)`, and there is a substitution R such that
+**系5.7 **（ `tp`の完全性）` S'A、C'⊢e：σ'`と `（S'、C'）≼（S0、C0）`とします。
+そして、 `tp（e、A、S0、C0）`は `（τ、S、C）`で成功し、
 
-    S'A = RSA,   and    σ' ≼C' Rσ
+    S'A = RSA,   かつ    σ' ≼C' Rσ
 
-where `(σ, ~C) = gen(τ,SA,C)`.
+ここで `（σ、〜C）= gen（τ、SA、C）`である。
 
-As a corollary, we have the following result for principal type schemes.
+当然のこととして、プリンシパル・タイプ・スキームについては次のような結果が得られます。
 
-**Corollary 5.8** Suppose that `tp(e,A,S0,C0) = (τ,S,C)` and `gen(τ,SA,C) = (σ,C')`.
-Then `σ` is a principal type scheme for `e` under `SA` and `C'`.
+（t、S、C）=（τ、S、C）= `（τ、SA、C）=`σ、C '）とする。
+それで `σ`は` SA`と `C`の` e`の主要な型式です。
 
-## 6 Ambiguity Revisited
+## 6　あいまいさ再訪
 
-As we have seen in the introduction, parametric type classes share with standard type classes the problem that type schemes might be ambiguous.
+はじめに見てきたように、パラメトリック型のクラスは、型のスキームがあいまいかもしれないという問題を標準型のクラスと共有します。
 
-**Definition.** Given a type scheme `σ = ∀αi ::Γi.τ`, `let Cσ = {αi :: Γi}` be the generic context of `σ`.
+**定義**　型スキーム `σ=∀αi::Γi.τ`が与えられたとき、`Cσ= {αi::Γi} `を`σ`の一般的なコンテキストとします。
 
-**Definition.** A generic type variable α in a type scheme `σ = ∀αi :: Γi .τ` is (weakly) ambiguous if (1) `Cσ α ≠ ∅`, and (2) `α ∉ Cσ* (fv τ)`.
+**定義**　タイプスキーム ``σ=∀αi::Γiτのジェネリック型変数αは、（1） `Cσα≠∅`、（2）`α†Cσ *（fvτ） `となる。
 
-Ambiguous type variables pose an implementation problem.
-The usual approach to implement overloading polymorphism is to pass extra dictionary arguments for every type class in the context of a function signature.
-Since the constraints on ambiguous variables are non-empty (1), dictionaries need to be passed.
-But since the ambiguous variable does not occur free in the type (2), it is never instantiated, hence we do not know which dictionaries to pass.
-Seen from another perspective, any dictionary of an appropriate instance type would do, but we have a problem of coherence: There are several implementations of an expression with possibly different semantics [Jon92a].
+あいまいな型変数は、実装の問題を引き起こします。
+多態性のオーバーロードを実装する通常の方法は、関数シグネチャのコンテキスト内のすべての型クラスに対して余分な辞書引数を渡すことです。
+あいまいな変数の制約は空でないため（1）、辞書を渡す必要があります。
+しかし、あいまいな変数は型（2）で空きにならないので、インスタンス化されることはありません。したがって、どの辞書を渡すべきかわかりません。
+別の見方から見ると、適切なインスタンス型の辞書がありますが、一貫性の問題があります。異なるセマンティクス[Jon92a]を持つ式の実装がいくつかあります。
 
 <!-- page 9 -->
 
@@ -643,105 +643,105 @@ Seen from another perspective, any dictionary of an appropriate instance type wo
                                         tpgen(∀α :: C α.σ,A,C\α,C')
                                     else (σ, C)
 
-Figure 7: Type Reconstruction Algorithm
+図7: タイプ再構成アルゴリズム
 
-The problem is avoided by requiring that the programmer disambiguate expressions if needed, by using explicit type signatures.
-Conceptually, the ambiguity check takes place after type reconstruction; would it be part of type reconstruction then the principal type property would be lost.
-In a way, the ambiguity problem shows that sometimes reconstructed types are too general.
-Every ambiguous type has a substitution instance which is unambiguous (just instantiate ambiguous variables).
-The trouble is that there is not always a most general, unambiguous type.
+この問題は、明示的な型シグネチャを使用して、プログラマが必要に応じて式の曖昧性を排除するように要求することによって回避されます。
+概念的には、曖昧さチェックはタイプ再構成後に行われます。それが型の再構成の一部である場合、主たる型のプロパティは失われます。
+ある意味では、あいまいさの問題は、再構成されたタイプがあまりにも一般的であることを示しています。
+すべてのあいまいな型には明白な置換インスタンスがあります（あいまいな変数をインスタンス化するだけです）。
+問題は、最も一般的で曖昧ではないタイプが常にあるということです。
 
-Compared to multi-argument type classes, our type system often produces types with less ambiguity.
-Consider:
+多項式型のクラスと比較して、型システムはしばしばあいまいさの少ない型を生成します。
+検討してください：
 
     len :: (sa :: Sequence a) => sa -> Int
 
-Seen as a multi-argument type class, a would be ambiguous, since it occurs in a predicate but not in the type itself.
-Seen as a parametric type class, however, a is not ambiguous: Although it does not occur in the type, it both unconstrained and dependent on `sa` through `(sa :: Sequence a)`.
-Hence both (1) and (2) fail.
+複数引数型のクラスとして見れば、aは述語では発生しますが型ではないのであいまいです。
+しかし、パラメトリック型のクラスとして見えますが、aはあいまいではありません。型には発生しませんが、（sa :: Sequence a）によって `sa 'に制約されず依存します。
+したがって、（1）と（2）の両方が失敗します。
 
-Ambiguity problems can be further reduced by making use of the following observation: Because of restriction (b) in Section 3, the top-level type constructor of a type uniquely determines the dictionary that needs to be passed.
-Hence, if two types have the same top-level type constructor (but possibly different type arguments), their dictionaries share the same data constructor (but have possibly different parameters).
-We can recognize equality of top-level type constructors statically, using the following technique:
+3項の制約（b）のために、型のトップレベル型コンストラクタは、渡す必要がある辞書を一意に決定します。次のようにして、曖昧さの問題をさらに減らすことができます。
+したがって、2つの型が同じトップレベル型コンストラクタ（ただし型引数が異なる可能性があります）がある場合、それらのディクショナリは同じデータコンストラクタを共有します（ただしパラメータは異なる可能性があります）。
+次の手法を使用して、トップレベル型コンストラクタの等価性を静的に認識できます。
 
-We introduce a special "root" class `TC`, with one type parameter but no operations.
-Every type is an instance of `TC` by virtue of the following instance declaration (which can be thought of being implicitely generated for every type `κ τ`).
+1つの型パラメータを持ち操作を持たない特別な「ルート」クラス「TC」を紹介します。
+すべての型は、以下のインスタンス宣言（すべての型 `κτ 'に対して暗黙的に生成されると考えることができる）によって、` TC`のインスタンスです。
 
     inst κ τ:: TC (κ ())
 
-Effectively, `TC` is used to "isolate" the top-level type constructor of a type.
-That is, if two types are related by a `TC` constraint, we know that they have the same top-level type constructor.
-The two types are then called similar:
+実際には、TCは型のトップレベル型コンストラクタを「分離」するために使用されます。
+つまり、2つの型が「TC」制約によって関連付けられている場合、それらは同じトップレベル型コンストラクタを持つことがわかります。
+この2つのタイプは、同様に呼ばれます。
 
-**Definition.** Given a context `C`, let similarity in `C`, `(~C)`, be the smallest transitive and symmetric relation such that `C ⊦⊦ τ1 :: TC τ2` implies `τ1 ~C τ2` .
+**定義** 文脈 'C'を与えられたとき、 `C`、 `（〜C）`の類似性は、 `C⊦⊦τ1:: TCτ2`が`τ1〜 Cτ2`となる。
 
-`TC` is treated like every other type class during type re-construction.
-It is treated specially in the ambiguity check, allowing us to strengthen the ambiguity criterion:
+「TC」は型の再構築中に他のすべての型クラスと同様に扱われます。
+これはあいまいチェックで特に扱われ、あいまいさの基準を強化することができます：
 
-**Definition.** A generic type variable α in a type scheme `σ` is strongly ambiguous if `α` is weakly ambiguous in `σ`, and, for every type `τ, α ~ Cσ` implies that `τ` is a strongly ambiguous type variable in `σ` .
+**定義** タイプスキーム「σ」におけるジェネリックタイプ変数αは、「α」が「σ」において弱く曖昧である場合は強くあいまいであり、全てのタイプ「τ、α〜Cσ」は「τ」を意味する`σ`では強くあいまいな型変数です。
 
-The `TC` technique enables us to type map precisely [2](#2)
+「TC」技術は、我々が正確にタイプをマップすることを可能にする[2]（＃2）
 
-    map : ∀a.∀b.∀t.
+    地図：∀a.∀b.∀t。
 
         ∀sa :: {Sequence a,TC t}.
         ∀sb :: {Sequence b,TC t}.(a -> b) -> sa -> sb
 
 ----
 
-<a name="2"></a>2 Previously, it has been conjectured that this required second-order unification.
+<a name="2"> </a> 2これまでに、順序統一。
 
 ----
 
 <!-- page 10 -->
 
-This states that `sa` and `sb` are instance types of Sequence with element types `a` and `b`, and that `sa` and `sb` share the same type constructor.
+これは、 `sa`と` sb`は要素型 `a`と` b`を持つSequenceのインスタンス型で、 `sa`と` sb`は同じ型のコンストラクタを共有していると言います。
 
-The knowledge that `sa` and `sb` have the same type constructor is initially on the meta-level, derived from the form of the compiler-generated instance declarations.
-We can formalize it in the type system as follows:
+`sa`と` sb`が同じ型のコンストラクタを持っているという知識は、最初はコンパイラ生成のインスタンス宣言の形から導かれたメタレベル上にあります。
+これを型システムで次のように形式化することができます。
 
-**Definition.** A type scheme `σ = ∀αi :: Γi.τ'` is in reduced form if none of the `Γi` contains a `class TC (κ τ)`, for arbitrary constructor `κ` and type `τ`.
-We use `σR` for type schemes in reduced form.
+**定義** タイプスキーム `σ=∀αi::Γi.τ'`は、`Γi`のどれも `TC（κτ）`を含まない場合、任意のコンストラクタ `κ`のための縮小された形式です。 `τ`と入力します。
+型スキームには `σR`を使用します。
 
-**Definition.** Two type schemes `σ1`, `σ2` are equivalent under a context `C`, `σ1 ≃C σ2`, iff for all reduced type schemes `σR`,
+**定義** 2つのタイプスキーム「σ1」、「σ2」は、すべての縮小タイプスキーム「σR」について、「C」、「σ1≃Cσ2」、
 
     σR ≼C σ1    ⇔    σR ≼C σ2.
 
-We extend the definition of generic instance to include equivalence: A type scheme `σ1` is a generic instance of a type scheme `σ2` under a context `C` if there is a type scheme `σ'` s.t.
-`σ1 ≃C σ'`, and `σ' ≼C σ2` according to the definition of `≼C` in Section 3.
-This stronger notion of generic instance is important to check user-defined type signatures.
+等式を含むようにジェネリックインスタンスの定義を拡張する。タイプスキーム「σ1」は、タイプスキーム「σ」s.tが存在する場合、コンテキスト「C」の下でタイプスキーム「σ2」の一般的なインスタンスである。
+第3章の「≼C」の定義に従って、「σ1≃Cσ」と「σ 'CCσ2」を定義する。
+一般的なインスタンスのこの強力な概念は、ユーザー定義の型シグネチャをチェックするために重要です。
 
-**Example:** After substituting `List a` for `sa` , the type signature of map would become:
+**例：** `sa`に` List a`を代入すると、mapの型シグネチャは次のようになります：
 
     ∀sb :: {Sequence b,TC (List())} : (a -> b) -> List a -> sb
 
-The usual definition of map for lists, on the other hand, would have type:
+一方、リストのマップの通常の定義には、次のようなタイプがあります。
 
     (a -> b) -> List a -> List b
 
-Equivalence is necessesary to verify that the first type is an instance of the second.
+第1のタイプが第2のタイプのインスタンスであることを検証するためには、等価が必要である。
 
-To keep contexts short, we will use in the next section the similarity relation `(~)` directly, instead of its definition in terms of `TC`.
+文脈を短くするために、次のセクションでは、類似性の関係を `TC 'の定義ではなく`（〜） `に直接使用します。
 
-## 7 From Monads to Lists
+## 7 Monads からリストへ
 
-In this section, we show how to use parametric type classes to generalize many of the operations and concepts which were previously restricted to lists.
-As sketched in the introduction, a first step overloads operations that are common to all implementations of sequence.
-Some important operations can even be applied in the more general Moand context[Wad90]; hence it makes sense to have "Monad" and "Monad with zero" as superclasses of "Sequence".
-The following enumeration shows on which levels in the hierarchy some familiar list operations are defined.
+このセクションでは、パラメトリック・タイプ・クラスを使用して、以前はリストに限定されていた操作と概念の多くを一般化する方法を示します。
+はじめにスケッチされているように、最初のステップは、シーケンスのすべての実装に共通の操作をオーバーロードします。
+いくつかの重要な操作は、より一般的なMoandコンテキスト[Wad90]でも適用できます。したがって、 "Monad"と "Monad with zero"を "Sequence"のスーパークラスとして持つことは理にかなっています。
+次の列挙は、階層内のどのレベルでよく知られたリスト操作が定義されているかを示します。
 
-**Monad:** unit, join, map, monad comprehensions.
+**モナド:** ユニット、結合、マップ、モナド理解。
 
-**Monad0:** nil, filter, comprehensions with filters.
+** Monad0:** 無フィルタ、フィルタ、フィルタ付きの解説。
 
 **Sequence:** cons, hd, tl, reverse, foldl, foldr, (++).
 
-The use of monads in functional programming was explored in [Wad90, Wad91]; for a motivation of the concept we refer the reader to the examples given there.
-The point we want to explore here is how to express monads (and their specializations) in the type system of a programing language such that we can abstract from their concrete implementations.
-We show how the monad operations can be overloaded, using parametric type classes.
-This is useful since it allows to define functions over arbitrary Monads, to reuse the same names for operations on different monads, and to generalize list comprehensions without changing their present syntax.
+関数プログラミングにおけるモナドの使用は[Wad90、Wad91]で探究された。概念の動機付けのために、読者にそこに与えられた例を紹介する。
+ここで探求したいのは、具体的な実装から抽象化できるように、プログラミング言語の型システムでモナド（とその特殊化）を表現する方法です。
+パラメトリック型クラスを使用して、モナド演算がどのようにオーバーロードされるかを示します。
+これは、任意のモナド上の関数を定義し、異なるモナド上の演算に同じ名前を再利用し、現在の構文を変更することなくリスト内包を一般化することができるので便利です。
 
-We formulate class Monad as follows:
+Monadクラスを次のように定式化する。
 
     class ma :: Monad a where
         unit :: a -> ma
@@ -756,16 +756,16 @@ We formulate class Monad as follows:
         join xss  = xss `bind` id
         bind xs f = join (map f xs)
 
-This introduces two equivalent formulations of a monad, one in terms of unit and bind, the other in terms of unit, map and join.
-The default definitions in the class express one formulation in terms of the other; hence instances can alternatively define bind or map and join.
-To qualify for a monad, an instance has to satisfy three laws, which are not enforced by the type system.
-`bind` must be associative, with `unit` as left and right unit:
+これは、モナドの2つの等価な公式を導入します。一つはユニットとバインドであり、もう一つはユニット、マップ、ジョインの観点からです。
+クラスのデフォルト定義では、一方の定式化を他方の定式化で表します。インスタンスは代わりにbindまたはmapとjoinを定義することができます。
+モナドの資格を得るためには、インスタンスは3つの法則を満たさなければならず、これは型システムによって強制されません。
+`bind`は左と右の単位として` unit`を伴って結合的でなければなりません：
 
     (m `bind` f) `bind` g = m `bind` \x -> f x `bind` g
     \x -> unit x `bind` f = f
     m `bind` unit         = m
 
-Lists form a monad, as witnessed by the following instance declaration, and a check that monad laws hold:
+リストは、次のインスタンス宣言とモナド法が保有するチェックによって目撃されるように、モナドを形成します。
 
     inst List a :: Monad a where
         unit x          = [x]
@@ -774,7 +774,7 @@ Lists form a monad, as witnessed by the following instance declaration, and a ch
         join []         = []
         join (xs::xss)  = xs ++ join xss
 
-Another example of a monad are "reply"-types, as witnessed by:
+モナドのもう一つの例は、次のような "返信"タイプです：
 
     data Maybe a = Some a | None
 
@@ -783,8 +783,8 @@ Another example of a monad are "reply"-types, as witnessed by:
         bind (Some x) f = f x
         bind None f     = None
 
-As a consequence, code can now be written that works on lists as well as on reply types or any other monad instance.
-In particular, we can use the list comprehension notation in each case, by applying the standard translation to `unit`, `map` and `join`:
+その結果、リストや応答タイプや他のモナドインスタンスで動作するコードを書くことができるようになりました。
+特に、 `unit`、` map`、 `join`に標準翻訳を適用することで、それぞれの場合にリスト理解表記を使用できます。
 
 <!-- page 11 -->
 
@@ -792,22 +792,22 @@ In particular, we can use the list comprehension notation in each case, by apply
     [t | g1,g2]   ≙ join [[t | g2] | g1]
     [t | x <- e]  ≙ map (x : t) e
 
-Here, `t` and `e` are terms, `x` is `a` variable, and `g1` and `g2` are generators `x <- e`.
+ここで、 `t`と` e`は項、 `x`は` a`変数、 `g1`と` g2`はジェネレータ `x < - e`です。
 
-Monad0 is a subclass of Monad.
-It adds a zero monad, nil, and a filter function.
+Monad0はMonadのサブクラスです。
+これは、ゼロモード、ゼロ、およびフィルタ関数を追加します。
 
     class (ma :: Monad a) => ma :: Monad0 a where
         nil     :: ma
         filter  :: (a -> Bool) -> ma -> ma
 
-Monads with zero are the most general type class on which list comprehensions with filters can be defined.
-The standard translation functions are (`p` is a filter, i.e. a Boolean term):
+ゼロを持つモナドは、フィルタ付きのリスト内包を定義できる最も一般的な型クラスです。
+標準翻訳関数は（ `p 'はフィルタ、すなわちブール項である）。
 
     []      ≙ nil
     [t | p] ≙ filter p (unit t)
 
-Lists and reply types both have zeros, as witnessed by:
+リストと返信の両方のタイプは、次のようにゼロになります。
 
     instance List a :: Monad0 a where
         nil               = []
@@ -822,17 +822,17 @@ Lists and reply types both have zeros, as witnessed by:
         filter p (Some x) = if p x then Some x
                             else None
 
-As an example of programming with Monads we discuss abstract parsers, adapting and extending an example from [Wad90].
-A parser is a function that maps a sequence of input symbols to some output, or to a failure value, if no legal parse exists.
-If a parse exists, then it will consist of the unused portion of the input stream, plus some application dependent result value, such as a parse tree.
-If the parser uses backtracking, there might exist several such parses, whereas if it is determinstic, there will be zero or one.
-We construct in the following a library for determinstic parsers.
-Such parsers all have type signature:
+Monadsを使ったプログラミングの例として、抽象パーサについて議論し、[Wad90]の例を適用して拡張します。
+パーサーは、入力シンボルのシーケンスを出力にマップする関数です。正当な解析が存在しない場合は、失敗した値にマップします。
+解析が存在する場合は、入力ストリームの未使用部分と解析ツリーなどのアプリケーション依存の結果値で構成されます。
+パーサーがバックトラックを使用する場合、そのような解析がいくつか存在する可能性がありますが、determinsticの場合はゼロまたは1が存在します。
+以下では、決定性パーサのためのライブラリを構築する。
+そのようなパーサーはすべて型シグネチャを持ちます。
 
     data Parser a = P (String -> Maybe (a, String))
 
-The constructor tag `P` is necessary because of the restriction that instances may only be formed of datatypes.
-Parsers form themselves a monad with zero, as witnessed by the following instance declarations.
+インスタンスはデータ型でしか構成できないという制約があるため、コンストラクタタグ `P`が必要です。
+パーサーは、以下のインスタンス宣言によって目撃されるように、ゼロを持つモナドを形成します。
 
     inst Parser a :: Monad a where
         unit x      = P (\i -> [(x, i)])
@@ -848,10 +848,10 @@ Parsers form themselves a monad with zero, as witnessed by the following instanc
                                 [(x, i') | (x, i') <- p i,
                                         b x])
 
-Note that we have overloaded the comprehension notation.
-The monad comprehensions in the previous two instance declarations work on option types, not lists.
+私たちは理解の表記に過負荷をかけていることに注意してください。
+前の2つのインスタンス宣言のモナドの補完は、リストではなくオプションの型で機能します。
 
-We need two primitive parsers and one more parser combinator:
+2つのプリミティブパーサーともう1つのパーサーコンビネータが必要です。
 
     sym         :: Parser Char
     sym         = P p
@@ -868,7 +868,7 @@ We need two primitive parsers and one more parser combinator:
                                 None   => q i
                             | Some x => Some x)
 
-A deterministic parser for lambda terms can then be written as follows:
+ラムダ項の決定論的パーサーは、次のように書くことができます。
 
     data Term = Lambda Term Term
                 | Apply Term Term
@@ -901,36 +901,36 @@ A deterministic parser for lambda terms can then be written as follows:
 
 <!-- page 12 -->
 
-The defined parser is determinstic; it never backtracks.
-Therefore, parse failure has to be treated differently according to whether it occurs at the start of a production, or in the middle.
-If failure occurs at the start of a production, it signals that another alternative should be tried.
-Failure in the middle of a production signals a syntax error that is reported by returning an Error node.
+定義されたパーサーは決定的です。それは決して逆戻りしない。
+したがって、解析の失敗は、プロダクションの開始時に発生するのか、途中で発生するのかによって異なるように扱われなければなりません。
+生産開始時に障害が発生した場合は、別の代替案を試してください。
+プロダクションの途中でエラーが発生すると、エラー・ノードを戻すことによって報告される構文エラーが通知されます。
 
-Note that most of the productions are expressed in terms of monad comprehensions.
-This time, comprehensions refer to parsers instead of option types or lists.
-Unlike in [Wad90], monad comprehensions need not be labelled with the monad they refer to; we rely instead on the type system for disambiguation (including programmer defined typings if ambiguities arise otherwise).
-The monad style gives us a flexible interface between parsing and abstract tree generation.
-The resulting parser resembles an attribute grammar with both synthesized and inherited attributes (see the definition of aterm).
+生産の大部分はモナド理解の観点から表現されていることに注意してください。
+今回は、オプションの種類やリストの代わりにパーサを参照しています。
+[Wad90]とは違って、モナドの包摂は参照するモナドにラベルを付ける必要はありません。私たちは代わりに曖昧さを除去するために型システムに依存します（あいまいさがなければプログラマが定義した型付けを含みます）。
+モナドスタイルは、解析と抽象的なツリー生成との間の柔軟なインターフェースを提供します。
+生成されるパーサーは、合成された属性と継承された属性の両方を持つ属性文法に似ています（atermの定義を参照）。
 
-## 8 Conclusion
+## 8 結論
 
-We have proposed a generalization of Haskell's type classes to support container classes with overloaded data constructors and selectors.
-The underlying type system is an extension of the Hindley/Milner system with parametric type classes.
-This extension preserves two important properties of the original system, namely decidable typability and principal types.
-Its type scheme uses bounded quantification whose introduction and elimination depend on a separate context-constrained instance theory.
-The decoupling of the instance theory from the type inference system makes our system more modular than previous work.
-We believe that the gained modularity can also be a great aid to implementors.
+オーバーロードされたデータコンストラクタとセレクタを持つコンテナクラスをサポートするために、Haskellの型クラスの一般化を提案しました。
+基礎となるタイプのシステムは、パラメトリックタイプのクラスを持つHindley / Milnerシステムの拡張です。
+この拡張は、元のシステムの2つの重要な特性、すなわち決定可能な型定義性とプリンシパル型を保持します。
+そのタイプスキームは、限定された定量化を使用し、その導入および除去は、別の状況制約付きインスタンス理論に依存する。
+型推論システムからインスタンス理論を切り離すことで、私たちのシステムは以前の作業よりもモジュール化されています。
+得られたモジュール性は、実装者にとって大きな助けになると考えています。
 
-A point we have not discussed so far is how to implement parametric type classes at run-time.
-Essentially, a translation scheme into Haskell along the lines of [WB89] can be employed.
-Additional parameters for type classes translate then into parameters for run-time dictionaries.
-Such a translation can provide a (transformational) semantics for parametric type classes.
-Whether it can also provide a good run-time model is debatable.
-Existing implementations that are based on this translation scheme have been criticized for their run-time performance.
-We argue that, in principle, the run-time performance of a program with type classes should not be any worse than the performance of a program written in an object-oriented language.
-Moreover, similar optimization techniques can be used [CU90].
+これまで説明していない点は、実行時にパラメトリック型クラスを実装する方法です。
+本質的に、[WB89]の行に沿ったHaskellへの翻訳スキームを採用することができます。
+型クラスの追加パラメータは、ランタイム辞書のパラメータに変換されます。
+そのような変換は、パラメトリック型クラスの（変換的）セマンティクスを提供することができる。
+良いランタイムモデルを提供できるかどうかは議論の余地があります。
+この翻訳スキームに基づいた既存の実装は、実行時のパフォーマンスが批判されています。
+原則として、型クラスを持つプログラムの実行時のパフォーマンスは、オブジェクト指向言語で記述されたプログラムのパフォーマンスよりも悪くあってはならないと主張します。
+さらに、同様の最適化手法を用いることができる[CU90]。
 
-## References
+## 参考文献
 
 [CCH+89] P. Canning, W. Cook, W. Hill, W. Olthff, and J. Mitchell. F-bounded polymorphism for objectoriented programming. In Proc. ACM Conf. Functional Programming Languages and Computer Architecture, pages 273-280, 1989.
 
