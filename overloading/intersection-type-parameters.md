@@ -42,51 +42,34 @@
 
 <!-- page 2 -->
 
-  Function foo could then be used, for example, in application (foo reverse),
-  where reverse computes the reversal of a list, having type ∀a.[a] → [a].
+  Function foo could then be used, for example, in application (foo reverse), where reverse computes the reversal of a list, having type `∀a.[a] → [a]`.
 
-  The above type for foo is a rank-2 type, as it contains quantifiers to the left
-  of the function arrow. Other higher-ranked types could also be assigned to foo.
-  For example, foo could be assigned type (∀a.[a] → Int) → (Int,Int) in an
-  application such as (foo length), where length has type ∀a.[a] → Int.
+  The above type for `foo` is a rank-2 type, as it contains quantifiers to the left of the function arrow.
+  Other higher-ranked types could also be assigned to `foo`.
+  For example, `foo` could be assigned type `(∀a.[a] → Int) → (Int,Int)` in an application such as `(foo length)`, where `length` has type `∀a.[a] → Int`.
 
-  These two types are however incomparable in system F. In other words,
-  system F lacks principal types for expressions: a single expression may be typeable
-  with two or more incomparable types, where neither is more general than the
-  other. As a consequence, type inference cannot always choose a single type and
-  use it throughout the scope of a let-bound definition. In particular, there exists
-  no principal type for the above definiton of foo, such that all others follows from
-  it by a sequence of instantiations and generalizations.
+  These two types are however incomparable in system F.
+  In other words, system F lacks principal types for expressions:
+  a single expression may be typeable with two or more incomparable types, where neither is more general than the other.
+  As a consequence, type inference cannot always choose a single type and use it throughout the scope of a let-bound definition. In particular, there exists no principal type for the above definiton of foo, such that all others follows from it by a sequence of instantiations and generalizations.
 
-  Another drawback for the use of system F as the basis for a programming
-  language is that complete type inference in this system is undecidable [31]. 3
-  In order to cope with these problems, more practical type systems have been
-  recently proposed as a basis for the support of higher-ranked polymorphism in
-  programming languages. The main idea is to require the programmer to sup-
-  ply a type annotation for the definition of a function with polymorphic type
-  parameters, thus avoiding possible ambiguities on its type and also providing
-  type information that can be used for guiding type inference. Some relevant
-  works along this line are MLF [15,16], FPH [30] and Flexible Types [18,17]. These
-  type systems differ on the changes that are introduced to the Hindley-Milner
-  type system, particularly on the choice of type annotations required and on the
-  strategy used for type inference.
+  Another drawback for the use of system F as the basis for a programming language is that complete type inference in this system is undecidable [31]. 3
+  In order to cope with these problems, more practical type systems have been recently proposed as a basis for the support of higher-ranked polymorphism in programming languages.
+  The main idea is to require the programmer to supply a type annotation for the definition of a function with polymorphic type parameters, thus avoiding possible ambiguities on its type and also providing type information that can be used for guiding type inference.
+  Some relevant works along this line are MLF [15,16], FPH [30] and Flexible Types [18,17].
+  These type systems differ on the changes that are introduced to the Hindley-Milner type system, particularly on the choice of type annotations required and on the strategy used for type inference.
 
   Lack of principal types and the need for type annotations are not the only
   issues related to avoiding the restriction of monomorphism of function parame-
   ters. The annotation of a higher-ranked polymorphic type for a function (or the
   annotation of a quantified type for a function parameter) inevitably restricts the
   contexts where the function may be used. For example, if the type annotated for
-  foo is (∀a.[a] → [a]) → ([Bool],[Char]), none of the following applications
+  foo is `(∀a.[a] → [a]) → ([Bool],[Char])`, none of the following applications
   can be type-checked:
 
-  foo length
-  foo head
-  foo listMaybe
-  where length
-  has type ∀a.[a] → Int
-  where head
-  has type ∀a.[a] → a
-  where listMaybe has type ∀a.[a] → Maybe a
+    foo length     where length    has type ∀a.[a] → Int
+    foo head       where head      has type ∀a.[a] → a
+    foo listMaybe  where listMaybe has type ∀a.[a] → Maybe a
 
   Modern functional programming languages already include other useful ex-
   tensions to HM and it is desired that higher-ranked functions work well in con-
@@ -105,33 +88,21 @@
   used in Haskell to support overloading.
   Consider, for example, the use of foo in the following Haskell examples:
 
-      foo
-      foo
-      foo
-      foo
-      allEqual
-      sort
-      nub
-      fromEnum
-      where
-      where
-      where
-      where
-      allEqual :: ∀a. Eq a ⇒ [a] → Bool
-      sort :: ∀a. Ord a ⇒ [a] → [a]
-      nub :: ∀a. Eq a ⇒ [a] → [a]
-      fromEnum :: ∀a. Enum a ⇒ a → Int
+      foo allEqual  where allEqual :: ∀a. Eq a ⇒ [a] → Bool
+      foo sort      where sort :: ∀a. Ord a ⇒ [a] → [a]
+      foo nub       where nub :: ∀a. Eq a ⇒ [a] → [a]
+      foo fromEnum  where fromEnum :: ∀a. Enum a ⇒ a → Int
 
   The type of each of the above arguments is a constrained polymorphic type
   (also called a predicated type). In Haskell, a type class denotes a family of
   types (instances) on which certain values (the member functions) are defined.
-  For example, the equality operator (==) has type ∀a. Eq a ⇒ a → a → Bool,
+  For example, the equality operator `(==)` has type `∀a. Eq a ⇒ a → a → Bool`,
   where the class constraint Eq a indicates that equality is not parametrically
   polymorphic, but only works for those types that are an instance of the Eq class.
   In other words, class constraints restrict the possible types to which quantified
   type variables can be instantiated. Class constraints introduced on the types
   of overloaded symbols are also propagated to the types of expressions defined
-  in terms of these symbols. For example, the constraint on the type of (==) is
+  in terms of these symbols. For example, the constraint on the type of `(==)` is
   propagated to the type of function allEqual, which checks that all elements
   of a given list are equal, and also to the type of function nub, that removes
   duplicate elements in a given list. 4
@@ -144,11 +115,11 @@
 
       (∀a. Ord a ⇒ [a] → [a]) → ([Bool],[Char])
 
-  Then, both applications (foo sort) and (foo reverse) are allowed in QMLF,
-  where the type of reverse can be instantiated to type ∀a.Ord a ⇒ [a] → [a].
-  But, again, this type annotation for foo forbids, for example, all other appli-
-  cations in the list above. In particular, application foo nub would not type check,
-  despite the fact that the type of nub differs from the type of foo’s parameter
+  Then, both applications `(foo sort)` and `(foo reverse)` are allowed in QMLF,
+  where the type of reverse can be instantiated to type `∀a.Ord a ⇒ [a] → [a]`.
+  But, again, this type annotation for `foo` forbids, for example, all other appli-
+  cations in the list above. In particular, application `foo nub` would not type check,
+  despite the fact that the type of `nub` differs from the type of foo’s parameter
   only on its class constraint. Therefore, allowing type annotation of higher-ranked
   types with predicate constraints does not solve all problems with respect to a
   flexible use of higher-ranked functions.
@@ -162,8 +133,7 @@
 
   ----
 
-  4
-  A more detailed description of Haskell’s type classes may be found, for example,
+  4 A more detailed description of Haskell’s type classes may be found, for example,
   in [23,1,28].
 
   ----
@@ -195,12 +165,12 @@
 
   ## 2 Intersection parameters and polymorphic arguments
 
-  Let us consider what should be the principal (minimal) type of function foo,
+  Let us consider what should be the principal (minimal) type of function `foo`,
   which would allow any of the previously discussed arguments to be applied to
-  this function. Intuitively, an application (foo f) should be valid if f is a function
-  that can be applied to lists of booleans and to lists of chars. Also, (foo f) should
-  have type (τ 1 , τ 2 ), where τ 1 is the result type of an application of f to a list of
-  booleans and τ 2 is the result type of an application of f to a list of chars. Using
+  this function. Intuitively, an application `(foo f)` should be valid if `f` is a function
+  that can be applied to lists of booleans and to lists of chars. Also, `(foo f)` should
+  have type `(τ1, τ2)`, where `τ1` is the result type of an application of f to a list of
+  booleans and `τ2` is the result type of an application of `f` to a list of chars. Using
   intersection types, this can be written as (for ease of reference, the definition of
   foo is repeated below):
 
@@ -222,27 +192,27 @@
 
 <!-- page 5 -->
 
-  An intersection type (τ 1 ∧ τ 2 ) may occur in the type of an expression only
+  An intersection type `(τ1 ∧ τ2)` may occur in the type of an expression only
   to the left of the function type constructor, as, for example, in the above type
-  annotation for foo. A type (τ 1 ∧τ 2 ) may also occur in typing context assignments,
+  annotation for foo. A type `(τ1 ∧ τ2)` may also occur in typing context assignments,
   being introduced in this context by means of a type annotation.
 
   Since intersection types may only occur to the left of function arrows, in-
   tersection type elimination is restricted, in our system, to the rule for type
   derivation of a term variable. Dually, intersection type introduction may occur
   only in the type derivation for the argument of an application: assuming a term
-  t can be assigned type (τ 1 ∧ τ 2 ) → τ in a given typing context, an application
-  (t u) will be well typed in this context, if u can be assigned, in this context, a
-  type σ that can be instantiated both to τ 1 and to τ 2 .
+  t can be assigned type `(τ1 ∧ τ2) → τ` in a given typing context, an application
+  `(t u)` will be well typed in this context, if `u` can be assigned, in this context, a
+  type σ that can be instantiated both to `τ1` and to `τ2`.
 
-  For example, application (foo reverse) is well typed according to this rule,
-  since the type annotated for foo can be instantiated to ([Bool] → [Bool] ∧
-  [Char] → [Char]) → ([Bool],[Char]), and the type of reverse can be in-
-  stantiated to both [Bool] → [Bool] and [Char] → [Char].
+  For example, application `(foo reverse)` is well typed according to this rule,
+  since the type annotated for foo can be instantiated to `([Bool] → [Bool] ∧
+  [Char] → [Char]) → ([Bool],[Char])`, and the type of reverse can be in-
+  stantiated to both `[Bool] → [Bool]` and `[Char] → [Char]`.
 
-  Analogously, application (foo sort) is well typed, in a context where Bool
-  and Char are both instances of type class Ord , since the type of sort can be
-  instantiated to both [Bool] → [Bool] and [Char] → [Char], in this context.
+  Analogously, application `(foo sort)` is well typed, in a context where Bool
+  and Char are both instances of type class `Ord`, since the type of sort can be
+  instantiated to both `[Bool] → [Bool]` and `[Char] → [Char]`, in this context.
   Each of the applications of foo discussed previously would also be valid, in a
   context where the constraints on the type of the arguments could be satisfied.
 
@@ -251,10 +221,10 @@
   type is inferred according to the type required in each context where the pa-
   rameter is used, in the same way as it happens for uses of overloaded symbols
   in a type system for context-dependent overloading, such as Haskell’s type class
-  system. For example, the type for each use of parameter g in the body of foo
-  is inferred according to the type of the argument to which g is applied. Dually,
-  the type for each use of parameter x in the body of function f1, defined below,
-  is infered according to the types of the parameters of the function to which x is
+  system. For example, the type for each use of parameter `g` in the body of foo
+  is inferred according to the type of the argument to which `g` is applied. Dually,
+  the type for each use of parameter `x` in the body of function `f1`, defined below,
+  is infered according to the types of the parameters of the function to which `x` is
   given as argument.
 
   Example 2.
@@ -262,11 +232,11 @@
       f1 :: (Bool ∧ Int) → Int
       f1 x = if x then (x+1) else (x-1)
 
-  Function f1 could be applied, for example, to an overloaded symbol, say o ::
-  C a ⇒ a, declared in type class C, provided that there exist instance definitions
-  of this class for types Bool and Int.
+  Function f1 could be applied, for example, to an overloaded symbol, `say o ::
+  C a ⇒ a`, declared in type class `C`, provided that there exist instance definitions
+  of this class for types `Bool` and `Int`.
 
-  Consider now the definition of function f2 below:
+  Consider now the definition of function `f2` below:
 
   Example 3.
 
@@ -275,19 +245,19 @@
       
 <!-- page 6 -->
 
-  The types of parameters h and y on each application h y, in the body of func-
-  tion f2, can be determined by the type of the result of this function. Therefore,
-  type inference for function f2 is defined so as to use the additional information
-  provided by type annotations for selecting the appropriate type for h and y on
-  each application h y. On the other hand, if type annotations were provided only
-  for the parameters of f2, then four incomparable types could be derived for f2,
-  namely, (Int,Bool), (Int,Int), (Bool,Int) and (Bool,Bool); it would not
-  be possible then to determine the types of h and y on each application. No type
-  could then be infered for f2.
+  The types of parameters `h` and `y` on each application `h y`, in the body of func-
+  tion `f2`, can be determined by the type of the result of this function. Therefore,
+  type inference for function `f2` is defined so as to use the additional information
+  provided by type annotations for selecting the appropriate type for `h` and `y` on
+  each application `h y`. On the other hand, if type annotations were provided only
+  for the parameters of `f2`, then four incomparable types could be derived for `f2`,
+  namely, `(Int,Bool)`, `(Int,Int)`, `(Bool,Int)` and `(Bool,Bool)`; it would not
+  be possible then to determine the types of `h` and `y` on each application. No type
+  could then be infered for `f2`.
 
   As in the case for overloaded symbols, an expression involving a function
   parameter annotated with an to an intersection type may sometimes be ambigu-
-  ous. As an example, consider application s z in the body of function f3 defined
+  ous. As an example, consider application `s z` in the body of function `f3` defined
   below:
 
   Example 4.
@@ -296,39 +266,38 @@
       f3 s z = s z
 
   In this case, there are two distinct possible type derivations for the body of
-  f3, corresponding to the two different possible choices for the types of parameters
-  s and z in application s z.
+  `f3`, corresponding to the two different possible choices for the types of parameters
+  `s` and `z` in application `s z`.
 
+todo-->
   ## 3 Constrained Polymorphism and Intersection Types
 
   Haskell’s type class system is based on the more general theory of qualified
   types [10], which extends Hindley-Milner type expressions with type constraints
-  (or predicates). A constrained polymorphic type has the form ∀ a. P ⇒ τ , where
-  P is a (possibly empty) set of class constraints and τ is a monomorphic type.
-  Here, and elsewhere, we use the notation a for a sequence of type variables
-  a 1 , . . . , a n , for some n ≥ 0.
+  (or predicates). A constrained polymorphic type has the form `∀a.P ⇒ τ`, where
+  `P` is a (possibly empty) set of class constraints and `τ` is a monomorphic type.
+  Here, and elsewhere, we use the notation `a` for a sequence of type variables
+  `a1, ..., an`, for some `n ≥ 0`.
 
-  Type ∀ a. P ⇒ τ denotes the set of instances of τ that satisfy the predicates
-  in P . For example, type Int → Int → Bool is an instance of type ∀a. Eq a ⇒
-  a → a → Bool, if constraint Eq Int can be satisfied according to the visible
+  Type `∀a.P ⇒ τ` denotes the set of instances of `τ` that satisfy the predicates
+  in `P`. For example, type `Int → Int → Bool` is an instance of type `∀a. Eq a ⇒
+  a → a → Bool`, if constraint `Eq Int` can be satisfied according to the visible
   class and instance declarations, that is, if there exists an instance definition of
-  type Int for class Eq. In other words, each class constraint C τ is an assertion
-  that type τ must be an instance of class C. 5
+  type `Int` for class `Eq`. In other words, each class constraint `C τ` is an assertion
+  that type `τ` must be an instance of class `C`. 5
 
   Satisfiability of class constraints can be described using an entailment rela-
-  tion, denoted by the symbol |=. If P and Q are finite sets of type predicates,
-  then the assertion that P |= Q means that predicates in Q are satisfied whenever
+  tion, denoted by the symbol `|=`. If `P` and `Q` are finite sets of type predicates,
+  then the assertion that `P |= Q` means that predicates in `Q` are satisfied whenever
   predicates in P are satisfied. 6
 
   ----
 
-  5
-  6
-  For simplicity, we only consider here single parameter type classes, since the exten-
+  5 For simplicity, we only consider here single parameter type classes, since the exten-
   sion to multiparameter type classes [12,11] is orthogonal to the problem considered
   in this paper.
-  See [10] for the general assumptions made about the predicate entailment relation
-  P |= Q, and for a definition of the entailment relation induced by Haskell class and
+  6 See [10] for the general assumptions made about the predicate entailment relation
+  `P |= Q`, and for a definition of the entailment relation induced by Haskell class and
   instance declarations.
 
   ----
