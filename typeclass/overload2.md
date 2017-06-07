@@ -300,6 +300,12 @@
 
 ## 2 Type System
 
+  We base our discussion on a simple functional language with overloaded identifiers.
+
+#### syntax
+
+  Figure 1 gives the syntax of terms and types.
+
     Unique variables       u ∈ U
     Overloaded variables   o ∈ O
     Constructors           k ∈ K = ∪{K_D | D ∈ D}
@@ -316,6 +322,36 @@
     Typotheses             Γ = x1 : σ1, ..., xn : σn            (n ≧ 0)
 
   Figure 1: Abstract syntax of System O.
+
+  We split the variable alphabet into subalphabets `U` for unique variables, ranged over by `u`, `O` for overloaded variables, ranged over by `o`, and `K` for data constructors, ranged over by `k`.
+  The letter `x` ranges over both unique and overloaded variables as well as constructors.
+  We assume that every non-overloaded variable `u` is bound at most once in a program.
+
+  The syntax of terms is identical to the language Exp in [<a name="rMil78"></a>[Mil78](#Mil78)].
+  A program consists of a sequence of instance declarations and a term.
+  An instance declaration (`inst o:στ = e in p`) overloads the meaning of the identifier `o` with the function given by `e` on all arguments that are constructed from the type constructor `T`.
+
+  A type `τ` is a type variable, a function type, or a datatype.
+  Datatypes are constructed from datatype constructors `D`.
+  For simplicity, we assume that all value constructors and selectors of a datatype `Dτ1...τn` are prede ned, with bindings in some fixed initial typothesis `Γ0`.
+  With user-defined type declarations, we would simply collect in `Γ0` all selectors and constructors actually declared in a given program.
+  Let `K_D` be the set of all value constructors that yield a value in `D τ1, ..., τn` for some types `τ1, ..., τn`.
+
+  We assume that there exists a bottom datatype `⫫ ∈ D` with `K_⫫ = ∅`.
+  Note that this type is present in Miranda, where it is written `()`, but is absent in Haskell, where `()` has a value constructor, also written `()`.
+  We let `T` range over datatype constructors as well as the function type constructor `(->)`, writing `(->) τ τ'` as a synonym for `τ -> τ'` .
+
+  A type scheme `σ` consists of a type `τ` and quantifiers for some of the type variables in `τ`.
+  Unlike with Hindley/Milner polymorphism, a quantified variable `α` comes with a constraint `πα`, which is a (possibly empty) set of bindings `o : α -> τ`.
+  An overloaded variable `o` can appear at most once in a constraint.
+  Constraints restrict the instance types of a type scheme by requiring that overloaded identifiers are defined at given types.
+  The Hindley/Milner type scheme `∀α.σ` is regarded as syntactic sugar for `∀α.()⇒σ`.
+
+  ----
+
+#### typing rules
+
+  Figure 2 defines the typing rules of System O.
 
     Γ ⊢ x : σ (x : σ ∈ Γ)              (TAUT)
 
@@ -350,34 +386,6 @@
 
   Figure 2: Typing rules for System O.
 
-  We base our discussion on a simple functional language with overloaded identifiers.
-  Figure 1 gives the syntax of terms and types.
-
-  We split the variable alphabet into subalphabets `U` for unique variables, ranged over by `u`, `O` for overloaded variables, ranged over by `o`, and `K` for data constructors, ranged over by `k`.
-  The letter `x` ranges over both unique and overloaded variables as well as constructors.
-  We assume that every non-overloaded variable `u` is bound at most once in a program.
-
-  The syntax of terms is identical to the language Exp in [<a name="rMil78"></a>[Mil78](#Mil78)].
-  A program consists of a sequence of instance declarations and a term.
-  An instance declaration (`inst o:στ = e in p`) overloads the meaning of the identifier `o` with the function given by `e` on all arguments that are constructed from the type constructor `T`.
-
-  A type `τ` is a type variable, a function type, or a datatype.
-  Datatypes are constructed from datatype constructors `D`.
-  For simplicity, we assume that all value constructors and selectors of a datatype `Dτ1...τn` are prede ned, with bindings in some fixed initial typothesis `Γ0`.
-  With user-defined type declarations, we would simply collect in `Γ0` all selectors and constructors actually declared in a given program.
-  Let `K_D` be the set of all value constructors that yield a value in `D τ1, ..., τn` for some types `τ1, ..., τn`.
-
-  We assume that there exists a bottom datatype `⫫ ∈ D` with `K_⫫ = ∅`.
-  Note that this type is present in Miranda, where it is written `()`, but is absent in Haskell, where `()` has a value constructor, also written `()`.
-  We let `T` range over datatype constructors as well as the function type constructor `(->)`, writing `(->) τ τ'` as a synonym for `τ -> τ'` .
-
-  A type scheme `σ` consists of a type `τ` and quantifiers for some of the type variables in `τ`.
-  Unlike with Hindley/Milner polymorphism, a quantified variable `α` comes with a constraint `πα`, which is a (possibly empty) set of bindings `o : α -> τ`.
-  An overloaded variable `o` can appear at most once in a constraint.
-  Constraints restrict the instance types of a type scheme by requiring that overloaded identifiers are defined at given types.
-  The Hindley/Milner type scheme `∀α.σ` is regarded as syntactic sugar for `∀α.()⇒σ`.
-
-  Figure 2 defines the typing rules of System O.
   The type system is identical to the original Hindley/Milner system, as presented in in [<a name="rDM82"></a>[DM82](#DM82)], except for two modifications.
 
   - In rule (∀I), the constraint πα on the introduced bound variable ff is traded between typothesis and type scheme.
@@ -388,7 +396,6 @@
   - There is an additional rule (INST) for instance declarations.
   The rule is similar to (LET), except that the overloaded variable `o` has an explicit type scheme `στ` and it is required that the type constructor `T` is different in each instantiation of a variable `o`.
 
-  ----
 
   We let `στ` range over closed type schemes that have `T` as outermost argument type constructor:
 
@@ -414,7 +421,9 @@
   Hence, for any argument type `τ` and overloaded variable `o`, there can be only one instance type of `o` on arguments of type `τ`.
   By embodying this rule in the form of type variable constraints we enforce it at the earliest possible time.
 
-  **Example 2.1** The following program fragment gives instance declarations for the equality function `(==)`.
+## Example 2.1
+
+  The following program fragment gives instance declarations for the equality function `(==)`.
   We adapt our notation to Haskell's conventions, writing `::` instead of `:`
   in a typing; writing `(o::a->t1)=>t2` instead of `∀α:(o : a -> τ1) ⇒ τ2`
   and writing `inst o :: s; o = e` instead of `inst o : σ = e`.
@@ -432,7 +441,9 @@
   Note that using `(==)` directly in the second instance declaration would not work, since instance declarations are not recursive.
   An extension of System O to recursive instance declaration would be worthwhile but is omitted here for simplicity.
 
-  **Example 2.2** The following example demonstrates an object-oriented style of programming, and shows where we are more expressive than Haskell's type classes.
+### Example 2.2
+
+The following example demonstrates an object-oriented style of programming, and shows where we are more expressive than Haskell's type classes.
   We write instances of a polymorphic class `Set`, with a member test and operations to compute the union, intersection, and difference of two sets.
   In Haskell, only sets of a fixed element type could be expressed.
   The example uses the record extension of Section 5;

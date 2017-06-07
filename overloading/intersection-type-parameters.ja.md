@@ -21,28 +21,25 @@
 ## 1 はじめに
 
   Hindley-Milner 型システム <a name="r9"></a>[[9]](#9) (HM) は、 Haskell <a name="r23"></a>[[23]](#23) や ML <a name="r20"></a>[20](#20) のような最近の関数型プログラミング言語の型システムの基礎として用いられています。
-  これは、コンパイラがプログラマの助けを借りずに、あらゆる言語表現の主要型を推論できるという顕著な特性のためで、
-  型推論アルゴリズム <a name="r5"></a>[[5]](#5) は比較的単純です。
+  これは、コンパイラがプログラマの助けを借りずに、あらゆる言語表現の主要型を推論できるという顕著な特性のためで、 型推論アルゴリズム <a name="r5"></a>[[5]](#5) は比較的単純です。
   しかしながら、いくつかの制約を課すことによってこれが達成されており、関数パラメータが単相型でなければならないという主な制約があります。
 
   たとえば、 HM 型システム では、次の定義は使用できません:
 
     foo g = (g [True,False], g [’a’,’b’,’c’])
 
-  パラメータ `g` は、関数の本体で異なる型 (ブール値のリストと文字のリストの両方に適用される) で使用されるため、その型は単相性ではありません。したがって、 foo のこの定義は HM で型付けできません。
+  パラメータ `g` は、関数の本体で異なる型 (ブール値のリストと文字のリストの両方に適用される) で使用されるため、その型は単相的ではありません。したがって、 foo のこの定義は HM で型付けできません。
 
   対照的に、 Girard-Reynolds システム F \[<a name="r7"></a>[7](#7), <a name="r25"></a>[25](#25)\] では、型の中に汎用的な量指定子を使用することができます。
-  システム F に基づく言語では、 foo を割り当てることができます。
-  たとえば、次のように型付けします
+  システム F に基づく言語では、 foo を割り当てることができ、 たとえば、次のように型付けします
 
-        (∀a.[a] → [a]) → ([Bool],[Char])
+      (∀a.[a] → [a]) → ([Bool],[Char])
 
   ----
 
   <a name="ast"></a>[\*](#r_ast) この研究は、 FAPEMIG によって部分的に支援されています。
 
   ----
-
 
 <!-- page 2 -->
 
@@ -52,189 +49,123 @@
   他の高階の型も `foo` に割り当てることができます。
   例えば、`length` が `∀a.[a] → Int` 型であるとき、 `(foo length)` のような関数適用で `foo` に 型 `(∀a.[a] → Int) → (Int,Int)` を割り当てます。
 
-  しかしながら、これらの2つのタイプは、システム F では比較できません。
+  しかしながら、これらの2つの型は、システム F では比較できません。
   言い換えれば、システム F には式の主要型が欠けています。
   1つの式は、2つ以上の比類のない型を持つ型付け可能であり、どちらも他の型よりも一般的ではありません。
-  結果として、型推論は常に単一の型を選択することはできず、レットバインド定義の範囲全体でそれを使用することはできません。 特に、上記の foo の定義には主要な型は存在せず、他のすべてのインスタンスは一連のインスタンス化と一般化によってそれに従う。
+  結果として、型推論は常に単一の型を選択することはできず、レットバインド定義の範囲全体でそれを使用することはできません。 特に、上記の foo の定義には主要な型は存在せず、他のすべてのインスタンスは一連のインスタンス化と一般化によってそれに従います。
 
-プログラミング言語の基礎としてシステムFを使用するもう一つの欠点は、このシステムの完全な型推論は決定不能であることです [31]。 3
+  プログラミング言語の基礎としてシステムFを使用するもう一つの欠点は、このシステムの完全な型推論は決定不能であることです [31]。 3
   これらの問題に対処するために、より実用的な型システムが、プログラミング言語におけるより高ランクの多相型のサポートのための基礎として最近提案されています。
   主な考え方は、プログラマが多相型パラメータを持つ関数の定義のための型注釈を提供することを要求することで、型の曖昧さを回避し、型推論の指針として使用できる型情報を提供することです。
   この行に沿ったいくつかの関連する作品は、MLF [15,16]、FPH [30]、および柔軟なタイプ[18,17]です。
   これらの型システムは、 Hindley-Milner 型システムに導入された変更、特に必要な型の注釈の選択と型推論に使用される方針によって異なります。
 
-  Lack of principal types and the need for type annotations are not the only
-  issues related to avoiding the restriction of monomorphism of function parame-
-  ters. The annotation of a higher-ranked polymorphic type for a function (or the
-  annotation of a quantified type for a function parameter) inevitably restricts the
-  contexts where the function may be used. For example, if the type annotated for
-  foo is (∀a.[a] → [a]) → ([Bool],[Char]), none of the following applications
-  can be type-checked:
+  関数型パラメータの単相性の制限を避けることに関連する主要型の欠如と型注釈の必要性だけではありません。
+  関数の上位ランクの多相型の注釈 (または、関数パラメータの量化された型の注釈) は、関数が使用されるコンテキストを必然的に制限します。
+  たとえば、 foo の注釈の型が `(∀a.[a] → [a]) → ([Bool],[Char])` の場合、次の関数適用のいずれも型検査できません:
 
-  foo length
-  foo head
-  foo listMaybe
-  where length
-  has type ∀a.[a] → Int
-  where head
-  has type ∀a.[a] → a
-  where listMaybe has type ∀a.[a] → Maybe a
+    foo length     where length    has type ∀a.[a] → Int
+    foo head       where head      has type ∀a.[a] → a
+    foo listMaybe  where listMaybe has type ∀a.[a] → Maybe a
 
-  Modern functional programming languages already include other useful ex-
-  tensions to HM and it is desired that higher-ranked functions work well in con-
-  junction with these extensions. In particular, it is desirable that higher-ranked
+  現代の関数プログラミング言語は、すでに HM への他の有用な拡張を含んでおり、上位ランクの関数がこれらの拡張と共にうまく機能することが望まれています。特に、上位ランクの関数は、オーバーロードをサポートするために Haskell で使用される型クラス [10,8] のメカニズムと連携してうまく機能することが望ましいのです。
 
   ----------
 
-  3 Kfoury and Tiuryn have indeed also proved undecidability of typeability for any
-  subset of system F with rank ≥ 3 [13].
+  3 Kfoury と Tiuryn は、確かにランクが3以上のシステムFの任意のサブセットに対する型付け性の決定不能性を証明しています [13]。
 
   ----------
 
 <!-- page 3 -->
 
-  functions work well in conjunction with the mechanism of type classes [10,8],
-  used in Haskell to support overloading.
-  Consider, for example, the use of foo in the following Haskell examples:
+  例えば、以下の Haskell の例で `foo` を使うことを考えてみましょう:
 
-      foo
-      foo
-      foo
-      foo
-      allEqual
-      sort
-      nub
-      fromEnum
-      where
-      where
-      where
-      where
-      allEqual :: ∀a. Eq a ⇒ [a] → Bool
-      sort :: ∀a. Ord a ⇒ [a] → [a]
-      nub :: ∀a. Eq a ⇒ [a] → [a]
-      fromEnum :: ∀a. Enum a ⇒ a → Int
+      foo allEqual  where allEqual :: ∀a. Eq a ⇒ [a] → Bool
+      foo sort      where sort :: ∀a. Ord a ⇒ [a] → [a]
+      foo nub       where nub :: ∀a. Eq a ⇒ [a] → [a]
+      foo fromEnum  where fromEnum :: ∀a. Enum a ⇒ a → Int
 
-  The type of each of the above arguments is a constrained polymorphic type
-  (also called a predicated type). In Haskell, a type class denotes a family of
-  types (instances) on which certain values (the member functions) are defined.
-  For example, the equality operator (==) has type ∀a. Eq a ⇒ a → a → Bool,
-  where the class constraint Eq a indicates that equality is not parametrically
-  polymorphic, but only works for those types that are an instance of the Eq class.
-  In other words, class constraints restrict the possible types to which quantified
-  type variables can be instantiated. Class constraints introduced on the types
-  of overloaded symbols are also propagated to the types of expressions defined
-  in terms of these symbols. For example, the constraint on the type of (==) is
-  propagated to the type of function allEqual, which checks that all elements
-  of a given list are equal, and also to the type of function nub, that removes
-  duplicate elements in a given list. 4
+  上記の各引数の型は、(述語型とも呼ばれる) 制約された多相型です。
+  Haskell では、型クラスは、ある値 (メンバ関数) が定義されている型 (インスタンス) のファミリを表します。
+  例えば、等価演算子 `(==)` は `∀a. Eq a ⇒ a → a → Bool` 型です。ここで、クラス制約 `Eq a` は、等価演算子がパラメトリック多相ではないことを示しますが、`Eq` クラスのインスタンスである型に対してのみ動作します。
+  言い換えると、クラス制約は、量化された型変数のインスタンス化可能な型を制限します。
+  オーバーロードされたシンボルの型に導入されたクラス制約は、これらのシンボルに関して定義された式の型にも伝播されます。
+  例えば ​​`(==)` 型の制約は、与えられたリストのすべての要素が等しいかどうかをチェックする関数` allEqual` の型に、また関数 `nub`の型にも渡されます。 指定されたリスト内の重複要素を削除します。 4
 
-  Type system QMLF [19] is, to our knowledge, the only work that investigates
-  how higher-ranked polymorphism can work in conjunction with constrained poly-
-  morphism. It extends the MLF type system, allowing predicate constraints (such
-  as class constraints) to be specified on higher-ranked types. For example, in this
-  system, foo could be annotated with type
+  型システム QMLF [19] は、私たちの知る限りでは、より高いランクの多相性がどのように制約付き多相型と連携して機能するかを調べる唯一の研究です。
+  これは MLF 型システムを拡張し、上位クラスの型で述語制約 (クラス制約など) を指定できるようにします。
+  たとえば、このシステムでは、 foo には型の注釈を付けることができます
 
       (∀a. Ord a ⇒ [a] → [a]) → ([Bool],[Char])
 
-  Then, both applications (foo sort) and (foo reverse) are allowed in QMLF,
-  where the type of reverse can be instantiated to type ∀a.Ord a ⇒ [a] → [a].
-  But, again, this type annotation for foo forbids, for example, all other appli-
-  cations in the list above. In particular, application foo nub would not type check,
-  despite the fact that the type of nub differs from the type of foo’s parameter
-  only on its class constraint. Therefore, allowing type annotation of higher-ranked
-  types with predicate constraints does not solve all problems with respect to a
-  flexible use of higher-ranked functions.
+そして、QMLFでは `(foo sort)` と `(foo reverse)` の両方の関数適用が許可されています。`reverse` の型は `∀a.Ord a ⇒ [a] → [a]` と型付けできます。
+  しかし、 `foo` のこの型の注釈は、例えば、上記リストの他のすべての関数適用を禁止します。
+  特に、関数適用 `foo nub` は、 `nub`の型がクラスの制約上の `foo` のパラメータの型と異なっているにもかかわらず、型検査を行いません。
+  したがって、述語制約付きの上位ランクの型の型注釈を許可しても、上位ランクの関数の柔軟な使用に関するすべての問題は解決されません。
 
-  In order to solve these problems and promote code reuse, we adopt a different
-  approach, allowing programmers to annotate intersection types for the types of
-  function parameters that are used with different types in the function’s body.
-  Intersection types [3] provide a conceptually simple and tractable alternative to
-  the impredicative polymorphism of System F, while typing many more programs
-  than the Hindley-Milner type system. The novelty of our work is the combination
+  これらの問題を解決し、コードの再利用を促進するために、関数の本体でさまざまな型で使用されている関数パラメータの型に対して、プログラマが交差タイプを注釈できるようにする、異なるアプローチを採用しています。
+  交差型 [3] は、 Hindley-Milner 型システムよりも多くのプログラムを型付けしながら、システムFの忠実な多型に概念的に単純で扱いやすい代替を提供します。
 
   ----
 
-  4
-  A more detailed description of Haskell’s type classes may be found, for example,
-  in [23,1,28].
+  4 Haskell の型クラスのより詳細な記述は、例えば [23,1,28] で見つけることができます。
 
   ----
 
 <!-- page 4 -->
 
-  of intersection types with usual Hindley-Milner types and constrained polymor-
-  phism, in order to allow the definition of higher-ranked functions, with arguments
-  of intersection types, and application of such functions to both polymorphic or
-  overloaded arguments.
+  我々の研究の新規性は、交叉型の引数を用いて上位ランクの関数の定義を可能にするために、通常の Hindley-Milner 型と制約付き多相型との交差型の組み合わせと、多相型または多重定義引数の両方へのそのような関数の適用です。
 
-  Several interesting applications which require higher-ranked polymorphism
-  have been described, for example, in [26,22,29], including the definition of monadic
-  abstractions, data type invariants, dynamic types and generic (or polytypic)
-  functions. In some of these examples, a higher-ranked type annotation serves ex-
-  actly the purpose of restricting the set of possible arguments for such a function,
-  thus guaranteeing that it has some desired properties (see, for example, chapter
-  3 on [29]). It should thus be made clear that we do not argue against the use-
-  fulness of this kind of polymorphism in a programming language, regarding our
-  work as complementary.
+  モダリティ抽象化、データ型不変量、動的型、および汎用（または多型）関数の定義を含む、上位ランクの多型を必要とするいくつかの興味深いアプリケーションが、 [26,22,29] などで説明されています。
+  これらの例のいくつかでは、上位ランクの型注釈は、そのような関数の可能な引数の集合を制限する目的にまさに機能し、いくつかの望ましい特性を保証します (例えば、[3] の第3章を参照)。
+  したがって、この種の多形性のプログラミング言語における有用性、すなわち私たちの研究が補完的であるということに関して、我々は主張しないことは明らかです。
 
-  Our type system is named CTi, as it combines constrained polymorphic types
-  and intersection types. The intuitive ideas behind this system are explained in
-  Section 2. Section 3 briefly reviews the two main topics we want to combine
-  — constrained polymorphism and intersection types — and presents a formal
-  definition for the type language of our system. Type system CTi is defined in Sec-
-  tion 4 and Section 5 presents a corresponding type inference algorithm. Finally,
-  our conclusions are presented in Section 6.
+  我々の型システムは、束縛された多相型と交差型を組み合わせた CTi という名前です。
+  このシステムの背後にある直感的な考え方は第2章で説明されています。
+  3章では、束縛したいと思う2つの主要なトピック、すなわち制限された多相性と交差型について簡単に説明し、システムの型言語の形式的な定義を提示します。
+  型システム CTi はセクション4で定義され、セクション5は対応する型推論アルゴリズムを提示します。
+  最後に、我々の結論をセクション6に示します。
 
-  ## 2 Intersection parameters and polymorphic arguments
+  ## 2 交差パラメータと多相引数
 
-  Let us consider what should be the principal (minimal) type of function foo,
-  which would allow any of the previously discussed arguments to be applied to
-  this function. Intuitively, an application (foo f) should be valid if f is a function
-  that can be applied to lists of booleans and to lists of chars. Also, (foo f) should
-  have type (τ 1 , τ 2 ), where τ 1 is the result type of an application of f to a list of
-  booleans and τ 2 is the result type of an application of f to a list of chars. Using
-  intersection types, this can be written as (for ease of reference, the definition of
-  foo is repeated below):
+  前述の引数のいずれかがこの関数に適用されることを可能にする、(最小の)主要型の関数 `foo` を検討しましょう。
+  直感的に、関数適用 `(foo f)` は `f` が boolean のリストと char のリストに適用できる関数であれば有効です。
+  また、 `(foo f)` は `(τ1,τ2)` 型でなければならず、ここで `τ1` は boolean のリストに対する `f` のアプリケーションの結果の型、`τ2` は `f` を文字のリストに追加します。
+  交差タイプを使用すると、これは次のように書くことができます（参照の容易さのために、fooの定義は以下で繰り返されます）。
 
-  Example 1.
+  例 1.
 
       foo :: ∀b, c.([Bool] → b ∧ [Char] → c) → (b,c)
       foo g = (g [True,False], g [’a’,’b’,’c’])
 
-  The use of intersection types seems to us to be a natural choice for expressing
-  the type of a function parameter that is used with different types in the function’s
-  body, since only finite uses of this parameter can occur.
+  交差の型の使用は、このパラメーターの有限な使用だけが起こる可能性があるので、関数の本体でさまざまな型で使用される関数パラメーターの型を表現するための自然な選択と思われます。
 
-  Differently from usual intersection type systems [3,14,4], our type system
-  is intended as a conservative extension of (HM + constrained polymorphism),
-  maintaining complete compatibility with this system in the absence of type an-
-  notations. Type annotations are required for the definition of higher-ranked func-
-  tions, where the types of parameters that are used polymorphically inside the
-  function’s body are specified in the form of intersection types.
+  私たちの型システムは、通常の交差型システム[3,14,4]とは異なり、(HM + 制約付き多相型) の控えめな拡張として意図されており、型注釈がない場合にこのシステムとの完全な互換性を維持します。
+  関数の本体内で多相的に使用されるパラメータの型が交差型の形式で指定される上位ランクの関数の定義には、型注釈が必要です。
 
 <!-- page 5 -->
 
-  An intersection type (τ 1 ∧ τ 2 ) may occur in the type of an expression only
+  An intersection type `(τ1 ∧ τ2)` may occur in the type of an expression only
   to the left of the function type constructor, as, for example, in the above type
-  annotation for foo. A type (τ 1 ∧τ 2 ) may also occur in typing context assignments,
+  annotation for foo. A type `(τ1 ∧ τ2)` may also occur in typing context assignments,
   being introduced in this context by means of a type annotation.
 
   Since intersection types may only occur to the left of function arrows, in-
   tersection type elimination is restricted, in our system, to the rule for type
   derivation of a term variable. Dually, intersection type introduction may occur
   only in the type derivation for the argument of an application: assuming a term
-  t can be assigned type (τ 1 ∧ τ 2 ) → τ in a given typing context, an application
-  (t u) will be well typed in this context, if u can be assigned, in this context, a
-  type σ that can be instantiated both to τ 1 and to τ 2 .
+  t can be assigned type `(τ1 ∧ τ2) → τ` in a given typing context, an application
+  `(t u)` will be well typed in this context, if `u` can be assigned, in this context, a
+  type σ that can be instantiated both to `τ1` and to `τ2`.
 
-  For example, application (foo reverse) is well typed according to this rule,
-  since the type annotated for foo can be instantiated to ([Bool] → [Bool] ∧
-  [Char] → [Char]) → ([Bool],[Char]), and the type of reverse can be in-
-  stantiated to both [Bool] → [Bool] and [Char] → [Char].
+  For example, application `(foo reverse)` is well typed according to this rule,
+  since the type annotated for foo can be instantiated to `([Bool] → [Bool] ∧
+  [Char] → [Char]) → ([Bool],[Char])`, and the type of reverse can be in-
+  stantiated to both `[Bool] → [Bool]` and `[Char] → [Char]`.
 
-  Analogously, application (foo sort) is well typed, in a context where Bool
-  and Char are both instances of type class Ord , since the type of sort can be
-  instantiated to both [Bool] → [Bool] and [Char] → [Char], in this context.
+  Analogously, application `(foo sort)` is well typed, in a context where Bool
+  and Char are both instances of type class `Ord`, since the type of sort can be
+  instantiated to both `[Bool] → [Bool]` and `[Char] → [Char]`, in this context.
   Each of the applications of foo discussed previously would also be valid, in a
   context where the constraints on the type of the arguments could be satisfied.
 
@@ -243,10 +174,10 @@
   type is inferred according to the type required in each context where the pa-
   rameter is used, in the same way as it happens for uses of overloaded symbols
   in a type system for context-dependent overloading, such as Haskell’s type class
-  system. For example, the type for each use of parameter g in the body of foo
-  is inferred according to the type of the argument to which g is applied. Dually,
-  the type for each use of parameter x in the body of function f1, defined below,
-  is infered according to the types of the parameters of the function to which x is
+  system. For example, the type for each use of parameter `g` in the body of foo
+  is inferred according to the type of the argument to which `g` is applied. Dually,
+  the type for each use of parameter `x` in the body of function `f1`, defined below,
+  is infered according to the types of the parameters of the function to which `x` is
   given as argument.
 
   Example 2.
@@ -254,11 +185,11 @@
       f1 :: (Bool ∧ Int) → Int
       f1 x = if x then (x+1) else (x-1)
 
-  Function f1 could be applied, for example, to an overloaded symbol, say o ::
-  C a ⇒ a, declared in type class C, provided that there exist instance definitions
-  of this class for types Bool and Int.
+  Function f1 could be applied, for example, to an overloaded symbol, `say o ::
+  C a ⇒ a`, declared in type class `C`, provided that there exist instance definitions
+  of this class for types `Bool` and `Int`.
 
-  Consider now the definition of function f2 below:
+  Consider now the definition of function `f2` below:
 
   Example 3.
 
@@ -267,19 +198,19 @@
       
 <!-- page 6 -->
 
-  The types of parameters h and y on each application h y, in the body of func-
-  tion f2, can be determined by the type of the result of this function. Therefore,
-  type inference for function f2 is defined so as to use the additional information
-  provided by type annotations for selecting the appropriate type for h and y on
-  each application h y. On the other hand, if type annotations were provided only
-  for the parameters of f2, then four incomparable types could be derived for f2,
-  namely, (Int,Bool), (Int,Int), (Bool,Int) and (Bool,Bool); it would not
-  be possible then to determine the types of h and y on each application. No type
-  could then be infered for f2.
+  The types of parameters `h` and `y` on each application `h y`, in the body of func-
+  tion `f2`, can be determined by the type of the result of this function. Therefore,
+  type inference for function `f2` is defined so as to use the additional information
+  provided by type annotations for selecting the appropriate type for `h` and `y` on
+  each application `h y`. On the other hand, if type annotations were provided only
+  for the parameters of `f2`, then four incomparable types could be derived for `f2`,
+  namely, `(Int,Bool)`, `(Int,Int)`, `(Bool,Int)` and `(Bool,Bool)`; it would not
+  be possible then to determine the types of `h` and `y` on each application. No type
+  could then be infered for `f2`.
 
   As in the case for overloaded symbols, an expression involving a function
   parameter annotated with an to an intersection type may sometimes be ambigu-
-  ous. As an example, consider application s z in the body of function f3 defined
+  ous. As an example, consider application `s z` in the body of function `f3` defined
   below:
 
   Example 4.
@@ -287,40 +218,37 @@
       f3 ::(Int → Int ∧ Bool → Int) → (Int ∧ Bool) → Int
       f3 s z = s z
 
-  In this case, there are two distinct possible type derivations for the body of
-  f3, corresponding to the two different possible choices for the types of parameters
-  s and z in application s z.
+  In this case, there are two distinct possible type derivations for the body of `f3`, corresponding to the two different possible choices for the types of parameters `s` and `z` in application `s z`.
 
+todo-->
   ## 3 Constrained Polymorphism and Intersection Types
 
   Haskell’s type class system is based on the more general theory of qualified
   types [10], which extends Hindley-Milner type expressions with type constraints
-  (or predicates). A constrained polymorphic type has the form ∀ a. P ⇒ τ , where
-  P is a (possibly empty) set of class constraints and τ is a monomorphic type.
-  Here, and elsewhere, we use the notation a for a sequence of type variables
-  a 1 , . . . , a n , for some n ≥ 0.
+  (or predicates). A constrained polymorphic type has the form `∀a.P ⇒ τ`, where
+  `P` is a (possibly empty) set of class constraints and `τ` is a monomorphic type.
+  Here, and elsewhere, we use the notation `a` for a sequence of type variables
+  `a1, ..., an`, for some `n ≥ 0`.
 
-  Type ∀ a. P ⇒ τ denotes the set of instances of τ that satisfy the predicates
-  in P . For example, type Int → Int → Bool is an instance of type ∀a. Eq a ⇒
-  a → a → Bool, if constraint Eq Int can be satisfied according to the visible
+  Type `∀a.P ⇒ τ` denotes the set of instances of `τ` that satisfy the predicates
+  in `P`. For example, type `Int → Int → Bool` is an instance of type `∀a. Eq a ⇒
+  a → a → Bool`, if constraint `Eq Int` can be satisfied according to the visible
   class and instance declarations, that is, if there exists an instance definition of
-  type Int for class Eq. In other words, each class constraint C τ is an assertion
-  that type τ must be an instance of class C. 5
+  type `Int` for class `Eq`. In other words, each class constraint `C τ` is an assertion
+  that type `τ` must be an instance of class `C`. 5
 
   Satisfiability of class constraints can be described using an entailment rela-
-  tion, denoted by the symbol |=. If P and Q are finite sets of type predicates,
-  then the assertion that P |= Q means that predicates in Q are satisfied whenever
+  tion, denoted by the symbol `|=`. If `P` and `Q` are finite sets of type predicates,
+  then the assertion that `P |= Q` means that predicates in `Q` are satisfied whenever
   predicates in P are satisfied. 6
 
   ----
 
-  5
-  6
-  For simplicity, we only consider here single parameter type classes, since the exten-
+  5 For simplicity, we only consider here single parameter type classes, since the exten-
   sion to multiparameter type classes [12,11] is orthogonal to the problem considered
   in this paper.
-  See [10] for the general assumptions made about the predicate entailment relation
-  P |= Q, and for a definition of the entailment relation induced by Haskell class and
+  6 See [10] for the general assumptions made about the predicate entailment relation
+  `P |= Q`, and for a definition of the entailment relation induced by Haskell class and
   instance declarations.
 
   ----
@@ -334,6 +262,7 @@
   can be introduced only by a type annotation for a function parameter, and ap-
   pear in the type of an expression only to the left of a function arrow.
   Intersection types
+
   ι
   Monointersection types τ
   Polymorphic types
@@ -361,7 +290,9 @@
   let x = u in t Let-binding
   t :: σ
   Type annotated expression (σ closed)
+
   Figure 1. Syntax of types and terms
+
   The intersection type constructor (∧) is considered, as usual, to be commu-
   tative and associative. We write τ 0 ∈ (τ 1 ∧ . . . ∧ τ n ) if τ 0 = τ i , for some 1 ≤ i ≤ n.
   A typing context Γ conveys the typings of in-scope variables; Γ binds a term

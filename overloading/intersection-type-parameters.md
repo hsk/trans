@@ -30,7 +30,8 @@
 
   Since parameter `g` is used with distinct types in the function’s body (being applied to both a list of booleans and a list of characters), its type cannot be monomorphic, and this definition of foo cannot thus be typed in HM.
 
-  In contrast, higher-ranked polymorphic type systems such as Girard-Reynolds system F [<a name="r7"></a>[7](#7),<a name="r25"></a>[25](#25)] allow universal quantifiers to appear within a type. In a language based on system F, foo could be assigned, for example, type
+  In contrast, higher-ranked polymorphic type systems such as Girard-Reynolds system F [<a name="r7"></a>[7](#7),<a name="r25"></a>[25](#25)] allow universal quantifiers to appear within a type.
+  In a language based on system F, foo could be assigned, for example, type
 
       (∀a.[a] → [a]) → ([Bool],[Char])
 
@@ -59,136 +60,88 @@
   Some relevant works along this line are MLF [15,16], FPH [30] and Flexible Types [18,17].
   These type systems differ on the changes that are introduced to the Hindley-Milner type system, particularly on the choice of type annotations required and on the strategy used for type inference.
 
-  Lack of principal types and the need for type annotations are not the only
-  issues related to avoiding the restriction of monomorphism of function parame-
-  ters. The annotation of a higher-ranked polymorphic type for a function (or the
-  annotation of a quantified type for a function parameter) inevitably restricts the
-  contexts where the function may be used. For example, if the type annotated for
-  foo is `(∀a.[a] → [a]) → ([Bool],[Char])`, none of the following applications
-  can be type-checked:
+  Lack of principal types and the need for type annotations are not the only issues related to avoiding the restriction of monomorphism of function parameters.
+  The annotation of a higher-ranked polymorphic type for a function (or the annotation of a quantified type for a function parameter) inevitably restricts the contexts where the function may be used.
+  For example, if the type annotated for foo is `(∀a.[a] → [a]) → ([Bool],[Char])`, none of the following applications can be type-checked:
 
     foo length     where length    has type ∀a.[a] → Int
     foo head       where head      has type ∀a.[a] → a
     foo listMaybe  where listMaybe has type ∀a.[a] → Maybe a
 
-  Modern functional programming languages already include other useful ex-
-  tensions to HM and it is desired that higher-ranked functions work well in con-
-  junction with these extensions. In particular, it is desirable that higher-ranked
+  Modern functional programming languages already include other useful extensions to HM and it is desired that higher-ranked functions work well in conjunction with these extensions. In particular, it is desirable that higher-ranked functions work well in conjunction with the mechanism of type classes [10,8], used in Haskell to support overloading.
 
   ----------
 
-  3 Kfoury and Tiuryn have indeed also proved undecidability of typeability for any
-  subset of system F with rank ≥ 3 [13].
+  3 Kfoury and Tiuryn have indeed also proved undecidability of typeability for any subset of system F with rank ≥ 3 [13].
 
   ----------
 
 <!-- page 3 -->
 
-  functions work well in conjunction with the mechanism of type classes [10,8],
-  used in Haskell to support overloading.
-  Consider, for example, the use of foo in the following Haskell examples:
+  Consider, for example, the use of `foo` in the following Haskell examples:
 
       foo allEqual  where allEqual :: ∀a. Eq a ⇒ [a] → Bool
       foo sort      where sort :: ∀a. Ord a ⇒ [a] → [a]
       foo nub       where nub :: ∀a. Eq a ⇒ [a] → [a]
       foo fromEnum  where fromEnum :: ∀a. Enum a ⇒ a → Int
 
-  The type of each of the above arguments is a constrained polymorphic type
-  (also called a predicated type). In Haskell, a type class denotes a family of
-  types (instances) on which certain values (the member functions) are defined.
-  For example, the equality operator `(==)` has type `∀a. Eq a ⇒ a → a → Bool`,
-  where the class constraint Eq a indicates that equality is not parametrically
-  polymorphic, but only works for those types that are an instance of the Eq class.
-  In other words, class constraints restrict the possible types to which quantified
-  type variables can be instantiated. Class constraints introduced on the types
-  of overloaded symbols are also propagated to the types of expressions defined
-  in terms of these symbols. For example, the constraint on the type of `(==)` is
-  propagated to the type of function allEqual, which checks that all elements
-  of a given list are equal, and also to the type of function nub, that removes
-  duplicate elements in a given list. 4
+  The type of each of the above arguments is a constrained polymorphic type (also called a predicated type).
+  In Haskell, a type class denotes a family of types (instances) on which certain values (the member functions) are defined.
+  For example, the equality operator `(==)` has type `∀a. Eq a ⇒ a → a → Bool`, where the class constraint `Eq a` indicates that equality is not parametrically polymorphic, but only works for those types that are an instance of the `Eq` class.
+  In other words, class constraints restrict the possible types to which quantified type variables can be instantiated.
+  Class constraints introduced on the types of overloaded symbols are also propagated to the types of expressions defined in terms of these symbols.
+  For example, the constraint on the type of `(==)` is propagated to the type of function `allEqual`, which checks that all elements of a given list are equal, and also to the type of function `nub`, that removes duplicate elements in a given list. 4
 
-  Type system QMLF [19] is, to our knowledge, the only work that investigates
-  how higher-ranked polymorphism can work in conjunction with constrained poly-
-  morphism. It extends the MLF type system, allowing predicate constraints (such
-  as class constraints) to be specified on higher-ranked types. For example, in this
-  system, foo could be annotated with type
+  Type system QMLF [19] is, to our knowledge, the only work that investigates how higher-ranked polymorphism can work in conjunction with constrained polymorphism.
+  It extends the MLF type system, allowing predicate constraints (such as class constraints) to be specified on higher-ranked types.
+  For example, in this system, foo could be annotated with type
 
       (∀a. Ord a ⇒ [a] → [a]) → ([Bool],[Char])
 
-  Then, both applications `(foo sort)` and `(foo reverse)` are allowed in QMLF,
-  where the type of reverse can be instantiated to type `∀a.Ord a ⇒ [a] → [a]`.
-  But, again, this type annotation for `foo` forbids, for example, all other appli-
-  cations in the list above. In particular, application `foo nub` would not type check,
-  despite the fact that the type of `nub` differs from the type of foo’s parameter
-  only on its class constraint. Therefore, allowing type annotation of higher-ranked
-  types with predicate constraints does not solve all problems with respect to a
-  flexible use of higher-ranked functions.
+  Then, both applications `(foo sort)` and `(foo reverse)` are allowed in QMLF, where the type of `reverse` can be instantiated to type `∀a.Ord a ⇒ [a] → [a]`.
+  But, again, this type annotation for `foo` forbids, for example, all other applications in the list above.
+  In particular, application `foo nub` would not type check, despite the fact that the type of `nub` differs from the type of `foo`’s parameter only on its class constraint.
+  Therefore, allowing type annotation of higher-ranked types with predicate constraints does not solve all problems with respect to a flexible use of higher-ranked functions.
 
-  In order to solve these problems and promote code reuse, we adopt a different
-  approach, allowing programmers to annotate intersection types for the types of
-  function parameters that are used with different types in the function’s body.
-  Intersection types [3] provide a conceptually simple and tractable alternative to
-  the impredicative polymorphism of System F, while typing many more programs
-  than the Hindley-Milner type system. The novelty of our work is the combination
+  In order to solve these problems and promote code reuse, we adopt a different approach, allowing programmers to annotate intersection types for the types of function parameters that are used with different types in the function’s body.
+  Intersection types [3] provide a conceptually simple and tractable alternative to the impredicative polymorphism of System F, while typing many more programs than the Hindley-Milner type system.
 
   ----
 
-  4 A more detailed description of Haskell’s type classes may be found, for example,
-  in [23,1,28].
+  4 A more detailed description of Haskell’s type classes may be found, for example, in [23,1,28].
 
   ----
 
 <!-- page 4 -->
 
-  of intersection types with usual Hindley-Milner types and constrained polymor-
-  phism, in order to allow the definition of higher-ranked functions, with arguments
-  of intersection types, and application of such functions to both polymorphic or
-  overloaded arguments.
+  The novelty of our work is the combination of intersection types with usual Hindley-Milner types and constrained polymorphism, in order to allow the definition of higher-ranked functions, with arguments of intersection types, and application of such functions to both polymorphic or overloaded arguments.
 
-  Several interesting applications which require higher-ranked polymorphism
-  have been described, for example, in [26,22,29], including the definition of monadic
-  abstractions, data type invariants, dynamic types and generic (or polytypic)
-  functions. In some of these examples, a higher-ranked type annotation serves ex-
-  actly the purpose of restricting the set of possible arguments for such a function,
-  thus guaranteeing that it has some desired properties (see, for example, chapter
-  3 on [29]). It should thus be made clear that we do not argue against the use-
-  fulness of this kind of polymorphism in a programming language, regarding our
-  work as complementary.
+  Several interesting applications which require higher-ranked polymorphism have been described, for example, in [26,22,29], including the definition of monadic abstractions, data type invariants, dynamic types and generic (or polytypic) functions.
+  In some of these examples, a higher-ranked type annotation serves exactly the purpose of restricting the set of possible arguments for such a function, thus guaranteeing that it has some desired properties (see, for example, chapter 3 on [29]).
+  It should thus be made clear that we do not argue against the usefulness of this kind of polymorphism in a programming language, regarding our work as complementary.
 
-  Our type system is named CTi, as it combines constrained polymorphic types
-  and intersection types. The intuitive ideas behind this system are explained in
-  Section 2. Section 3 briefly reviews the two main topics we want to combine
-  — constrained polymorphism and intersection types — and presents a formal
-  definition for the type language of our system. Type system CTi is defined in Sec-
-  tion 4 and Section 5 presents a corresponding type inference algorithm. Finally,
-  our conclusions are presented in Section 6.
+  Our type system is named CTi, as it combines constrained polymorphic types and intersection types.
+  The intuitive ideas behind this system are explained in Section 2.
+  Section 3 briefly reviews the two main topics we want to combine — constrained polymorphism and intersection types — and presents a formal definition for the type language of our system.
+  Type system CTi is defined in Section 4 and Section 5 presents a corresponding type inference algorithm.
+  Finally, our conclusions are presented in Section 6.
 
   ## 2 Intersection parameters and polymorphic arguments
 
-  Let us consider what should be the principal (minimal) type of function `foo`,
-  which would allow any of the previously discussed arguments to be applied to
-  this function. Intuitively, an application `(foo f)` should be valid if `f` is a function
-  that can be applied to lists of booleans and to lists of chars. Also, `(foo f)` should
-  have type `(τ1, τ2)`, where `τ1` is the result type of an application of f to a list of
-  booleans and `τ2` is the result type of an application of `f` to a list of chars. Using
-  intersection types, this can be written as (for ease of reference, the definition of
-  foo is repeated below):
+  Let us consider what should be the principal (minimal) type of function `foo`, which would allow any of the previously discussed arguments to be applied to this function.
+  Intuitively, an application `(foo f)` should be valid if `f` is a function that can be applied to lists of booleans and to lists of chars.
+  Also, `(foo f)` should have type `(τ1, τ2)`, where `τ1` is the result type of an application of f to a list of booleans and `τ2` is the result type of an application of `f` to a list of chars.
+  Using intersection types, this can be written as (for ease of reference, the definition of foo is repeated below):
 
   Example 1.
 
       foo :: ∀b, c.([Bool] → b ∧ [Char] → c) → (b,c)
       foo g = (g [True,False], g [’a’,’b’,’c’])
 
-  The use of intersection types seems to us to be a natural choice for expressing
-  the type of a function parameter that is used with different types in the function’s
-  body, since only finite uses of this parameter can occur.
+  The use of intersection types seems to us to be a natural choice for expressing the type of a function parameter that is used with different types in the function’s body, since only finite uses of this parameter can occur.
 
-  Differently from usual intersection type systems [3,14,4], our type system
-  is intended as a conservative extension of (HM + constrained polymorphism),
-  maintaining complete compatibility with this system in the absence of type an-
-  notations. Type annotations are required for the definition of higher-ranked func-
-  tions, where the types of parameters that are used polymorphically inside the
-  function’s body are specified in the form of intersection types.
+  Differently from usual intersection type systems [3,14,4], our type system is intended as a conservative extension of (HM + constrained polymorphism), maintaining complete compatibility with this system in the absence of type annotations.
+  Type annotations are required for the definition of higher-ranked functions, where the types of parameters that are used polymorphically inside the function’s body are specified in the form of intersection types.
 
 <!-- page 5 -->
 
@@ -265,9 +218,7 @@
       f3 ::(Int → Int ∧ Bool → Int) → (Int ∧ Bool) → Int
       f3 s z = s z
 
-  In this case, there are two distinct possible type derivations for the body of
-  `f3`, corresponding to the two different possible choices for the types of parameters
-  `s` and `z` in application `s z`.
+  In this case, there are two distinct possible type derivations for the body of `f3`, corresponding to the two different possible choices for the types of parameters `s` and `z` in application `s z`.
 
 todo-->
   ## 3 Constrained Polymorphism and Intersection Types
