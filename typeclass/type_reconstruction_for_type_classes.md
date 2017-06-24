@@ -357,8 +357,7 @@
 
   Definition 3.2
 
-  The type scheme `σ` is a principal type of an expression `e` w.r.t. `Σ` and a closed environment `E`, if `Σ,[],E ⊢ e : σ` and for every `σ′` with `Σ,[],E ⊢ e : σ′`, the type scheme `σ′` must be a generic instance of `σ`, i.e. `Σ,[] ⊢ σ ⪰ σ′`.
-
+  The type scheme `σ` is a principal type of an expression `e` w.r.t. `Σ` and a closed environment `E`, if `Σ,[],E ⊢ e : σ` and for every `σ′` with `Σ,[],E ⊢ e : σ′`, the type scheme `σ'` must be a generic instance of `σ`, i.e. `Σ,[] ⊢ σ ⪰ σ′`.
   For the syntax-directed system, the rules APP and ABS remain unchanged, the quantifier rules are incorporated into ASM and LET, as shown in Figure 5.
 
          Σ,Γ ⊢ E(x) ⪰ τ
@@ -430,7 +429,7 @@
     D(t, C) = {(Sn)~ | ∃D ≤ C. (t : ((Sn)~)D) ∈ ∆}
 
   is either empty or contains a greatest element w.r.t. `⪯`.
-  If `Σ` is coregular let `Dom(t, C)` return the greatest element of `D(t, C)` or fail if `D(t, C)` is empty.
+  If `Σ` is coregular let `Dom(t,C)` return the greatest element of `D(t,C)` or fail if `D(t,C)` is empty.
   For instance, `Dom(list, Eq) = Eq` but `Dom(list, Ord)` fails.
 
   Sorted unification can be expressed as unsorted unification plus constraint solving.
