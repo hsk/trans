@@ -39,7 +39,7 @@
 
   ----
 
-<!-- page 2 -->
+  <!-- page 2 -->
 
   where the type variable `α` ranges over all types.
   However, `=` should not be applied to arguments of function type.
@@ -85,7 +85,7 @@
 
   ----
 
-<!-- page 3 -->
+  <!-- page 3 -->
 
     Type classes        C
     Sorts               S  = {C 1 , ..., C n }
@@ -134,7 +134,7 @@
   However, it is almost easier to deal with subclasses directly than to eliminate them, as done in (NP93).
   To demonstrate this, and because subclasses are part of Haskell, we have included them in Mini-Haskell.
 
-<!-- page 4 -->
+  <!-- page 4 -->
 ## 2.1 Sorts and Types
 
   As motivated in the introduction, sorts are finite sets of classes.
@@ -178,7 +178,7 @@
   This feature is clearly not essential and could, for instance, be modeled by representing a set of functions by a single tuple of functions.
   Strictly speaking, we could have dropped class names altogether since there is a one to one correspondence between class names and the single function declared in that class. 
 
-<!-- page 5 -->
+  <!-- page 5 -->
 
   This would have lead us to the language of Stefan Kaes (Kae88) but would have obscured the connection with Haskell.
 
@@ -229,7 +229,7 @@
   In this section we present two type inference systems for Mini-Haskell.
   We start with a set of inference rules which define the types of Mini-Haskell programs and expressions.
   
-<!-- page 6 -->
+  <!-- page 6 -->
 
     [i = 1 ... n]
       :
@@ -286,7 +286,7 @@
   There are two judgements which are defined in Figures 3 and 4: `∆,≤,Γ,E ⊢ p : σ` and `∆,≤,Γ,E ⊢ e : σ` express that program `p` and expression `e` are of type `σ` in the context of `∆`, `≤`, `Γ` and `E`.
   The rules for `∆,≤,Γ,E ⊢ p : σ`, when applied backwards, simply traverse the declarations, building up `∆`, `≤` and `E`.
 
-<!-- page 7 -->
+  <!-- page 7 -->
 
   Class declarations extend `E` and `≤`, instance declarations extend `∆`.
   Notice that it is necessary to take the transitive closure `(≤ ∪ {(C, D) | D ∈ S})*` of `≤` and the new subclass relations in rule CLASS.
@@ -339,7 +339,7 @@
   The next step towards a type reconstruction algorithm is a more restricted set of rules.
   The application of these rules is determined by the syntax of the expression whose type is to be computed.
 
-<!-- page 8 -->
+  <!-- page 8 -->
 
   To distinguish the syntax-directed system we use `▷` instead of `⊢` and prime the names of its rules, e.g. `ASM′`.
 
@@ -390,7 +390,7 @@
   For instance, the `LET′` rule explicitly extends `Γ`.
   The `⪰` operation, used in the `ASM′` rule, may introduce new type variables, whose sorts must be constrained in `Γ`.
 
-<!-- page 9 -->
+  <!-- page 9 -->
 
   The syntax-directed system already has a very operational flavour.
   In order to make the transition from a type inference system to an algorithm we need one more ingredient: unification.
@@ -440,7 +440,7 @@
           Γc = Constrain(θ,Γ)
       in (Γc ∪ (Γ \ Dom(θ)),θ)
 
-<!-- page 10 -->
+  <!-- page 10 -->
 
   where
 
@@ -497,7 +497,7 @@
   If `α ∈/ Dom(θ0)`, then `Γα ⊆ Γ0 α` and the claim follows trivially.
   If `α ∈ Dom(θ0)` then `Γ0 ⪯ Γc = Constrain(θ0,Γ) ⪯ constrain(θ0 α,Γα)` and the claim follows from Lemma 4.1.
 
-<!-- page 11 -->
+  <!-- page 11 -->
 
   To show completeness let `(Γ1,θ1) ∈ U(Γ, τ1 = τ2)`, i.e. `θ1 τ1 = θ1 τ2` and `Γ1 ⊢ θ1 : Γ`.
   Since `τ1` and `τ2` have an unsorted unifier `θ1`, `mgu(τ1 = τ2)` is defined and yields a substitution `θ0` such that `θ1 = δθ0` for some `δ`.
@@ -544,7 +544,7 @@
 
   This implies a number of simple properties:
 
-<!-- page 12 -->
+  <!-- page 12 -->
 
   Fact 4.6
 
@@ -592,7 +592,7 @@
   Algorithm W follows the same pattern as Milner’s original algorithm of the same name (Mil78): the type of an expression `e` is computed by traversing `e` in a top-down manner.
   `W(V,Γ,E,e)` returns a quadruple `(V′,Γ′,θ,τ)`, where `θτ` is the type of `e` in the context of `Γ′` and `θE`. 
 
-<!-- page 13 -->
+  <!-- page 13 -->
 
   The top level call is `W({},[],E,e)`, where `E` is closed.
   Observe the different let-constructs: the one on the left hand side is in the object language, the ones on the right are part of the type inference algorithm.
@@ -641,7 +641,7 @@
   The first item states that all used variables are recorded in `V′`.
   Next, all new variables occuring in the computed objects are in `V′` but not in `V`, i.e. there is no “reuse” of names.
 
-<!-- page 14 -->
+  <!-- page 14 -->
 
   The third item states that if some type variables of the computed type are not new, they must have been in the environment `E`.
   The last item requires the computed context to be free of assumptions about old variables (which are in `Dom(θ′)`), i.e. no “litter”.
@@ -696,7 +696,7 @@
 
     FV(θ2,τ2) ∩ V1 ⊆ FV(θ1E).
 
-<!-- page 15 -->
+  <!-- page 15 -->
 
   Then the rest of the proof proceeds as for `(e1 e2)`.
   The proof of `Dom(Γ2) ∩ Dom(θ2θ1) = {}` also works as in the `(e1 e2)` case;
@@ -749,7 +749,7 @@
 
   If `Σ,Γ,E ▷ e : τ` and `Γ′ ⊢ θ′ : Γ`, then `Σ,Γ′,θ′E ▷ e : θ′ τ`.
 
-<!-- page 16 -->
+  <!-- page 16 -->
 
   Proof simple by adding proofs of the form `Γ′ ⊢ θ′ α : Γα` in the proof tree of `Σ,Γ,E ▷ e : τ` to obtain a proof of `Σ,Γ′,θ′E ▷ e : θ′ τ`. □
 
@@ -807,7 +807,7 @@
 
     Σ,Γ2,θ2θ1E′ ▷ e2 : θ2θ1τ2  (8)
 
-<!-- page 17 -->
+  <!-- page 17 -->
 
   Now LET′ applies to
 
@@ -863,7 +863,7 @@
   Now `θ0 E = δ1 θ′ E` follows from (10).
   Furthermore, from (10) we obtain `τ1* = δ1 θ′ α` and hence `τ1* → τ2* = δ1 θ′ (α → τ′)` from (11).
 
-<!-- page 18 -->
+  <!-- page 18 -->
 
   `(e1 e2)` : We assume
 
@@ -915,7 +915,7 @@
   The case `β = α` is trivial because `Γ2 α = {}`.
   The remaining case, `Σ,Γ* ⊢ δ2θ2 β : Γ2 β`, follows easily from (20) since `Dom(Γ2) ∩ Dom(θ2) = {}`.
 
-<!-- page 19 -->
+  <!-- page 19 -->
 
   Then by completeness of unification, `θ′` is a most general unifier computed in unify, and there exists `δ′` such that `δ* = δ′θ′`.
   Hence we get
@@ -967,7 +967,7 @@
 
   Then the induction hypothesis applies to e 2 with `Γ* ⊢ δ1 : Γ′1` and the environment `θ1 E[x:∀αn :Sn .θ1 τ1]`.
   
-<!-- page 20 -->
+  <!-- page 20 -->
 
   We get `δ2` such that
 
@@ -1022,7 +1022,7 @@
 
   ----
 
-<!-- page 21 -->
+  <!-- page 21 -->
 
     I(V,Γ,θ,E,e) = case e of
       x    ⇒ let ∀(αn : Sn)~ .τ  =  E(x)
@@ -1063,7 +1063,7 @@
   An interesting extension of Haskell using the notion of “qualified types” was designed and implemented by Mark Jones (Jon92b).
   The main difference is that he allows arbitrary predicates `P(τ1,...,τn)` over types as opposed to our membership constraints `α : S`.
 
-<!-- page 22 -->
+  <!-- page 22 -->
 
   On the other hand he does not solve constraints of the form `τ : S` to obtain atomic constraints of the form `α : S′` as is done in our function constrain.
   Instead he accumulates the unsolved constraints.
@@ -1106,7 +1106,7 @@
   In rule `∀I`, the proviso `α ∈ FV(σ)` is intended to propagate ambiguity problems: with this restriction, the expression `let x = (f c) in 5` (preceded by classes `C` and `D` as declared above) has type int only in a context containing an assumption `α : {C, D}`.
 
 
-<!-- page 23 -->
+  <!-- page 23 -->
 
   If the proviso is dropped, the expression also has type `int` in the empty context, thus disguising the local ambiguity.
   The reason is that `x` can be given the ambiguous type `∀α:{C, D}.int`, but since `x` does not occur in 5, this does not matter.
@@ -1148,7 +1148,7 @@
 
   John Peterson and Mark Jones. Implementing type classes. In Proc. SIGPLAN ’93 Symp. Programming Language Design and Implementation, pages 227–236. ACM Press, 1983.
 
-<!-- page 24 -->
+  <!-- page 24 -->
 
   Dennis M. Volpano and Geoffrey S. Smith. On the complexity of ML typability with overloading. In Proc. 5th ACM Conf. Functional Programming Languages and Computer Architecture, pages 15–28. LNCS 523, 1991.
 
