@@ -78,7 +78,7 @@
   The instance declaration describes what the methods given
   in the class declaration do for the particular type.
   Figure 1 contains an example that declares the class Eq
-  with the two methods == and /= intended to compare for
+  with the two methods == and ≠ intended to compare for
   equality and inequality. The type Char and lists are then
   declared to be instances of this class. The example also con-
   tains a function, mem , which uses the (overloaded) method
@@ -101,8 +101,8 @@
   will be named m k in the translated program. The defaultclass Eq a where
 
   class Eq a where
-    (==), (/=) :: a -> a -> Bool
-    x /= y = not (x == y)
+    (==), (≠) :: a -> a -> Bool
+    x ≠ y = not (x == y)
   instance Eq Char where
     (==) = primEqChar
   instance Eq a => Eq [a] where
@@ -116,23 +116,23 @@
   val = mem [] 'a'
 
   (==) (m, _) = m
-  (/=) (_, m) = m
+  (≠) (_, m) = m
   Eq.(==) dictEq x y = error "no =="
-  Eq.(/=) dictEq x y = not ((==) dictEq x y)
+  Eq.(≠) dictEq x y = not ((==) dictEq x y)
 
   Eq.Char.(==) = primEqChar
-  Eq.Char.(/=) = Eq.(/=) Eq.Char
-  Eq.Char      = (Eq.Char.(==), Eq.Char.(/=))
+  Eq.Char.(≠) = Eq.(≠) Eq.Char
+  Eq.Char      = (Eq.Char.(==), Eq.Char.(≠))
 
   Eq.List.(==) dictEq []     []     = True
   Eq.List.(==) dictEq (x:xs) (y:ys) =
       (==) dictEq x y && Eq.List.(==) dictEq xs ys
   Eq.List.(==) dictEq _      _      = False
-  Eq.List.(/=) dictEq xs     ys     =
-      Eq.(/=) (Eq.List dictEq) xs ys
+  Eq.List.(≠) dictEq xs     ys     =
+      Eq.(≠) (Eq.List dictEq) xs ys
 
   Eq.List dictEq =
-      (Eq.List.(==) dictEq, Eq.List.(/=) dictEq)
+      (Eq.List.(==) dictEq, Eq.List.(≠) dictEq)
 
   mem dictEq [] y = False
   mem dictEq (x:xs) y =
@@ -203,7 +203,7 @@
   sider the translation of equality on list (gure 2):
 
       Eq.List dictEq =
-          (Eq.List.(==) dictEq, Eq.List.(/=) dictEq)
+          (Eq.List.(==) dictEq, Eq.List.(≠) dictEq)
 
   A typical use of this dictionary would be translating \ [x]
   == [y] " into
@@ -233,23 +233,23 @@
   memory references.
 
       (==) (f,d) = f 0 d
-      (/=) (f,d) = f 1 d
+      (≠) (f,d) = f 1 d
       Eq.(==) dictEq x y = error "no =="
-      Eq.(/=) dictEq x y = not ((==) dictEq x y)
+      Eq.(≠) dictEq x y = not ((==) dictEq x y)
 
       Eq.Char.(==) = primEqChar
-      Eq.Char.(/=) = Eq.(/=) Eq.Char
+      Eq.Char.(≠) = Eq.(≠) Eq.Char
       VEC.Eq.Char k= case k of { 0 -> \() -> Eq.Char.(==);
-                                1 -> \() -> Eq.Char.(/=) }
+                                1 -> \() -> Eq.Char.(≠) }
       Eq.List.(==) dictEq []     []     = True
       Eq.List.(==) dictEq (x:xs) (y:ys) =
           (==) dictEq x y && Eq.List.(==) dictEq xs ys
       Eq.List.(==) dictEq _      _      = False
-      Eq.List.(/=) dictEq xs     ys     =
-          Eq.(/=) (VEC.Eq.List, (dictEq)) xs ys
+      Eq.List.(≠) dictEq xs     ys     =
+          Eq.(≠) (VEC.Eq.List, (dictEq)) xs ys
       VEC.Eq.List k =
           case k of { 0 -> \(dictEq) -> Eq.List.(==) dictEq;
-                      1 -> \(dictEq) -> Eq.List.(/=) dictEq }
+                      1 -> \(dictEq) -> Eq.List.(≠) dictEq }
 
       mem dictEq [] y = False
       mem dictEq (x:xs) y =
@@ -265,7 +265,7 @@
   a function (with the index as argument), and the second as
   a tuple. It is, of course, possible to devise a much better low
   level representation. The method selector functions ( (==)
-  and (/=) ) are just shown for clarity; in a real translation
+  and (≠) ) are just shown for clarity; in a real translation
   they would be unfolded.
   Together with the next transformation the tail calls in-
   side the case expression can be made quite ecient.
@@ -370,10 +370,10 @@
       @@
       R
       Eq.List.(==)
-      Eq.Int.(/=)
+      Eq.Int.(≠)
       @@R
       Eq.Int
-      Eq.List.(/=)
+      Eq.List.(≠)
       Eq.Pair.Char,Int
       9 0 0
       Eq.Pair.(==)
@@ -381,7 +381,7 @@
       R
       Eq.Char
       Eq.Int
-      Eq.Pair.(/=)
+      Eq.Pair.(≠)
 
   Figure 3: Some sample dictionaries: equality on Int , [Int] , and (Char,Int) .
 
@@ -447,12 +447,12 @@
       (<=)     (_, m, _, _, _) = m
       Eq       (_, _, d, _, _) = d
       Ord.(==) (_, _, _, m, _) = m
-      Ord.(/=) (_, _, _, _, m) = m
+      Ord.(≠) (_, _, _, _, m) = m
 
       Ord.Char.(<)  = primLtChar
       Ord.Char.(<=) = primLeChar
       Ord.Char.Eq   = (Ord.Char.(<), Ord.Char.(<=),
-                      Eq.Char, Eq.(==), Eq.(/=))
+                      Eq.Char, Eq.(==), Eq.(≠))
 
       f dictOrd x = Ord.(==) dictOrd x x
 
@@ -1010,8 +1010,8 @@
 ## A Subset of the Haskell Prelude
 
   class Eq a where
-  (==), (/=) :: a -> a -> Bool
-  x /= y = if x == y then False else True
+  (==), (≠) :: a -> a -> Bool
+  x ≠ y = if x == y then False else True
   class (Eq a, Text a) => Num a where
   (+), (-), (*) :: a -> a -> a
   negate

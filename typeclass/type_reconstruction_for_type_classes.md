@@ -4,6 +4,19 @@
 
   TU München 4
 
+
+  ----
+
+  1 This is an extended version of (NP93)
+
+  2 Research supported by ESPRIT BRA 6453, TYPES.
+
+  3 Research supported by the Deutsche Forschungsgemeinschaft (DFG) under grant Br 887/4, Deduktive Programmentwicklung.
+
+  4 Address: Institut für Informatik, Technische Universität München, 80290 München, Germany. Email: {nipkow,prehofer}@informatik.tu-muenchen.de
+
+  ----
+
 ## Abstract
 
   We study the type inference problem for a system with type classes as in the functional programming language Haskell.
@@ -25,19 +38,7 @@
 
   A type class in Haskell is essentially a set of types (which all happen to provide a certain set of functions).
   The classical example is equality.
-  In the pre-standard versions of ML, the equality function = has the polymorphic type `∀α.α → α → bool`,
-
-  ----
-
-  1 This is an extended version of (NP93)
-
-  2 Research supported by ESPRIT BRA 6453, TYPES.
-
-  3 Research supported by the Deutsche Forschungsgemeinschaft (DFG) under grant Br 887/4, Deduktive Programmentwicklung.
-
-  4 Address: Institut für Informatik, Technische Universität München, 80290 München, Germany. Email: {nipkow,prehofer}@informatik.tu-muenchen.de
-
-  ----
+  In the pre-standard versions of ML, the equality function `=` has the polymorphic type `∀α.α → α → bool`,
 
   <!-- page 2 -->
 
@@ -88,10 +89,10 @@
   <!-- page 3 -->
 
     Type classes        C
-    Sorts               S  = {C 1 , ..., C n }
+    Sorts               S  = {C1, ..., Cn}
     Type variables      α
     Type constructors   t
-    Types               τ  = α | t(τ 1 , ..., τ n )
+    Types               τ  = α | t(τ1, ..., τn)
     Type schemes        σ  = τ | ∀α:S.σ
     Identifiers         x
     Expressions         e  = x
@@ -99,7 +100,7 @@
                            | λx.e
                            | let x = e0 in e1
     Declarations        d  = class α : C ≤ S where x : σ
-                           | inst t : (S 1 , ..., S n )C where x = e
+                           | inst t : (S1, ..., Sn)C where x = e
     Programs            p  = d; p | e
 
   Fig. 1. Syntax of Mini-Haskell types and expressions
@@ -147,7 +148,7 @@
     S1 ⪯ S2 ⇔ ∀C2 ∈ S2 .∃C1 ∈ S1.C1 ≤ C2
 
   It follows directly that `S1 ⊇ S2` implies `S1 ⪯ S2`.
-  In the context of a non-trivial ordering `≤` on classes, the reverse implication does not hold: for example `{Ord} ⪯ {Eq}` although `{Ord} /⊇ {Eq}`.
+  In the context of a non-trivial ordering `≤` on classes, the reverse implication does not hold: for example `{Ord} ⪯ {Eq}` although `{Ord} ⊉ {Eq}`.
   It is easy to see that any two sorts `S1` and `S2` possess an infimum whose representation is their union `S1 ∪ S2`.
 
   Because `⪯` is in general only a quasi-order (i.e. it is not antisymmetric), it gives rise to an equivalence
@@ -183,7 +184,7 @@
   This would have lead us to the language of Stefan Kaes (Kae88) but would have obscured the connection with Haskell.
 
   A Mini-Haskell instance declaration `inst t : (S1, ..., Sn)C where x = e` expresses that `t(τ1, ... τn)` is in class `C` provided the `τi` are of sort `Si`.
-  It corresponds to the Haskell declaration `inst (con) ⇒ C(t α1 ... αn) where x = e` where `con` is a list consisting of assumptions `C′αi` with `C′ ∈ Si` for all `i = 1 ... n`.
+  It corresponds to the Haskell declaration `inst (con) ⇒ C(t α1 ... αn) where x = e` where `con` is a list consisting of assumptions `C'αi` with `C' ∈ Si` for all `i = 1 ... n`.
 
 ## 2.3 Classifying Types
 
@@ -194,7 +195,7 @@
 
   - the sorts of the type variables in `τ`.
 
-      This is recorded in a sort context `Γ`, which is a total mapping from type variables to sorts such that `Dom(Γ) = {α | Γα /= {}}` is finite.
+      This is recorded in a sort context `Γ`, which is a total mapping from type variables to sorts such that `Dom(Γ) = {α | Γα ≠ {}}` is finite.
       Sort contexts can be written as `[α1 : S1, ..., αn : Sn]`.
 
   - the “functionality” of the type constructors.
@@ -213,13 +214,13 @@
 
   The ordering `⪯` extends easily from sorts to contexts:
 
-    Γ ⪯ Γ′ ⇔ ∀α. Γα ⪯ Γ′ α
+    Γ ⪯ Γ' ⇔ ∀α. Γα ⪯ Γ' α
 
-  We say that `Γ′` is more general than `Γ`.
-  It is easy to show that `⊢` is monotonic w.r.t. this ordering: `Σ,Γ′ ⊢ τ : S` implies `Σ,Γ ⊢ τ : S`.
+  We say that `Γ'` is more general than `Γ`.
+  It is easy to show that `⊢` is monotonic w.r.t. this ordering: `Σ,Γ' ⊢ τ : S` implies `Σ,Γ ⊢ τ : S`.
   In the sequel this fact is often used implicitly.
 
-  Because every two sorts possess an infimum, every type `τ` has a most specific sort `S`, i.e. `Σ, Γ ⊢ τ : S` and if `Σ, Γ ⊢ τ : S′` then `S ⪯ S′`.
+  Because every two sorts possess an infimum, every type `τ` has a most specific sort `S`, i.e. `Σ, Γ ⊢ τ : S` and if `Σ, Γ ⊢ τ : S'` then `S ⪯ S'`.
   The computation of this most specific sort is straightforward and shall not concern us here because it is not relevant for our purposes.
 
   Having seen sort inference for Mini-Haskell types we are prepared for our main goal, type inference and type reconstruction for Mini-Haskell programs.
@@ -259,15 +260,15 @@
 
   Fig. 2. The judgement Σ, Γ ⊢ τ : S
   
-          ∆,(≤ ∪{(C, D) | D ∈ S})*,Γ,E[x:∀α:C.σ] ⊢ p : σ′
+          ∆,(≤ ∪{(C, D) | D ∈ S})*,Γ,E[x:∀α:C.σ] ⊢ p : σ'
     CLASS ----------------------------------------------------------
-          ∆,≤,Γ,E ⊢ (class α : C ≤ S where x : σ; p) : σ′
+          ∆,≤,Γ,E ⊢ (class α : C ≤ S where x : σ; p) : σ'
 
-          ∆ ∪ {t : ((Sn)~)C},≤,Γ,E ⊢ p : σ′
+          ∆ ∪ {t : ((Sn)~)C},≤,Γ,E ⊢ p : σ'
           E(x) = ∀α:C.σ
           Γ[(αn : Sn)~],∆,≤,E ⊢ e : {α |→ t((αn)~)}σ
     INST  -----------------------------------------------------
-          ∆,≤,Γ,E ⊢ (inst t : ((Sn)~)C where x = e; p) : σ′
+          ∆,≤,Γ,E ⊢ (inst t : ((Sn)~)C where x = e; p) : σ'
 
   Fig. 3. The judgement ∆,≤,Γ,E ⊢ p : σ
 
@@ -281,7 +282,7 @@
 
   **A substitution** is a finite mapping from type variables to types, written as `{α1 |→ τ1, ...}`.
   Substitutions are denoted by `θ` and `δ; {}` is the empty substitution.
-  Define `Dom(θ) = {α | θα /= α}`, `Cod(θ) = ∪_{α∈Dom(θ)} FV(θ(α))` and `FV(θ) = Dom(θ) ∪ Cod(θ)`.
+  Define `Dom(θ) = {α | θα ≠ α}`, `Cod(θ) = ∪_{α∈Dom(θ)} FV(θ(α))` and `FV(θ) = Dom(θ) ∪ Cod(θ)`.
 
   There are two judgements which are defined in Figures 3 and 4: `∆,≤,Γ,E ⊢ p : σ` and `∆,≤,Γ,E ⊢ e : σ` express that program `p` and expression `e` are of type `σ` in the context of `∆`, `≤`, `Γ` and `E`.
   The rules for `∆,≤,Γ,E ⊢ p : σ`, when applied backwards, simply traverse the declarations, building up `∆`, `≤` and `E`.
@@ -295,7 +296,7 @@
 
   Note that there are two context conditions for declaration sequences we have chosen not to formalize:
 
-  1. `class α : C ≤ S` must be preceded by a declaration for each superclass in `S`, but not by another declaration `class α : C;`
+  1. `class α : C ≤ S` must be preceded by a declaration for each superclass in `S`, but not by another declaration `class α : C;`.
 
   2. `inst t : ((Sn)~)C` must be preceded, for each superclass `D` of `C`, by a declaration `inst t : ((Tn)~)D` such that `(Sn)~ ⪯ (Tn)~`, but not by another declaration `inst t(...)C`.
 
@@ -309,7 +310,7 @@
 
         Σ,Γ,E ⊢ e : ∀α:S.σ   Σ,Γ ⊢ τ : S
     ∀E -----------------------------------
-        Σ,Γ,E ⊢ e : {α 7→ τ }σ
+        Σ,Γ,E ⊢ e : {α |→ τ }σ
 
         Σ,Γ[α:S],E ⊢ e : σ    α ∈ FV(σ) − FV(E)
     ∀I ----------------------------------------
@@ -341,38 +342,39 @@
 
   <!-- page 8 -->
 
-  To distinguish the syntax-directed system we use `▷` instead of `⊢` and prime the names of its rules, e.g. `ASM′`.
+  To distinguish the syntax-directed system we use `▷` instead of `⊢` and prime the names of its rules, e.g. `ASM'`.
 
   Definition 3.1
 
-  The type scheme `σ′ = ∀(αn′ :Sn′)~ .τ′` is a generic instance of `σ = ∀(αm :Sm)~ .τ` under `Σ` and `Γ`, written `Σ,Γ ⊢ σ ⪰ σ′`, iff there exists a substitution `θ` such that
+  The type scheme `σ' = ∀(αn' :Sn')~ .τ'` is a generic instance of `σ = ∀(αm :Sm)~ .τ` under `Σ` and `Γ`, written `Σ,Γ ⊢ σ ⪰ σ'`, iff there exists a substitution `θ` such that
 
-    θτ                   = τ ′ ,
+    θτ                   = τ ' ,
     Dom(θ)               ⊆ {α m },
-    Σ, Γ[α n ′ :S n ′ ]  ⊢ θα i : S i  [i = 1 ... m],
-    {(α n ′)~} ∩ FV(σ)   = {}.
+    Σ, Γ[α n' :S n' ]  ⊢ θα i : S i  [i = 1 ... m],
+    {(α n')~} ∩ FV(σ)   = {}.
 
   With this relation on types we can now define the most general or principal type of an expression.
   We say `E` is closed if `FV(E) = {}`.
 
   Definition 3.2
 
-  The type scheme `σ` is a principal type of an expression `e` w.r.t. `Σ` and a closed environment `E`, if `Σ,[],E ⊢ e : σ` and for every `σ′` with `Σ,[],E ⊢ e : σ′`, the type scheme `σ'` must be a generic instance of `σ`, i.e. `Σ,[] ⊢ σ ⪰ σ′`.
+  The type scheme `σ` is a principal type of an expression `e` w.r.t. `Σ` and a closed environment `E`, if `Σ,[],E ⊢ e : σ` and for every `σ'` with `Σ,[],E ⊢ e : σ'`, the type scheme `σ'` must be a generic instance of `σ`, i.e. `Σ,[] ⊢ σ ⪰ σ'`.
   For the syntax-directed system, the rules APP and ABS remain unchanged, the quantifier rules are incorporated into ASM and LET, as shown in Figure 5.
 
          Σ,Γ ⊢ E(x) ⪰ τ
-    ASM′ ------------------
+    ASM' ------------------
          Σ,Γ,E ▷ x : τ
 
          Σ,Γ[(αk : Sk)~],E ▷ e1 : τ1
          Σ,Γ,E[x:∀(αk :Sk)~ .τ1] ▷ e2 : τ2
-    LET′ --------------------------------------
+    LET' --------------------------------------
          Σ,Γ,E ▷ let x = e1 in e2 : τ2
          where {(αk)~} = FV(τ1) − FV(E)
 
   Fig. 5. The judgement Σ,Γ,E ▷ e : σ
 
-  There is a straightforward correspondence between the two systems. The syntax-directed derivations are sound
+  There is a straightforward correspondence between the two systems.
+  The syntax-directed derivations are sound
 
   Theorem 3.3
 
@@ -387,8 +389,8 @@
   The proof of the last theorem is standard, as for instance in (CDDK86, App. A.1).
 
   Theorem 3.4 clarifies in what sense `▷` works differently from `⊢:` by applying the primed rules backwards, the sort constraints for type variables are stored solely in `Γ`, and not in the type scheme of `e`.
-  For instance, the `LET′` rule explicitly extends `Γ`.
-  The `⪰` operation, used in the `ASM′` rule, may introduce new type variables, whose sorts must be constrained in `Γ`.
+  For instance, the `LET'` rule explicitly extends `Γ`.
+  The `⪰` operation, used in the `ASM'` rule, may introduce new type variables, whose sorts must be constrained in `Γ`.
 
   <!-- page 9 -->
 
@@ -406,20 +408,20 @@
   This is simply a notational device which avoids excessive parameterization.
 
   Since sort information is maintained in contexts, we frequently work with pairs of contexts and substitutions.
-  A substitution `θ` obeys the sort constraints of `Γ` in the context of `Γ′`, written `Γ′ ⊢ θ : Γ`, iff `Σ, Γ′ ⊢ θα : Γα` for all `α`.
-  Because `Σ,Γ′ ⊢ θα : Γα` is trivially fulfilled if `Γα = {}` it suffices to require`Σ,Γ′ ⊢ θα : Γα` for all `α ∈ Dom(Γ)`.
+  A substitution `θ` obeys the sort constraints of `Γ` in the context of `Γ'`, written `Γ' ⊢ θ : Γ`, iff `Σ, Γ' ⊢ θα : Γα` for all `α`.
+  Because `Σ,Γ' ⊢ θα : Γα` is trivially fulfilled if `Γα = {}` it suffices to require`Σ,Γ' ⊢ θα : Γα` for all `α ∈ Dom(Γ)`.
   For instance, let `Eq` and list be defined as in the examples in Section 2.
   Then we have `[β:Eq] ⊢ {α |→ list(β)} : [α:Eq]`.
 
   We define an ordering on context-substitution pairs:
 
-    (Γ,θ) ≥ (Γ′,θ′) ⇔ ∃δ. δθ = θ′ ∧ Γ′ ⊢ δ : Γ
+    (Γ,θ) ≥ (Γ',θ') ⇔ ∃δ. δθ = θ' ∧ Γ' ⊢ δ : Γ
 
   where `δθ` is defined as the composition: `(δθ)(s) = δ(θ(s))`.
 
   The set of unifiers of `τ1` and `τ2` w.r.t. `Γ`, written `U(Γ, τ1 = τ2)`, consists of the following context-substitution pairs:
 
-    U(Γ, τ1 = τ2) = {(Γ′,θ) | θτ1 = θτ2 ∧ Γ′ ⊢ θ : Γ}
+    U(Γ, τ1 = τ2) = {(Γ',θ) | θτ1 = θτ2 ∧ Γ' ⊢ θ : Γ}
 
   A unifier `(Γ0 , θ0) ∈ U(Γ, τ1 = τ2)` is most general if `(Γ0, θ0) ≥ (Γ1, θ1)` for all `(Γ1, θ1) ∈ U(Γ, τ1 = τ2)`.
   We say that unification modulo `Σ` is unitary if for all `Γ` and `τ1 = τ2` the set `U(Γ, τ1 = τ2)` is empty or contains a most general unifier.
@@ -494,7 +496,7 @@
   Proof To show soundness, let `unify(Γ,τ1 = τ2)` terminate with result `(Γ0,θ0)`.
   It follows directly that `θ0 τ1 = θ0 τ2`.
   It remains to be seen that `Γ0 ⊢ θ0 α : Γα` for all `α`.
-  If `α ∈/ Dom(θ0)`, then `Γα ⊆ Γ0 α` and the claim follows trivially.
+  If `α ∉ Dom(θ0)`, then `Γα ⊆ Γ0 α` and the claim follows trivially.
   If `α ∈ Dom(θ0)` then `Γ0 ⪯ Γc = Constrain(θ0,Γ) ⪯ constrain(θ0 α,Γα)` and the claim follows from Lemma 4.1.
 
   <!-- page 11 -->
@@ -506,7 +508,7 @@
 
   It remains to be shown that `Γ1 ⊢ δ : Γ0`.
   If `β ∈ Dom(θ0)` then `Γ0 β = {}` and hence `Γ1 ⊢ δβ : Γ0 β` holds trivially.
-  Now assume `β ∈/ Dom(θ0)`.
+  Now assume `β ∉ Dom(θ0)`.
   Thus `Γ0 β = Γc β ∪ Γβ`.
   From `Γ1 ⊢ θ1 : Γ` it follows that `Γ1 ⊢ δβ : Γβ`.
   Proving `Γ1 ⊢ δ : Γc` is more involved.
@@ -520,7 +522,7 @@
 
   Proof The “if” direction is a consequence of Theorem 4.4.
   For the “only if” direction let `Σ` not be coregular.
-  Thus there are classes `C`, `D ≤ E` and declarations `t : ((Sn)~)C` and `t : ((Tn)~)D, (Sn)~ ⪯/ (Tn)~`, and `(Tn)~ ⪯/ (Sn)~`, such that there is no third declaration `t : ((Un)~)E′`, `E′ ⪯ E`, and `(Sn)~`, `(Tn)~ ⪯ (Un)~`.
+  Thus there are classes `C`, `D ≤ E` and declarations `t : ((Sn)~)C` and `t : ((Tn)~)D, (Sn)~ ⪯/ (Tn)~`, and `(Tn)~ ⪯/ (Sn)~`, such that there is no third declaration `t : ((Un)~)E'`, `E' ⪯ E`, and `(Sn)~`, `(Tn)~ ⪯ (Un)~`.
   Hence the unification problem `([β:E], t((αn)~)=β)` does not have a most general unifier.
   Two maximal ones are `([(αn : Sn)~],θ)` and `([(αn:Tn)~], θ)` where `θ = {β → t((αn)~)}`. □
 
@@ -536,10 +538,10 @@
   It should be pointed out that ignoring the subclass hierarchy means giving up a degree of freedom afforded by the equivalence `≈` on sorts defined in Section 2.
   For example `unify([α : {Eq}, β : {Ord}], α = β)` returns `([α : {Eq, Ord}], {β |→ α})`.
   Taking `≈` into account, we could just as well return `([α : {Ord}], {β |→ α})`.
-  In order to show that the subsequent developments do not depend on which of these unifiers is computed, we assume in the sequel that `unify` is an arbitrary function which, provided `Σ` is coregular, returns a most general unifier: if `U(Γ, τ1 = τ2) /= {}` then
+  In order to show that the subsequent developments do not depend on which of these unifiers is computed, we assume in the sequel that `unify` is an arbitrary function which, provided `Σ` is coregular, returns a most general unifier: if `U(Γ, τ1 = τ2) ≠ {}` then
 
   - `unify(Γ, τ1 = τ2) ∈ U(Γ, τ1 = τ2)` and
-  - `(Γ′,θ) ≤ unify(Γ, τ1 = τ2)` for all `(Γ′,θ) ∈ U(Γ, τ1 = τ2)`.
+  - `(Γ',θ) ≤ unify(Γ, τ1 = τ2)` for all `(Γ',θ) ∈ U(Γ, τ1 = τ2)`.
 
 
   This implies a number of simple properties:
@@ -548,49 +550,50 @@
 
   Fact 4.6
 
-  If `unify(Γ,τ1 = τ2) = (Γ′,θ)` then
+  If `unify(Γ,τ1 = τ2) = (Γ',θ)` then
 
   - `θ` is a most general unifier of `τ1` and `τ2`,
-  - `Dom(Γ′) ∪ FV(θ) ⊆ Dom(Γ) ∪ FV(τ1) ∪ FV(τ2)`,
-  - `Dom(Γ′) ∩ Dom(θ) = {}`.
+  - `Dom(Γ') ∪ FV(θ) ⊆ Dom(Γ) ∪ FV(τ1) ∪ FV(τ2)`,
+  - `Dom(Γ') ∩ Dom(θ) = {}`.
 
 
-  The second fact states that `unify` does not introduce new variables, and the last expresses that `Γ′` does not constrain variables instantiated by `θ`.
-  It is easy to see that the `Γ′` is determined only up to `≈`.
-  Hence the unification algorithm could always ensure that `Γ′` is “minimized” by removing redundant elements from each sort.
+  The second fact states that `unify` does not introduce new variables, and the last expresses that `Γ'` does not constrain variables instantiated by `θ`.
+  It is easy to see that the `Γ'` is determined only up to `≈`.
+  Hence the unification algorithm could always ensure that `Γ'` is “minimized” by removing redundant elements from each sort.
 
   Finally one may wonder if the fact that coregularity is strictly weaker than Haskell’s context conditions means the latter could be relaxed.
   We believe that there are no non-trivial relaxations but do not want to enlarge on this subject because it requires going beyond the type system to take semantics and pragmatics into account.
 
 ## 5 Algorithm W
 
-  The syntax-directed rule system in Figure 5 is non-deterministic, since rule ASM′ can choose any instance of the type of `x`.
+  The syntax-directed rule system in Figure 5 is non-deterministic, since rule ASM' can choose any instance of the type of `x`.
   To obtain a deterministic algorithm, we refine the syntax directed system such that it keeps types as general as possible.
-  The result is algorithm W in Figure 6. In this section we assume that `Σ` is coregular — otherwise unify is not well-defined.
+  The result is algorithm W in Figure 6.
+  In this section we assume that `Σ` is coregular — otherwise unify is not well-defined.
 
     W(V,Γ,E,e) = case e of
                      x ⇒ let ∀(αn : Sn)~ .τ = E(x)
-                                          βi ∈/ V [i = 1 ... n]
-                          in (V′ ∪ {βn}, Γ[(βn :Sn)~], {}, {(αn |→ βn)~}τ)
-                  λx.e ⇒ let            α ∈/ V
-                              (V′,Γ′,θ′,τ) = W(V ∪ {α}, Γ, E[x:α], e)
-                          in (V′,Γ′,θ′,α → τ)
+                                          βi ∉ V [i = 1 ... n]
+                          in (V' ∪ {(βn)~}, Γ[(βn :Sn)~], {}, {(αn |→ βn)~}τ)
+                  λx.e ⇒ let            α ∉ V
+                              (V',Γ',θ',τ) = W(V ∪ {α}, Γ, E[x:α], e)
+                          in (V',Γ',θ',α → τ)
                (e1 e2) ⇒ let (V1,Γ1,θ1,τ1) = W(V,Γ,E,e1)
                               (V2,Γ2,θ2,τ2) = W(V1,Γ1,θ1 E,e2)
-                                          α ∈/ V2
-                                    (Γ′,θ′) = unify(Γ2, θ2θ1τ1 = θ2τ2 → α)
-                          in (V2 ∪ {α},Γ′,θ′θ2θ1,α)
+                                          α ∉ V2
+                                    (Γ',θ') = unify(Γ2, θ2θ1τ1 = θ2τ2 → α)
+                          in (V2 ∪ {α},Γ',θ'θ2θ1,α)
 
-      let x = e1 in e2 ⇒ let (V1,Γ1,θ1,τ1) = W(V, Γ, E, e 1 )
-                                       {αn} = FV(θ1 τ1) − FV(θ1 E)
-                              (V2,Γ2,θ2,τ2) = W(V1, Γ1 \ {αn},
+      let x = e1 in e2 ⇒ let (V1,Γ1,θ1,τ1) = W(V, Γ, E, e1)
+                                    {(αn)~} = FV(θ1 τ1) − FV(θ1 E)
+                              (V2,Γ2,θ2,τ2) = W(V1, Γ1 \ {(αn)~},
                                                 (θ1 E)[x : ∀(αn :Γ1 αn)~ .θ1 τ1],e2)
                           in (V2,Γ2,θ2θ1,τ2)
 
   Fig. 6. Algorithm W
 
   Algorithm W follows the same pattern as Milner’s original algorithm of the same name (Mil78): the type of an expression `e` is computed by traversing `e` in a top-down manner.
-  `W(V,Γ,E,e)` returns a quadruple `(V′,Γ′,θ,τ)`, where `θτ` is the type of `e` in the context of `Γ′` and `θE`. 
+  `W(V,Γ,E,e)` returns a quadruple `(V',Γ',θ,τ)`, where `θτ` is the type of `e` in the context of `Γ'` and `θE`. 
 
   <!-- page 13 -->
 
@@ -598,35 +601,35 @@
   Observe the different let-constructs: the one on the left hand side is in the object language, the ones on the right are part of the type inference algorithm.
 
   The parameter `V` contains all “used” variables, i.e. variables that occur in `Γ` or in `E`.
-  Thus a type variable `α ∈/ V` is a “new” variable.
-  For our algorithm to be truly functional, a linear ordering on variables may be used, such that the “next” new variable `α ∈/ V` can be computed deterministically.
+  Thus a type variable `α ∉ V` is a “new” variable.
+  For our algorithm to be truly functional, a linear ordering on variables may be used, such that the “next” new variable `α ∉ V` can be computed deterministically.
   We will assume in general that `W` is invoked with `V`, `Γ` and `E` such that `FV(E) ∪ Dom(Γ) ⊆ V`.
 
   Algorithm W is not meant to be implemented directly but merely serves as a mathematically tractable stepping stone towards an efficient implementation.
   Its principal weakness is the fact that substitutions are computed from scratch and composed later on.
   This problem is addressed and solved with algorithm I in the next section.
-  In contrast to substitutions, contexts are computed incrementally, i.e. the result context `Γ′` is an extension of the input context `Γ`.
+  In contrast to substitutions, contexts are computed incrementally, i.e. the result context `Γ'` is an extension of the input context `Γ`.
 
   A formal analysis of `W` requires some more notation.
   For an environment `E` and a substitution `θ`, define `θE = [x : θ(E(x)) | x ∈ Dom(E)]`.
-  Two substitutions are equal on a set of variables `W`, written as `θ = W θ′`, if `θα = θ′ α` for all `α ∈ W`.
+  Two substitutions are equal on a set of variables `W`, written as `θ = W θ'`, if `θα = θ' α` for all `α ∈ W`.
   The restriction of a substitution to a set of variables `W` is defined as `θ |W α = θα` if `α ∈ W` and `θ |W α = α` otherwise.
   Given a list of syntactic objects `(Cn)~` we write `FV((Cn)~)` instead of `FV(C1) ∪ ... ∪ FV(Cn)`.
 
   We first show that the algorithm is invariant under α-conversion.
   The free variables of an expression e, i.e. `FV(e)`, and the application of a substitution to `e` are defined as usually in λ-calculus.
 
-  Lemma 5.1
+  **Lemma 5.1**
 
-  If `W(V,Γ,E[x:τ],e) = (V′,Γ′,θ′,τ′)` and `y ∈/ Dom(E)` then `W(V,Γ,E[y:τ], {x |→ y}e) = (V′,Γ′,θ′,τ′)`.
+  If `W(V,Γ,E[x:τ],e) = (V',Γ',θ',τ')` and `y ∉ Dom(E)` then `W(V,Γ,E[y:τ], {x |→ y}e) = (V',Γ',θ',τ')`.
   Proof by induction on `e`. □
 
   With this lemma, we can easily show the desired theorem for α-conversion.
 
-  Theorem 5.2
+  **Theorem 5.2**
 
   Let `e` be `λx.e2` or `let y = e1 in e2`.
-  If `W(V,Γ,E,e)` is defined, `y ∈/ Dom(E)`, and `y ∈/ FV(e)`, then `W(V,Γ,E,e′) = W(V,Γ,E,e)`, where `e′` is `λy.{x |→ y} e2` or `let y = e1 in {x |→ y} e2` respectively.
+  If `W(V,Γ,E,e)` is defined, `y ∉ Dom(E)`, and `y ∉ FV(e)`, then `W(V,Γ,E,e') = W(V,Γ,E,e)`, where `e'` is `λy.{x |→ y} e2` or `let y = e1 in {x |→ y} e2` respectively.
 
   Proof by induction, using Lemma 5.1. □
 
@@ -634,55 +637,55 @@
 
   Theorem 5.3 (Correctness of W)
 
-  If `W(V,Γ,E,e) = (V′,Γ′,θ,τ)` then `Σ,Γ′, θE ▷ e : θτ`.
+  If `W(V,Γ,E,e) = (V',Γ',θ,τ)` then `Σ,Γ', θE ▷ e : θτ`.
 
   Before we can prove the correctness theorem, we need to supply a series of lemmas.
   The following lemma shows the basic relations between the variables of the objects used by `W`.
-  The first item states that all used variables are recorded in `V′`.
-  Next, all new variables occuring in the computed objects are in `V′` but not in `V`, i.e. there is no “reuse” of names.
+  The first item states that all used variables are recorded in `V'`.
+  Next, all new variables occuring in the computed objects are in `V'` but not in `V`, i.e. there is no “reuse” of names.
 
   <!-- page 14 -->
 
   The third item states that if some type variables of the computed type are not new, they must have been in the environment `E`.
-  The last item requires the computed context to be free of assumptions about old variables (which are in `Dom(θ′)`), i.e. no “litter”.
+  The last item requires the computed context to be free of assumptions about old variables (which are in `Dom(θ')`), i.e. no “litter”.
 
   Lemma 5.4
 
-  Assume `W(V,Γ,E,e) = (V′,Γ′,θ′,τ)` and `FV(E) ∪ Dom(Γ) ⊆ V`.
+  Assume `W(V,Γ,E,e) = (V',Γ',θ',τ)` and `FV(E) ∪ Dom(Γ) ⊆ V`.
   Then
 
-  1. `V ⊆ V′` and `Dom(Γ′) ∪ FV(θ′,E,τ) ⊆ V′`
-  2. `(Dom(Γ′) ∪ FV(θ′,τ)) − (Dom(Γ) ∪ FV(E)) ⊆ V′ − V`.
-  3. `FV(θ′,τ) ∩ V ⊆ FV(E)`
-  4. `Dom(Γ′) ∩ Dom(θ′) = {}`
+  1. `V ⊆ V'` and `Dom(Γ') ∪ FV(θ',E,τ) ⊆ V'`
+  2. `(Dom(Γ') ∪ FV(θ',τ)) − (Dom(Γ) ∪ FV(E)) ⊆ V' − V`.
+  3. `FV(θ',τ) ∩ V ⊆ FV(E)`
+  4. `Dom(Γ') ∩ Dom(θ') = {}`
 
 
-  **Proof** The first claim follows easily since all new variables are recorded in `V′` and since the unification algorithm does not introduce new variables (see Fact 4.6).
-  For the same reason and since all variables in `Dom(Γ′) ∪ FV(θ′,τ)` are either new or in `Dom(Γ) ∪ FV(E)`,  `FV(E) ∪ Dom(Γ) ⊆ V`.
+  **Proof** The first claim follows easily since all new variables are recorded in `V'` and since the unification algorithm does not introduce new variables (see Fact 4.6).
+  For the same reason and since all variables in `Dom(Γ') ∪ FV(θ',τ)` are either new or in `Dom(Γ) ∪ FV(E)`, `FV(E) ∪ Dom(Γ) ⊆ V`.
 
   The remaining two items are shown by induction on the term structure:
 
-  `x` : trivial since all `βi` are new variables, i.e. `βi ∈/ V`.
+  `x` : trivial since all `βi` are new variables, i.e. `βi ∉ V`.
 
   `λx.e` : by induction hypothesis and since `α` is a new variable.
 
   `(e1 e2)` : We first show
 
-    (FV(θ′) ∪ {α}) ∩ V ⊆ FV(E).
+    (FV(θ') ∪ {α}) ∩ V ⊆ FV(E).
 
-  Since the unification algorithm does not introduce new variables, it follows that `FV(θ′) ⊆ FV(θ2θ1,τ1,τ2) ∪ {α}`.
-  Because `α ∈/ V`, it suffices to show
+  Since the unification algorithm does not introduce new variables, it follows that `FV(θ') ⊆ FV(θ2θ1,τ1,τ2) ∪ {α}`.
+  Because `α ∉ V`, it suffices to show
 
     FV(θ2θ1,τ2,τ1) ∩ V ⊆ FV(E).  (1)
 
   The induction hypothesis for `e2` yields `FV(θ2,τ2) ∩ V1 ⊆ FV(θ1E)`.
   Using `FV(θ1E) ⊆ FV(E,θ1)` and `V ⊆ V1` we obtain `FV(θ2,τ2) ∩ V ⊆ F V(E,θ1)`.
   By induction hypothesis for `e1`, i.e. `FV(θ1,τ1)∩V ⊆ FV(E)`, we easily get (1).
-  Next we show that `Dom(Γ′) ∩ Dom(θ′θ2θ1) = {}`.
+  Next we show that `Dom(Γ') ∩ Dom(θ'θ2θ1) = {}`.
   We obtain `Dom(Γ1) ∩ Dom(θ1) = {}` from the induction hypothesis.
   Then from `Dom(θ1) ⊆ V1` and `Dom(θ1) ∩ FV(θ1E) = {}` (idempotence of `θ1`) we obtain `Dom(Γ2) ∩ Dom(θ1) = {}`, as `Dom(Γ2) − (Dom(Γ1) ∪ FV(θ1E)) ⊆ V2 − V1` (item 2 of Lemma 5.4).
   Next, from `Dom(Γ2) ∩ Dom(θ2) = {}` (induction hypothesis) and since `Dom(θ2θ1) = Dom(θ1) ∪ Dom(θ2)`, `Dom(Γ2) ∩ Dom(θ2θ1) = {}` follows.
-  Then `Dom(Γ′) ∩ Dom(θ′θ2θ1) = {}` follows from the properties of the unification algorithm, i.e. it may not constrain variables from `Dom(θ′)` (see Fact 4.6).
+  Then `Dom(Γ') ∩ Dom(θ'θ2θ1) = {}` follows from the properties of the unification algorithm, i.e. it may not constrain variables from `Dom(θ')` (see Fact 4.6).
 
   `let x = e1 in e2` : We first show
 
@@ -700,9 +703,9 @@
 
   Then the rest of the proof proceeds as for `(e1 e2)`.
   The proof of `Dom(Γ2) ∩ Dom(θ2θ1) = {}` also works as in the `(e1 e2)` case;
-  the only difference (apart from the additional `θ′`) is that we have `Dom(Γ2) ∩ {(αn)~} = {}`, which only simplifies the proof. □
+  the only difference (apart from the additional `θ'`) is that we have `Dom(Γ2) ∩ {(αn)~} = {}`, which only simplifies the proof. □
 
-  The next lemma shows that the relation `Γ ⊢ θ : Γ′` enjoys a kind of transitivity property w.r.t. substitutions.
+  The next lemma shows that the relation `Γ ⊢ θ : Γ'` enjoys a kind of transitivity property w.r.t. substitutions.
 
   Lemma 5.5
 
@@ -716,15 +719,15 @@
 
   Lemma 5.6
 
-  If `W(V,Γ,E,e) = (V′,Γ′,θ′,τ)` then `Γ′ ⊢ θ′ : Γ`.
+  If `W(V,Γ,E,e) = (V',Γ',θ',τ)` then `Γ' ⊢ θ' : Γ`.
 
   Proof by induction on the structure of `e`:
 
   `x` : `Γ[βn : Sn] ⊢ {} : Γ` trivial.
 
-  `λx.e` : Since the induction hypothesis holds for any `E`, including `E[x:α],Γ′ ⊢ θ′ : Γ` follows directly.
+  `λx.e` : Since the induction hypothesis holds for any `E`, including `E[x:α],Γ' ⊢ θ' : Γ` follows directly.
 
-  `(e1 e2)`: By induction hypothesis we get `Γ1 ⊢ θ1 : Γ` and `Γ2 ⊢ θ2 : Γ1` and by transitivity (Lemma 5.5) and by correctness of the unification algorithm we get `Γ′ ⊢ θ′θ2θ1 : Γ`.
+  `(e1 e2)`: By induction hypothesis we get `Γ1 ⊢ θ1 : Γ` and `Γ2 ⊢ θ2 : Γ1` and by transitivity (Lemma 5.5) and by correctness of the unification algorithm we get `Γ' ⊢ θ'θ2θ1 : Γ`.
 
   `let x = e1 in e2` : By induction hypothesis we get
 
@@ -747,11 +750,11 @@
 
   Lemma 5.7
 
-  If `Σ,Γ,E ▷ e : τ` and `Γ′ ⊢ θ′ : Γ`, then `Σ,Γ′,θ′E ▷ e : θ′ τ`.
+  If `Σ,Γ,E ▷ e : τ` and `Γ' ⊢ θ' : Γ`, then `Σ,Γ',θ'E ▷ e : θ' τ`.
 
   <!-- page 16 -->
 
-  Proof simple by adding proofs of the form `Γ′ ⊢ θ′ α : Γα` in the proof tree of `Σ,Γ,E ▷ e : τ` to obtain a proof of `Σ,Γ′,θ′E ▷ e : θ′ τ`. □
+  Proof simple by adding proofs of the form `Γ' ⊢ θ' α : Γα` in the proof tree of `Σ,Γ,E ▷ e : τ` to obtain a proof of `Σ,Γ',θ'E ▷ e : θ' τ`. □
 
   At last we are able to prove the correctness theorem:
 
@@ -761,15 +764,15 @@
   `x` : Correctness follows easily from
 
          Σ, Γ[(βn : Sn)~] ⊢ E(x) ⪰ {(αn |→ βn)~}τ
-    ASM′ ーーーーーーーーーーーーーーーーーーーーーーーーーー
+    ASM' ーーーーーーーーーーーーーーーーーーーーーーーーーー
          Σ, Γ[(βn : Sn)~],E ▷ x : {(αn |→ βn)~}τ
 
-  `λx.e`: By induction hypothesis we get `Σ,Γ′,(θ′E)[x:θ′α] ▷ e : θτ`.
+  `λx.e`: By induction hypothesis we get `Σ,Γ',(θ'E)[x:θ'α] ▷ e : θτ`.
   Then ABS applies:
 
-        Σ,Γ,(θ′E)[x:θ′α] ▷ e : θ′ τ′
+        Σ,Γ,(θ'E)[x:θ'α] ▷ e : θ' τ'
     ABS -----------------------------
-        Σ,Γ,θ′E ▷ λx.e : θ′α → θτ′
+        Σ,Γ,θ'E ▷ λx.e : θ'α → θτ'
 
   `(e1 e2)`: We get
 
@@ -777,39 +780,39 @@
     Σ,Γ2,θ2θ1E ▷ e2 : θ2 τ2
 
   from the induction hypotheses for `e1` and `e2`.
-  The correctness of the unification algorithm yields `Γ′ ⊢ θ′ : Γ2` and then with `Γ2 ⊢ θ2 : Γ1` (from Lemma 5.6) and Lemma 5.5 we obtain `Γ′ ⊢ θ′θ2 : Γ1`.
+  The correctness of the unification algorithm yields `Γ' ⊢ θ' : Γ2` and then with `Γ2 ⊢ θ2 : Γ1` (from Lemma 5.6) and Lemma 5.5 we obtain `Γ' ⊢ θ'θ2 : Γ1`.
 
-  From Lemma 5.7 we now get the two premises for the APP rule, since `θ′θ2θ1τ1 = θ′θ2τ2 → θ′ α`.
-  Furthermore, `θ2θ1α = α`, since `α` is a new variable (i.e. `α ∈/ V2` and `Dom(θ2) ∪ Dom(θ1) ⊆ V2` by Lemma 5.4).
+  From Lemma 5.7 we now get the two premises for the APP rule, since `θ'θ2θ1τ1 = θ'θ2τ2 → θ' α`.
+  Furthermore, `θ2θ1α = α`, since `α` is a new variable (i.e. `α ∉ V2` and `Dom(θ2) ∪ Dom(θ1) ⊆ V2` by Lemma 5.4).
 
-        Σ,Γ′,θ′θ2θ1E ▷ e1 : θ′θ2θ1τ1
-        Σ,Γ′,θ′θ2θ1E ▷ e2 : θ′θ2τ2
+        Σ,Γ',θ'θ2θ1E ▷ e1 : θ'θ2θ1τ1
+        Σ,Γ',θ'θ2θ1E ▷ e2 : θ'θ2τ2
     APP ------------------------------
-        Σ,Γ′,θ′θ2θ1E ▷ (e1 e2) : θ′α
+        Σ,Γ',θ'θ2θ1E ▷ (e1 e2) : θ'α
 
-  `let x = e1 in e2` : Using `Γ′1 = Γ1 \ {(αn)~}`, `(Sn = Γ1 αn)~`, and `E′ = E[x : ∀(αn :Sn)~ .θ1τ1]` the induction hypotheses are
+  `let x = e1 in e2` : Using `Γ'1 = Γ1 \ {(αn)~}`, `(Sn = Γ1 αn)~`, and `E' = E[x : ∀(αn :Sn)~ .θ1τ1]` the induction hypotheses are
 
-    Σ,Γ′1[(αn : Sn)~],θ1E ▷ e1 : θ1τ1 (5)
-    Σ,Γ2,θ2θ1E′ ▷ e2 : θ2τ2 (6)
+    Σ,Γ'1[(αn : Sn)~],θ1E ▷ e1 : θ1τ1 (5)
+    Σ,Γ2,θ2θ1E' ▷ e2 : θ2τ2 (6)
 
-  Notice that `FV(θ1E′) ∩ {(αn)~} = {}`.
-  To apply LET′, we show
+  Notice that `FV(θ1E') ∩ {(αn)~} = {}`.
+  To apply LET', we show
 
     Σ, Γ2[(αn : Sn)~], θ2θ1E ▷ e1 : θ2θ1τ1  (7)
 
-  As we get `Γ2 ⊢ θ2 : Γ′1` from Lemma 5.6 and `FV(θ2) ∩ {(αn)~} = {}` from Lemma 5.4 (recall that `{(αn)~} ⊆ V1` and `{(αn)~} ∩ FV(θ1 E′) = {}`), we obtain
+  As we get `Γ2 ⊢ θ2 : Γ'1` from Lemma 5.6 and `FV(θ2) ∩ {(αn)~} = {}` from Lemma 5.4 (recall that `{(αn)~} ⊆ V1` and `{(αn)~} ∩ FV(θ1 E') = {}`), we obtain
 
-    Γ2[(αn : Sn)~] ⊢ θ2 : Γ′1[(αn : Sn)~].
+    Γ2[(αn : Sn)~] ⊢ θ2 : Γ'1[(αn : Sn)~].
 
   Then (7) follows from Lemma 5.7 and (5).
 
-  As `Dom(θ1) ∩ FV(τ2) = {}` is a consequence of Lemma 5.4 (as above, `Dom(θ1) ⊆ V1` and `Dom(θ1) ∩ FV(θ1 E′) = {}` as `θ1` is idempotent), we obtain
+  As `Dom(θ1) ∩ FV(τ2) = {}` is a consequence of Lemma 5.4 (as above, `Dom(θ1) ⊆ V1` and `Dom(θ1) ∩ FV(θ1 E') = {}` as `θ1` is idempotent), we obtain
 
-    Σ,Γ2,θ2θ1E′ ▷ e2 : θ2θ1τ2  (8)
+    Σ,Γ2,θ2θ1E' ▷ e2 : θ2θ1τ2  (8)
 
   <!-- page 17 -->
 
-  Now LET′ applies to
+  Now LET' applies to
 
     (7)   (8)   {(αn)~} = FV(θ1τ1) − FV(θ1E)
     --------------------------------------------------------
@@ -834,14 +837,14 @@
   `x`: We have
 
           Σ,Γ* ⊢ θ* E(x) ⪰ τ*
-    ASM′ ---------------------
+    ASM' ---------------------
           Σ,Γ*,θ* E ▷ x : τ*
 
   Observe that we can write `θE(x) = θ* ∀(αn :Sn)~ .τ` as `∀(αn :Sn)~ .θ̂* τ`, where `θ̂* = θ*| (Dom(θ*) − {(αn)~})`, possibly by renaming some `(αn)~`.
   Assuming `Σ, Γ* ⊢ θ* E(x) ⪰ τ*`, let `θ` be the corresponding substitution as in Definition 3.1 with `Dom(θ) ⊆ {(αn)~}`, and `τ* = θθ̂* τ`. Let `δ = θ* ∪ {(βn |→ θαn)~}`.
   As `(βn)~` are new variables, `θ* E = δE` holds.
   Next, `τ* = δ({(αn |→ βn)~}τ) = θθ̂* τ` follows easily.
-  Finally, `Γ* ⊢ δ : Γ[(βn : Sn)~]` follows from `Γ* ⊢ θ* : Γ` (by premise) and from `Σ,Γ* ⊢ θ′ αi : Si`, `[i = 1, ..., n]` (see Definition 3.1).
+  Finally, `Γ* ⊢ δ : Γ[(βn : Sn)~]` follows from `Γ* ⊢ θ* : Γ` (by premise) and from `Σ,Γ* ⊢ θ' αi : Si`, `[i = 1, ..., n]` (see Definition 3.1).
 
   `λx.e`: The derivation ends with
 
@@ -849,19 +852,19 @@
     ABS -----------------------------------------
         Σ,Γ*,θ* E ▷ λx.e : τ1* → τ2*
 
-  As the algorithm is invariant under α-conversion (Lemma 5.2), we can safely assume that `x ∈/ Dom(E)`.
+  As the algorithm is invariant under α-conversion (Lemma 5.2), we can safely assume that `x ∉ Dom(E)`.
   To apply the induction hypotheses, we define `θ0 = θ* ∪ {α |→ τ1*}`.
   Then `Σ, Γ*, θ0 (E[x:α]) ▷ e : τ2*` and `Γ* ⊢ θ0 : Γ` are easy to verify.
   By induction hypothesis there exists `δ1` such that
 
-    W(V ∪ {α}, Γ, E[x:α], e) =  (V′,Γ′,θ′,τ′),              (9)
-    (θ0 E)[x:τ1*]             = δ1 θ′ E[x:α],               (10)
-    τ2*                       = δ1 θ′ τ′,                   (11)
-    Γ*                        ⊢ δ1 : Γ′                     (12)
+    W(V ∪ {α}, Γ, E[x:α], e) =  (V',Γ',θ',τ'),              (9)
+    (θ0 E)[x:τ1*]             = δ1 θ' E[x:α],               (10)
+    τ2*                       = δ1 θ' τ',                   (11)
+    Γ*                        ⊢ δ1 : Γ'                     (12)
 
-  and hence `W(V,Γ,E,λx.e) = (V′,Γ′,θ′,α → τ′)`.
-  Now `θ0 E = δ1 θ′ E` follows from (10).
-  Furthermore, from (10) we obtain `τ1* = δ1 θ′ α` and hence `τ1* → τ2* = δ1 θ′ (α → τ′)` from (11).
+  and hence `W(V,Γ,E,λx.e) = (V',Γ',θ',α → τ')`.
+  Now `θ0 E = δ1 θ' E` follows from (10).
+  Furthermore, from (10) we obtain `τ1* = δ1 θ' α` and hence `τ1* → τ2* = δ1 θ' (α → τ')` from (11).
 
   <!-- page 18 -->
 
@@ -899,12 +902,12 @@
 
   This overlap simplifies the following proofs by case analysis, in which the case `β = α` is immaterial.
   First, to show `δ* θ2 τ2 = δ2 θ2 τ2 = τ2*`, assume `β ∈ FV(τ2)`.
-  Then in case `β ∈/ FV(θ2)`, `δ* τ2 = δ2 τ2` follows from (21) if `β ∈ FV(θ1 τ1)` as `FV(θ2,τ2) ∩ FV(θ1τ1) ⊆ FV(θ1 E)`, and is trivial otherwise.
+  Then in case `β ∉ FV(θ2)`, `δ* τ2 = δ2 τ2` follows from (21) if `β ∈ FV(θ1 τ1)` as `FV(θ2,τ2) ∩ FV(θ1τ1) ⊆ FV(θ1 E)`, and is trivial otherwise.
   If `β ∈ FV(θ2)`, then `δ*θ2τ2 = δ2θ2τ2` is trivial.
 
   To show `δ*θ2θ1τ1 = δ1θ1τ1`, assume `β ∈ FV(θ1τ1)`.
   If `β ∈ Dom(θ2)`, (21) gives the desired result as `Dom(θ2) ∩ FV(θ1τ1) ⊆ FV(θ1E)`.
-  In case `β ∈/ Dom(θ2)`, `δ*θ1τ1 = δ1τ1` follows easily.
+  In case `β ∉ Dom(θ2)`, `δ*θ1τ1 = δ1τ1` follows easily.
   Hence `δ*` is the desired unifier:
 
     δ* θ2θ1τ1 = τ2* → τ1* = δ* (θ2τ2 → α).
@@ -917,16 +920,16 @@
 
   <!-- page 19 -->
 
-  Then by completeness of unification, `θ′` is a most general unifier computed in unify, and there exists `δ′` such that `δ* = δ′θ′`.
+  Then by completeness of unification, `θ'` is a most general unifier computed in unify, and there exists `δ'` such that `δ* = δ'θ'`.
   Hence we get
 
-    W(V,Γ,E,(e1 e2)) =  (V2 ∪ α,Γ′,θ′θ2θ1,α),
-               θ* E = δ′θ′θ2θ1E,
-                 τ* = δ′θ′θ2τ2,
-                 Γ* ⊢ δ′ : Γ′,
+    W(V,Γ,E,(e1 e2)) =  (V2 ∪ α,Γ',θ'θ2θ1,α),
+               θ* E = δ'θ'θ2θ1E,
+                 τ* = δ'θ'θ2τ2,
+                 Γ* ⊢ δ' : Γ',
 
   where the last statement follows from the completeness of unification.
-  `let x = e1 in e2`: We assume `Γ* ⊢ θ* : Γ` and, by LET′,
+  `let x = e1 in e2`: We assume `Γ* ⊢ θ* : Γ` and, by LET',
 
     Σ,Γ*[(αk* : Sk*)~],θ* E ▷ e1 : τ1*
     Σ,Γ*,(θ* E)[x:∀(αk* : Sk*)~ .τ1*] ▷ e2 : τ2*
@@ -934,25 +937,25 @@
     Σ,Γ*,θ* E ▷ let x = e1 in e2 : τ2*
 
   where `{(αk*)~} = FV(τ1*) − FV(θ* E)`.
-  As the algorithm is invariant under α-conversion (Lemma 5.2), we can safely assume that `x ∈/ Dom(E)`.
+  As the algorithm is invariant under α-conversion (Lemma 5.2), we can safely assume that `x ∉ Dom(E)`.
 
-  As `{(αk*)~} ∩ FV(θ* E) = {}` we can w.l.o.g. rename `(αk*)~` in the premises of the above rule (not in `Γ′`) in order to assume that `{(αk*)~} ∩ Dom(Γ*) = {}`.
+  As `{(αk*)~} ∩ FV(θ* E) = {}` we can w.l.o.g. rename `(αk*)~` in the premises of the above rule (not in `Γ'`) in order to assume that `{(αk*)~} ∩ Dom(Γ*) = {}`.
   Formally, this can be done by Lemma 5.5.
   Then we can apply the induction hypothesis to `e1` with `Γ* [(αk* : Sk*)~] ⊢ θ* : Γ` and obtain `δ1` such that
 
          W(V,Γ,E,e1) = (V1,Γ1,θ1,τ1),            (22)
                 θ* E = δ1θ1E,                    (23)
                  τ1* = δ1θ1τ1,                   (24)
-    Γ*[(αk* : Sk*)~] ⊢  δ1 : Γ′1 [(αn : Sn)~],   (25)
+    Γ*[(αk* : Sk*)~] ⊢  δ1 : Γ'1 [(αn : Sn)~],   (25)
 
-  where `Γ′1 = Γ1 \ {(αn)~}` and `(Sn)~ = (Γ1 αn)~`.
+  where `Γ'1 = Γ1 \ {(αn)~}` and `(Sn)~ = (Γ1 αn)~`.
 
   From `{(αn)~} = FV(θ1τ1) − FV(θ1 E)` we infer `FV({(δ1αn)~}) = FV(δ1θ1τ1) − FV(δ1θ1E) = {(αk*)~}`.
-  Hence `Γ* ⊢ δ1 : Γ′1` follows from (25).
+  Hence `Γ* ⊢ δ1 : Γ'1` follows from (25).
   Notice that `δ1 ∀(αn :Sn)~ .θ1τ1 = ∀(αn :Sn)~ .δ̂1θ1τ1`, where `δ̂1 = δ1|(Dom(δ1)−{(αn)~})`, follows from the assumption that new variables used by W do not occur in the chosen derivation, i.e. in `Cod(δ1)`.
   Then we obtain `Σ,Γ* ⊢ δ1 ∀(αn :Sn)~ .θ1 τ1 ⪰ ∀(αk* :Sk*)~ .τ*` by using `δ1 | {(αn)~}` as the substitution in Definition 3.1 and because `Σ,Γ* [(αk* :Sk*)~] ⊢ δ1αi : Si`, `[i = 1 ... n]` follows from (25).
 
-  Now the problem is that the induction hypothesis cannot be applied directly to `e2` with `Γ* ⊢ δ1 : Γ′1` and `θ1 E[...]`, since in general `(θ* E)[x:∀(αk* :Sk*)~ .τ1* ] /= (δ1 θ1 E)[x:δ1 ∀(αn :Sn)~ .θ1 τ1]`.
+  Now the problem is that the induction hypothesis cannot be applied directly to `e2` with `Γ* ⊢ δ1 : Γ'1` and `θ1 E[...]`, since in general `(θ* E)[x:∀(αk* :Sk*)~ .τ1* ] ≠ (δ1 θ1 E)[x:δ1 ∀(αn :Sn)~ .θ1 τ1]`.
   Thus we have to find a different basis in order to apply the induction hypothesis for `e2`.
 
   From
@@ -963,22 +966,22 @@
 
     Σ,Γ*,(θ* E)[x:δ1 ∀(αn :Sn)~ .θ1 τ1] ▷ e2 : τ2*,
 
-  since at each application of ASM′ to `x` in the proof of (26), we can use the more general `[x:δ1 ∀(αn :Sn)~ .θ1 τ1]` instead of `[x:∀(αk* :Sk*)~ .τ1*]`.
+  since at each application of ASM' to `x` in the proof of (26), we can use the more general `[x:δ1 ∀(αn :Sn)~ .θ1 τ1]` instead of `[x:∀(αk* :Sk*)~ .τ1*]`.
 
-  Then the induction hypothesis applies to e 2 with `Γ* ⊢ δ1 : Γ′1` and the environment `θ1 E[x:∀αn :Sn .θ1 τ1]`.
+  Then the induction hypothesis applies to e 2 with `Γ* ⊢ δ1 : Γ'1` and the environment `θ1 E[x:∀αn :Sn .θ1 τ1]`.
   
   <!-- page 20 -->
 
   We get `δ2` such that
 
-                  W(V1,Γ′1,E,e2) = (V2,Γ2,θ2,τ2),  (27)
+                  W(V1,Γ'1,E,e2) = (V2,Γ2,θ2,τ2),  (27)
     (θ* E)[x:δ1 ∀αn : Sn .θ1τ1] = δ2θ2 (θ1 E[x:∀αn : Sn.θ1τ1]), (28)
                              τ2* = δ2θ2τ2, (29)
                               Γ* ⊢ δ2 : Γ2. (30)
   
   Hence `W(V,Γ,E,let x = e1 in e2) = (V2,Γ2,θ2,τ2)`.
   We obtain `τ2* = δ2θ2θ1τ2` from `τ2* = δ2θ2τ2` and `Dom(θ1) ∩ FV(τ2) = {}` (as in Theorem 5.3).
-  It only remains to show `θ* E = δ2θ2θ1E`, which is a consequence of (28), as `x ∈/Dom(E)`. □
+  It only remains to show `θ* E = δ2θ2θ1E`, which is a consequence of (28), as `x ∉Dom(E)`. □
 
   Now we can finally show the desired principal type theorem.
 
@@ -987,13 +990,13 @@
   If `e` has type `σ0` under a closed environment `E`, i.e. `Σ,[],E ⊢ e : σ0` and `FV(E) ⊆ V0`, then `W(V0,[],{},E,e) = (V,Γ,θ,τ)` and `∀(αn : Γαn)~ .θτ` is a principal type of `e` w.r.t. `Σ` and `E`, where `{(αn)~} = FV(θτ)`.
 
   **Proof** Assume some typing `Σ,[],E ⊢ e : ∀(αm':Sm')~ .τ'`.
-  We infer `Σ,[αm′ :Sm′], E ⊢ e` :
-  `τ'` by `∀E` and then obtain a syntax-directed derivation `Σ,[αm' :Sm'],E ▷ e : τ′` by Theorem 3.4.
+  We infer `Σ,[αm' :Sm'], E ⊢ e` :
+  `τ'` by `∀E` and then obtain a syntax-directed derivation `Σ,[αm' :Sm'],E ▷ e : τ'` by Theorem 3.4.
   Then Lemma 5.8 applies with `Γ* = [αm' : Sm']` and `θ* = {}`.
   We thus get `δ` such that
 
     E   = δE,
-    τ′  = δθτ,
+    τ'  = δθτ,
     Γ*  ⊢  δ : Γ.
 
   Then `∀(αn : Γαn)~ .θτ` is a principal type of `e` w.r.t. `E`, since `∀(αn :Γαn)~ .θτ ⪰ ∀(αm' :Sm')~ τ'` follows from `τ' = δθτ`, `{(αn)~} = FV(θτ)`, and `Γ* ⊢ δ : Γ`. □
@@ -1007,10 +1010,10 @@
   The equivalence of W and I is an easy matter.
   A renaming is an injective substitution that maps variables to variables only.
 
-  Theorem 6.1 (Equivalence of W and I)
+  **Theorem 6.1** (Equivalence of W and I)
 
-  Assume `θ0` is an idempotent substitution such that `θ0E0 = E`.
-  If `W(V,Γ,E,e) = (V′,Γ′,θ′,τ′)` then `I(V,Γ,θ0,E0,e) = (V′′,Γ′′,θ′′,τ′′)` and there exists a renaming `σ` such that `V′′ = σV′`, `∀α.Γ′′α = Γ′(σα)`, `θ′′τ′′ = σθ′τ′` and `θ′′E = σθ′E`.
+  Assume `θ0` is an idempotent substitution such that `θ0 E0 = E`.
+  If `W(V,Γ,E,e) = (V',Γ',θ',τ')` then `I(V,Γ,θ0,E0,e) = (V'',Γ'',θ'',τ'')` and there exists a renaming `σ` such that `V'' = σV'`, `∀α.Γ''α = Γ'(σα)`, `θ''τ'' = σθ'τ'` and `θ''E = σθ'E`.
 
   Proof by simple induction on the structure of `e`. □
 
@@ -1026,16 +1029,16 @@
 
     I(V,Γ,θ,E,e) = case e of
       x    ⇒ let ∀(αn : Sn)~ .τ  =  E(x)
-                              βi  ∈/  V [i = 1 ... n]
+                              βi  ∉  V [i = 1 ... n]
               in (V ∪ {(βn)~},Γ[(βn : Sn)~],θ,{(αn |→ βn)~}τ)
-      λx.e ⇒ let        α ∈/ V
-              (V′,Γ′,θ′,τ) = I(V ∪ {α},Γ,θ,E[x:α],e)
-              in (V′,Γ′,θ′,α → τ)
+      λx.e ⇒ let        α ∉ V
+              (V',Γ',θ',τ) = I(V ∪ {α},Γ,θ,E[x:α],e)
+              in (V',Γ',θ',α → τ)
       (e1 e2) ⇒ let (V1,Γ1,θ1,τ1) = I(V,Γ,θ,E,e1)
                      (V2,Γ2,θ2,τ2) = I(V1,Γ1,θ1,E,e2)
-                                 α ∈/ V2
-                           (Γ′,θ′) = unify(Γ2,θ2τ1 = θ2τ2 → α)
-                in (V2 ∪ {α},Γ′,θ′θ2,α)
+                                 α ∉ V2
+                           (Γ',θ') = unify(Γ2,θ2τ1 = θ2τ2 → α)
+                in (V2 ∪ {α},Γ',θ'θ2,α)
       let x = e1 in e2 ⇒ let (V1,Γ1,θ1,τ1) = I(Γ,θ,E,e1)
                                     {(αn)~} = FV(θ1τ1) − FV(θ1E)
                           in I(V1,Γ1 \ {(αn)~},θ1,E[x : ∀(αn :Γ1 αn)~ .θ1τ1],e2)
@@ -1065,7 +1068,7 @@
 
   <!-- page 22 -->
 
-  On the other hand he does not solve constraints of the form `τ : S` to obtain atomic constraints of the form `α : S′` as is done in our function constrain.
+  On the other hand he does not solve constraints of the form `τ : S` to obtain atomic constraints of the form `α : S'` as is done in our function constrain.
   Instead he accumulates the unsolved constraints.
 
   Independently of our own work Chen, Hudak and Odersky (CHO92) developed an extension of type classes using similar techniques and arriving at a similar type reconstruction algorithm.
