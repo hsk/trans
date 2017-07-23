@@ -6,6 +6,14 @@
 
     Received October 10, 1977; revised April 19, 1978
 
+  ----  
+
+  0022 - 0000/78/0173 - 0348 $ 02. 00/0
+  Copyright 8 1978 by Academic Press, Inc.
+  All rights of reproduction in any form reserved.
+
+  ----  
+
   この作業の目的は、主に実用的なものです。
   型の規律を課さない構造処理言語におけるプログラミングの広く採用されたスタイルは、多種多様なオブジェクトでうまく動作するプロシージャを定義することを必要とします。
   そのような多相的手続きのための形式的な型の規律を、単純なプログラミング言語の文脈で提示し、規律を強制するコンパイル時型検査アルゴリズム W を提示します。
@@ -24,14 +32,7 @@
   実際、彼はそれを "パラメトリック" 多相型と呼んでいました。これは、"アドホック" 多相型とは対照的でした。
   後者の例は、整数加算と実加算の両方を表すために "-|" を使用することです(実際には、複素加算、ベクトル加算などを表すためにさらに拡張することができます)。いくつかの異なる型でこの識別子を使用することは、現在は "オーバーロード" と呼ばれていることが多く、このホワイトペーパーではそれに言及していません。
 
-
-<!-- 348 1/28 -->
-
-  0022 - 0000/78/0173 - 0348 $ 02. 00/0
-  Copyright 8 1978 by Academic Press, Inc.
-  All rights of reproduction in any form reserved.
-
-<!-- 349 2/28 -->
+  <!-- 349 2/28 -->
 
   この論文では、型の柔軟性を獲得する方法を提示し、正当化する一方で、堅牢なプログラムを保証する規律を保持しています。
   この仕事は単なる理論的な運動ではないという証拠があります。ここで議論する多相型規律は、 LCF メタ言語 ML に組み込まれており、 2 年近く使用されています。
@@ -64,7 +65,7 @@
   論文の残りの部分は、非常に簡単な適用言語 Exp を使って規律を正当化します。
   正当化は 2 つの部分に分かれます。
 
-<!-- 350 3/28 -->
+  <!-- 350 3/28 -->
 
   第 3 節では、型定義(正しい型の割り当て)の概念を定義し、型付きプログラムが意味的に型違反がないことを示す意味健全性定理を証明します。
   言語の操作上の定義を与える場合、これは、たとえば、整数が真理値に加算されることも、引数に適用されることもないことを意味し、その結果、実行時検査のためにその型を持ち運ぶ必要はありません。
@@ -88,12 +89,12 @@
 
   要約すると、命令型の機能を持つ現在使用されているプログラミング言語に対して構文的によく理解され、正当化されている多相型の規律を提示します。また、重要ではないが非必須のサブ言語についても意味論的に説明されます。
 
-## 2. 型の規律の図
+## 2. 型の規律の図  
 
   多相性の概念を簡単な例を使って説明します。
   それらは ML の断片で書かれていますが、これはわかりやすいものです。この断片は実際には Landins ISWIM [7] にすぎず、読者は Burge の本 [1] に言及して、このプログラミングのスタイルをほぼ正確に使用しています。
 
-<!-- 351 4/28 -->
+  <!-- 351 4/28 -->
 
   ここでは必須の構成要素を使用しません(割り当てやジャンプ)。
   コンストラクト
@@ -140,7 +141,7 @@
       σtl = τ4 list ➙ τ4 list,
     σcons = (τ5 ☓ τ5 list) ➙ τ5 list.
 
-<!-- 352 5/28 -->
+  <!-- 352 5/28 -->
 
   他の識別子 (`map`、 `f`、 `m`) はそれぞれ 2 回以上現れます。我々の規則では、それぞれのオカレンスに同じ型が割り当てられることを要求しています。規則はまた、いくつかの型 `ρ 1、 ρ 2、...`に対して以下の式が満たされることを要求します。
 
@@ -184,9 +185,9 @@
     ((tok ➙ int) ☓ tok list) ➙ int list,
     ((id ➙ real) ☓ int list) ➙ real list.
 
-<!-- 353 6/28 -->
+  <!-- 353 6/28 -->
 
-同様に、 `null` の場合、たとえば `map` の定義で 2 回発生した場合、その型は
+ 同様に、 `null` の場合、たとえば `map` の定義で 2 回発生した場合、その型は
 
     α list ➙ bool
 
@@ -224,7 +225,7 @@
 
     pair : α ➙ (β ➙ (α ☓ β) )
 
-<!-- 354 7/28 -->
+  <!-- 354 7/28 -->
 
     `pair (a) (b) = (a, b) ` となるようにします。
   我々は書くことができる
@@ -262,7 +263,7 @@
   この例は少し工夫されているように見えるかもしれません。確かに、我々の経験は、ほとんどの場合、ジェネリック型の型変数のすべてが一般的なものか、まったく共通なものではありませんでした。
   しかし、例外を排除する簡単な構文上の制約はなく、そうすることも望ましいとは思われません。
 
-これらの例から、それぞれ let (または letrec) とλによってバインドされた変数を入力するためのルールが異なることが明らかになります。
+ これらの例から、それぞれ let (または letrec) とλによってバインドされた変数を入力するためのルールが異なることが明らかになります。
   したがって、 2 つの式に対する我々の意味論
 
     let x = e in e ’; (λx. e ’) e
@@ -272,7 +273,7 @@
 
     let I = λx. x in I (I) ;    (λI. I (l) )(λx. x) .
 
-<!-- 355 8/28 -->
+  <!-- 355 8/28 -->
 
   これに対する部分的な直観は、λ抽象化が引数なしでしばしば起こることがあることです。上記の 2 番目の式は明示的な引数-` (λx. x) `-が存在するという点で、抽象化の特別な(むしろ不要な)使用を含んでいます。
     let 構文は(変換されると)抽象化のこの制限された使用を伴うので、型割り当ての規則がそれほど制約されないことは不自然ではません。
@@ -305,7 +306,7 @@
 
   (無限型表現を許さない限り)単一化によって解決することはできません。
 
-<!-- 356 9/28 -->
+  <!-- 356 9/28 -->
 
   しかし、方程式を同型写像として扱い、 2 つの関数を使って抽象型とその表現の間で前後に変換することで、この困難は取り除かれます。
   我々は、この解決策が抽象的な型の概念に従っていると主張している(例えば [8] 参照)。
@@ -326,7 +327,7 @@
 
     F (reverse) (x, y)
 
-    `x` と   `y` が異なる型のリストである場合、異なる型の逆のリストのペアを生成します。
+    `x` と `y` が異なる型のリストである場合、異なる型の逆のリストのペアを生成します。
   我々のシステムでは、このような `F` の使用を拒否します (a と b には同じ型が必要です)。しかし、
 
     let reversepair = λ(x, y) . (reverse (x) , reverse (y) )
@@ -351,7 +352,7 @@
            λx. e | x. e を修正する| e 'のx = e とします。
 
   ここで ` (e e') ` はアプリケーションを意味し、 `fix x. e` は最小固定点λ `x` を表す。最後の節は `e` の間に `e` の値に `x` を束縛します。
-    `d`、 `e`、 `f` を素数と接尾辞で `Exp` の範囲で使用することがよくあります。
+    `d` 、 `e` 、 `f` を素数と接尾辞で `Exp` の範囲で使用することがよくあります。
   定数は省略されています。初期の環境では、特定の識別子のための標準的なバインディングを想像することができます。
 
 <！ - 357 10/28 - >
@@ -359,7 +360,7 @@
   実行時の失敗の検出に対応する値`間違い`を含む `Exp` の通常の意味論的セマンティクスを与える。
   この小さな言語では、唯一の失敗は、条件の条件としてのブール値ではない値の出現と、アプリケーションの演算子としての機能しない値の出現です。
 
-  我々のセマンティックドメインは完全な部分的順序 (cpos) とみなされてもよい。 (a) 最小要素 `⊥ D` が存在し、 (b) `D` のすべての有向サブセットが、 `D` 内で最小の上限を有するような、部分的に順序付けられた集合です。
+  我々のセマンティックドメインは完全な部分的順序 (cpos) とみなされてもよい。 (a) 最小要素 `⊥D` が存在し、 (b) `D` のすべての有向サブセットが、 `D` 内で最小の上限を有するような、部分的に順序付けられた集合です。
   与えられたように基本ドメインのセット `{ Bi }` を取り、 3 つの要素の真理値ドメインである `B0 = T` を取ります
 
     true false
@@ -377,402 +378,830 @@
   彼は完全な格子で作業しましたが、解は cpos にも存在します (Plotkin [11] を参照)。
 
   セマンティック関数は、環境の領域である `Env = Id➙V` で、 `ε∈ Exp➙Env➙V` です。
-   `η` を使って `Env` を範囲指定します。
-   `ε` を定義する際には、後で、 Scott と Strachey [16] のよく知られた表記法を使用します(この例では `D` は
-   `V` のいくつかの要約):
+  `η` を使って `Env` を範囲指定します。
+  `ε` を定義する際には、後で、 Scott と Strachey [16] のよく知られた表記法を使用します(この例では `D` は `V` のいくつかの要約):
 
     (i) `d ∈ D` の場合、 `V` の `d` は、 `V` の `D` の注入の下での `d` の画像です。
 
-    （ii） `v∈V`ならば、
+    (ii) `v ∈ V` ならば、
 
       v ⁅ D == true if v = d in V for some d ∈ D,
             == ⊥T if v = ⊥V,
             == false otherwise.
 
-    (iii) If v ∈ V, then
+    (iii) `v ∈ V` ならば
 
       v | D == d if v = d in V, for some d ∈ D,
             == ⊥D otherwise.
 
-<!-- 358 11/28 -->
+  <!-- 358 11/28 -->
 
-  The environment η’ = η{ v/x } is identical with η except that η’ (x) = v. The value ・ in V
-  {・ ∈ IV) is written “ wrong. ” We require the conditional function COND ∈ T ➙ V ➙
-  V ➙ V, where COND tvv ’ is written t ➙ v, v ’ and takes the value
+  環境 'η' =η{v / x} `は`η '（x）= v`を除いて `η`と同じです。
+  `V（・∈W）`の値 `・`は「間違っている」と書かれています。
+  条件付き関数 `COND∈T➙V➙V➙V 'は` t➙v➙V'と書かれています。
 
     v if t == true,
     v '    if t == false,
     ⊥V if t == ⊥T.
 
-## 3. 2. Semantic Equations for Exp
+## 3.2. Expのセマンティック方程式
 
-  In these equations, the open brackets [| |] indicate syntactic arguments.
+   これらの方程式では、 `[| |]` は構文的な引数を示します。
 
 
-    ε[|x |]η = η[|x |]
-    ε[|e1 e2 |]η = v1 ⁅ F ➙ (v2 ⁅ W ➙ wrong, (v1 | F) v2) ,
+    ε[|x|]η = η[|x|]
+    ε[|e1 e2|]η = v1 ⁅ F ➙ (v2 ⁅ W ➙ wrong, (v1 | F)v2),
                      wrong
-                  where vi is ε[|ei |]η            (i = 1, 2) .
-    ε[|if e1 then e2 else e3 |]η = v1 ⁅ B0 ➙ (v1 | B0 ➙ v2, v3) , wrong
-                          where vi is ε[|ei |]η    (i = 1, 2, 3)
-    ε[|λx. e |]η = (λv ・ε[|e |]η {v /x }) in V
-    ε[|fix x. e |]η = Y (λv. ε[|e |]η{v /x })
-    ε[|let x = e1 in e2 |]η = v1 ⁅ W ➙ wrong, ε[|e2 |]η{v1 /x }
-                         where v1 = ε[|e1 |]η.
+                  where vi is ε[|ei|]η            (i = 1,2).
+    ε[|if e1 then e2 else e3|]η = v1 ⁅ B0 ➙ (v1 | B0 ➙ v2, v3), wrong
+                          where vi is ε[|ei|]η    (i = 1,2,3)
+    ε[|λx.e|]η = (λv・ε[|e|]η {v/x}) in V
+    ε[|fix x.e|]η = Y(λv.ε[|e|]η{v/x})
+    ε[|let x = e1 in e2|]η = v1 ⁅ W ➙ wrong, ε[|e2|]η{v1/x}
+                         where v1 = ε[|e1|]η.
 
-  Notes. (i) Y is the least fixed - point operation. In many languages the e in fix f ・ e
-  would be restricted to be an abstraction λy. e’, and then
+  ノート。 （i）「Y」は最小の固定小数点演算です。
+  多くの言語では、 `fix f・e` の `e` は抽象化 `λy . e’` に制限されます。
 
-    let f = fix f. (λy. e’)
+    let f = fix f . (λy . e’)
 
-  might receive the syntax
+  は以下の構文を受け取るかもしれません
 
-    let rec f (y) = e ’
+    let rec f(y) = e’
 
-    (ii) It is easy to see that “ let x = e1 in e2 ” has the same meaning under ε as
-  “ (λx * e2) e1 “. But part of our aim is a type discipline which admits certain expressions in
-  the first form and yet rejects their translations into the second form; this is because λ-
-  abstractions may in general occur without an explicit operand, and need more careful
-  treatment.
+  （ii） `e2` の `let x = e1`は `ε`と同じ意味を持ち、 `（λx* e2）e1` である。
+  しかし、私たちの目標の一部は、最初の形式で特定の式を認めるとともに、2番目の形式への変換を拒否するタイプの規律です。 これは、λ抽象化は一般に明示的なオペランドなしで発生する可能性があり、より注意深い処理が必要なためです。
 
-    (iii) The semantics for (e1 e2) corresponds to call - by - value, since the test “ v2 ⁅ W ”
-  ensures that the meaning of (e1 e2) is ⊥ V if the meaning of e2 is ⊥ V. The omission of
-  this test gives a call - by - name semantics (a similar test may be omitted in the semantics of
-  the let construct), and the Semantic Soundness Theorem goes through equally in this
-  case.
+  （iii） `（e1 e2）` の意味は、 `e2` の意味が `e2` は `⊥V` です。
+  このテストの省略は、名前による呼び出しのセマンティクスを提供する（同様のテストはlet構文のセマンティクスでは省略することができる）。この場合、セマンティック健全性定理は等しくなる。
 
-<!-- 359 12/28 -->
+  <!-- 359 12/28 -->
 
-## 3. 3. Discussion of Types
+## 3.3. タイプの議論
 
-  We now proceed, in outline, as follows. We define a new class of expressions which
-  we shall call types; then we say what is meant by a value possessing a type. Some values
-  have many types, and some have no type at all. In fact “ wrong ” has no type. But if a
-  functional value has a type, then as long as it is applied to the right kind (type) of argument
-  it will produce the right kind (type) of result - which cannot be “ wrong ”!
+  ここで概要を説明します。
+  型と呼ばれる新しいクラスの式を定義します。タイプを持つ値が意味するものを言う。
+  いくつかの値は多くの型を持ち、ある型は全く型を持たない。
+  実際、「間違っている」にはタイプがありません。
+  しかし、機能的な値が型を持っていれば、適切な型（型）の引数に適用されている限り、結果の正しい種類（型）を生成します。これは "間違っていてはいけません"！
 
-  Now we wish to be able to show that - roughly speaking - an Exp expression evaluates
-    (in an appropriate environment) to a value which has a type, and so cannot be wrong.
-  In fact, we can give a sufficient syntactic condition that an expression has this robust
-  quality; the condition is just that the expression has a “ well - typing ” with respect to the
-  environment, which means that we can assign types to it and all its subexpressions in a
-  way which satisfies certain laws.
+  ここでは、大まかに言えば、Exp式は（適切な環境で）型を持つ値を評価し、間違っていないことを示すことができます。
+  事実、表現がこの堅牢な品質を持つという十分な構文条件を与えることができます。条件は、式が環境に関して「適切な型付け」を持つということだけです。つまり、ある種の法則を満たす方法で、その型とそのすべての部分式に型を割り当てることができます。
 
-  So there are two main tasks, once the laws of type assignment are given. The first - to
-  show that an expression (or program) with a legal type assignment cannot “ go wrong ”--
-  is tackled in this section; surprisingly enough, it is the easier task (at least for an applicative
-  language). The second task is to discooer a legal type assignment, given a program with
-  incomplete type information. This task is often called type checking. Of course, this term
-  can also mean just verifying that a given type assignment is legal; in a practical situation
-  we probably require something between the two, since one cannot expect a programmer
-  to attach a type to every subexpression. In Section 4 we look at the class of legal type
-  assignments for a given program (the class is infinite in general, since we admit polymorphism),
-  and we give an algorithm which, if it succeeds, produces a legal type assignment.
-  We conjecture that if the latter exists then the algorithm finds one which is most
-  general, in the sense that any other legal type assignment is a substitution instance of it
-    (substituting types for type variables) .
+  したがって、タイプ割り当ての法則が与えられると、主に2つのタスクがあります。
+  最初に、法的型割り当てを持つ式（またはプログラム）が「間違っていない」ことができないことを示すことは、このセクションで取り組まれています。驚くべきことに、少なくともアプリケーション言語の場合は、より簡単な作業です。
+  第2の課題は、タイプ情報が不完全なプログラムが与えられた場合、法的なタイプ割り当てをディスクールすることです。
+  このタスクは、しばしば型チェックと呼ばれます。もちろん、この用語は、指定された型の割り当てが合法であることを検証することだけを意味することもできます。実用的な状況では、プログラマがすべての部分式に型を付けることを期待できないので、おそらく両者の間に何かが必要です。
+  セクション4では、与えられたプログラムのクラス型（クラスは無限大ですが、多態性を認めます）を見て、成功すれば正しい型の割り当てを行うアルゴリズムを与えます。
+  後者が存在する場合、アルゴリズムは、他の法的型の代入が代入の型（型変数の型を代入すること）であるという意味で、最も一般的なものを見つけ出すと推測します。
 
-## 3. 4. Types and their Semantics
+## 3.4. 型とその意味
 
-  The syntax of types is as follows.
+  型の構文は次のとおりです。
 
-    (1) ι0, ι1, ... are (basic) types; one for each Bi.
+  （1） `ι0`、`ι1`、...は（基本）型です。 `Bi` ごとに1つ。
 
-    (2) There is a denumerable set of type variables, which are types. We use α, β, γ, ...
+  （2）タイプ変数である、無数のセットがあります。
+  我々は、型変数の範囲を決めるために `α`、`β`、`γ`、...などを使います。
 
-  to range over type variables.
+  （3） `ρ` と `σ` が型であれば `p➙σ` も同様です。
 
-    (3) If ρ and σ are types, so is p ➙ σ.
+  モノタイプは、型変数を含まない型です。
+  私たちは単項式の範囲を決めるのに `μ`、`ν`、 `π`、...を使います。
+  ある型に変数が含まれている、あるいは含まれていることを暗示したいときは、polytypeという単語を使用します。
 
-  A monotype is a type containing no type variables. We use μ, ν, π,... to range over
-  monotypes. We use the word polytype when we wish to imply that a type may, or does,
-  contain a variable.
+  私たちは最初にモノタイプのセマンティクスを与えます。 つまり、我々は
+  値v∈Vはモノタイプ「μ」を有し、これは「v：μ」と書く。
 
-  We first give the semantics of monotypes; that is, we give the conditions under which
-  a value v ∈ V possesses a monotype μ, which we write v : μ.
+  （i）「v =⊥V」または「v≠Bi」の場合、「v：ιi」
 
-    (i) v : ιi iff v = ⊥ V or v ⁅ Bi
+  「u：μ」の場合は、「v =⊥V」または「v⁅F」および「（v | F）u：ν」の場合、「v：μ➙ν」を選択する。
 
-    (ii) v : μ ➙ ν iff either v = ⊥ V, or v ⁅ F and (v | F) u : ν whenever u : μ.
+  <!-- 360 13/28 -->
 
-<!-- 360 13/28 -->
+  多くの値に型がないことは明らかです。
+  例は次のとおりです
 
-  It is clear then that many values have no type. Examples are
+     間違っている、（V、V、V、間違っている）
+     （v | B0、VでV、BでV、yでV）、Vで
+       （ここで、x∈B1、y∈B2など）。
 
-    wrong, (λv ∈ V. wrong) in V,
-    (λv ∈ V. v ⁅ B0 ➙ (v | B0, ➙ x in V, y in V) , wrong) in V
-      (where x ∈ B1, y ∈ B2, for example) .
+   しかし、最後の例で `y∈B1`ならば、関数は`ι0➙ι1`という型を持ちます（他にはありません）。
 
-  But in the last example if y ∈ B1, instead, then the function has type ι0 ➙ ι1 (and no
-  other).
+   いくつかの値には多くの型があります。 アイデンティティ関数
 
-  Some values have many types; the identity function
+     （λv∈V、v）をV
 
-    (λv ∈ V. v) in V
+   たとえば、μごとに「μ➙μ」というタイプがあります。
+   もちろん、「⊥V」にはあらゆるタイプがあります（すべてのタイプを持つ唯一の値です）。
 
-  for example has type μ ➙ μ for every μ. And of course ⊥ V has every type (it is the only
-  value which has every type).
+  このタイプの概念は、Scott [17]に由来します。
+  実際、スコットが機能性をカレーの後に呼んでいるのは、それが退去という概念とは異なるものです。
+  一時的に値を持つ型の値を持つ型を識別すると、その型が下向きに閉じられ、指示されたことが完全であることを示すことは容易です
 
-  This notion of type is derived from Scott [17]. In fact, it is what Scott calls functionality
-    (after Curry) , and is distinct from the notion of a retract. If we temporarily identify a type
-  with the set of values which possess it, then it is easy to show that types are downward
-  closed and directed complete, that is
+  (i) `∀v, v’ ∈ V. (v : μ and v’ ⊑ v) ⇒ v’ : μ`、
 
-    (i) ∀ v, v ’ ∈ V. (v : μ and v ’ ⊑ v) ⇒ v ’ : μ,
+  (ii) `V` の各有向部分集合 `X` に対して、`(∀v ∈ X . v : μ) ⇒ ∐ X : μ`。
 
-    (ii) For each directed subset X of V, (∀ v ∈ X. v : μ) ⇒ ∐ X : μ.
+  後退は2番目のプロパティを共有しますが、最初のプロパティは共有しません。
+   最近、ShamirとWadge [18]は、これらの2つの特性を持つ任意の集合を型として定義し、 'v'型で値 'v'を特定した結果を調べる。 v '⊑v} `。
 
-  Retracts share the second property, but not the first. Recently Shamir and Wadge [18]
-  have defined a type to be any set with these two properties, and they investigate the
-  consequences of identifying a value v with the type { v ’ | v ’ ⊑ v }.
+   ポリタイプのセマンティクスは次のとおりです。
+   まず、 `ρ⩽σ`を使って、型変数に型を代入することによって`σ`からρを得ることができることを意味します（ `⩽`は明らかに反射的で推移的です）。
+   例えば、
 
-  The semantics of polytypes is as follows. First, we use ρ ⩽ σ to mean that ρ may be
-  obtained from σ by substituting types for type variables (⩽ is clearly reflexive and
-  transitive). For example,
+     μ➙➙α➙α➙β➙
 
-    μ ➙ ⩽ α ➙ α ⩽ β ➙ β ⩽ α ➙ β
+   だけど
 
-  but
+     α➙β/⩽β➙β（α=βの場合を除く）。
 
-TODO > 記号
-    α ➙ β /⩽ β ➙ β    (unless α = β) .
+   次に、
 
-  Then we define
+     v：σiff∀μ⩽σ.v：μ。
 
-    v : σ iff ∀μ ⩽ σ. v : μ.
+   例えば、
 
-  For example,
+     （λv。v）をV：α➙αとする。
 
-    (λv. v) in V : α ➙ α.
+  それによって、ポリタイプも「V」のサブセットを表し、これらもまた完全に向けられている。
+   読者は、最も外側に普遍的に定量化されているように、ポリタイプの各型変数を考えることができる。 例えば、
 
-  Polytypes thereby also stand for subsets of V, and these are also directed complete. The
-  reader may like to think of each type variable in a polytype as universally quantified at
-  the outermost; for example,
+     α➙α "は"Vα.α➙α "を意味し、
 
-    α ➙ α “means ” Vα. α ➙ α,
+   結合されたαは単一型に及ぶ。
+   実際、これは、ここでは「α」は単項型（すべての型ではない）と、式のような式を認めないからです
 
-  where the bound α ranges over monotypes. In fact, it is because α here ranges over
-  monotypes (not all types) and because we do not admit expressions like
+     （∀α.α➙α）➙（αα.αα）
 
-    (∀α. α ➙ α) ➙ (∀α. α ➙ α)
 
-<!-- 361 14/28 -->
+   結合型変数が単型以上の範囲にあるとすれば、それらが型のより豊かな概念の中でReynolds [12]の困難（また興味のあるもの）を避けることを意味することがわかります。
 
-  as types - though we can see they “ mean ” if the bound variables are taken to range over
-  monotypes - that we avoid the difficulties (and also some of the interest) of Reynolds [12]
-  in his richer notion of type.
+  <!-- 361 14/28 -->
 
-  We need the following simple properties, which are immediate from our definitions.
+   私たちの定義からすぐにわかる、以下の単純なプロパティが必要です。
 
-  PROPOSITION 1. If v : σ and τ ⩽ σ then v : τ.
+  命題1.「v：σ」と「τ⩽σ」の場合、「v：τ」。
 
-  PROPOSITION 2. If v : σ ➙ τ and v ’ : σ, then (v | F) v ’ : τ.
+  命題2.「v：σ➙τ」と「v：σ」の場合、 `（v | F）v '：τ`。
 
-  In each case, a property of monotypes is lifted to polytypes.
+  いずれの場合も、モノタイプの特性はポリタイプに持ち上げられる。
 
-## 3. 5. Type Assignments
+## 3.5. タイプ割り当て
 
-  To prepare the ground for the theorem that well - typed expressions cannot “ go wrong, ”
-  we need to define what is meant by typing an expression. We need first some notion of
-  a type environment to give types to the free variables in an expression.
+  よくタイプされた式が「間違っていない」という定理の根拠を準備するためには、式をタイプすることによって何を意味するのかを定義する必要があります。
+  式の自由変数に型を与える型環境の概念がまず必要です。
 
-  A prefix p is a finite sequence whose members have the form let x, fix x, or λX, where x
-  is a variable. A prefixed expression (pe) has the form p | e, where every variable free in e
-  occurs in a member of p. We separate the members of a prefix by a period (.).
+  接頭辞 `p` は、メンバーが `let x`、` fix x`、または `λx`の形式を持つ有限のシーケンスです。ここで` x`は変数です。
+   接頭辞付きの式 `（pe）`の形式は `p`です。 `e`にあり、` e`で空いているすべての変数は `p`のメンバにあります。
+   接頭辞のメンバーをピリオド`（.）`で区切ります。
 
-  Every pe has sub - pe’s given by the following, together with transitive reflexive closure :
+   すべての`pe`は、次のように sub-`pe` を与えます。
+   推移的反射的閉包と一緒に：
 
-    (i) p | x has no sub -pe’s except itself,
-    (ii) p | (e e’) has sub -pe’s p | e and p | e’,
-    (iii) p | (if e then e ’ else e ”) has sub -pe’s p | e, p | e ’ and p | e ”,
-    (iv) p | (λx. e) has sub -pe p. λx | e,
-    (v) P | (fix x. e) has sub -pe p. fix x | e,
-    (vi) p | (let x = e in e’) has sub -pe’s p | e and p. let x | e’.
+    （i）p | xはそれ自身を除いてsub-peを持たず、
+    （ii）p | （e e '）にはsub-peのp |があります。 eとp | e '、
+    （iii）p | （もしeならe 'else e "）はsub-peのp | e、p | e 'とp | e "、
+    （iv）p | （λx・e）はsub-pe pを有する。 λx| e、
+    （v）P | （fix x。e）にはsub-pe pがあります。 xを修正する| e、
+    （vi）p | （e 'のx = eとする）は、sub-peのp | eおよびp。 x | e '。
 
-  For example, λy | (let f = λx. (xy) in (fy)) has sub - pe’s (besides itself)
+  たとえば、λy| （fy）にf =λx（xy）を代入する）にsub-peを（それ自体のほかに）
 
-    λy | λx. (xy) ,      λy. λx | (xy) ,   λy. λx | x, λy. λx | y,
-    λy. let f | (fy) ,   λy. let f | f, λy. let f | y
+    λy | λx . (xy),      λy . λx | (xy),   λy . λx | x,      λy . λx | y,
+    λy . let f | (fy),   λy . let f | f,   λy . let f | y
 
-  so a sub - pe is just a subexpression prefixed with all the variable bindings which enclose it.
-  Note that λx. (x, v) in the above is not enclosed by let f - it is not in the scope of this
-  binding.
+  sub-peは、それを囲むすべての変数バインディングの接頭辞の部分式に過ぎません。
+   上記のλx。（x、v）はlet fで囲まれていないことに注意してください。このバインディングの範囲にはありません。
 
-  We say that a member let x or fix x or λx of p is active in p just if no x occurs to the
-  right of it in p.
+  メンバーは、pの右側にxが出現しない場合、pのxまたはλxを固定したメンバーがp内でアクティブであると言う。
 
-  Now a typing of a pe p | e is an assignment of a type to each element of p, and to each
-  subexpression and each λx, fix x, or let x in e, with the constraint that in a subexpression
-    (let x = e ’ in e ”) the same type is assigned to let x and e’. Thus one typing of the illustrated
-  pe (it is nearly, but not quite, a well typing in the sense later defined) is as follows :
+  今、pe pのタイプ入力| eは、pの各要素への型の割当てであり、各部分式と各λx、fix x、またはeをxとし、部分式（eのx = e 'とする）には同じ型 xとe 'を代入するように割り当てられます。
+  このように、図示されたpeの1つの型付け（それは、後に定義される意味では、ほとんど、しかしかなりではないが、よくタイプする）は以下の通りである。
 
 
-    λy_ α | let f_ ((α➙β) ➙β) = (λx_ (α➙β) (x_ (α➙β) y_α) _β) _ ((α➙β) ➙β) in (f_ ((α➙γ) ➙γ) y_α) _γ) _γ.
+    λy_α | let f_((α➙β)➙β) = (λx_(α➙β) (x_(α➙β) y_α)_β)_((α➙β)➙β) in (f_((α➙γ)➙γ)y_α)_γ)_γ .
 
-  We denote a typing of p | e by p ~ | e ~, or by p ~ | e σ~ when we want to indicate the type σ
-  assigned to e itself.
+  私たちは、p | e by p〜| e〜、またはp〜| eσ〜e自身に割り当てられた型σを示したいとき。
 
-<!-- 362 15/28 -->
+  <!-- 362 15/28 -->
 
-  In any p ~ | e ~, and any binding let x σ in either p ~ or e ~, a type variable in σ which does not
-  occur in (the type of) any enclosing λy τ or fix yτ, binding is called a generic type variable
-  for the binding let xσ. In the example above, β is generic, but α is not, for the binding
-  let f_ ((α➙β) ➙β). Intuitively, the generic type variables in a binding let x σ represent degrees
-  of freedom for the types at which x may be used; they represent the local polymorphism
-  of x. Notice that if no λ or fix bindings enclose let xσ, then all the type variables in σ are
-  generic. Ageneric instance of σ is an instance of σ in which only generic type variables are
-  instantiated.
+  任意のp〜| e〜、および任意の束縛は、p〜またはe〜のいずれかにxσを入れ、任意の囲みλyτまたはfixyτに出現しないσの型変数であり、束縛は束縛letxσ 。
+  上記の例では、βは一般的なものですが、αは束縛のためにはありません。（ααββ）➙β）。
+  直感的に、バインディングletxσのジェネリック型変数は、xを使用できる型の自由度を表します。 それらはxの局所多型を表す。
+  λまたは拘束の束縛がletxσを囲んでいない場合、σのすべての型変数は総称であることに注意してください。
+  σの大域的インスタンスは、一般的な型変数のみがインスタンス化されるσのインスタンスです。
 
-  For technical reasons we require that generic type variables occur in a controlled
-  manner. We say that p ~ | d ~ is standard if for every typed sub - pe p ’~ | d ’~ (with induced
-  typing) the generic type variables of each member let x σ of p ’~ occur nowhere else in
-  p ’~ | d '~. Thus in particular, if let x ρ = e ρ~ in e σ'~ is a subexpression of d ~, with induced typing,
-  then the generic type variables in ρ may not occur in e σ'~ (though they must of course
-  occur in e ρ~).
+  技術的な理由から、一般的な型変数が制御された方法で発生することが必要です。
+  p〜|と言う。 d〜はすべての型付きサブペアに対して標準です。p '〜| 各メンバーのジェネリック型変数は、p '〜のxσをp'〜|にはどこにも置かないようにします。 d '〜。
+  したがって、特に、eσ '〜の中のxρ=eρ〜が部分的なd - の型である場合、ρの一般的な型変数はeσ'〜には出現しないかもしれません（もちろんeρ〜でなければなりません） 。
 
-  We now define the notion of a well - typed (wt) pe as follows :
+  ここで、well-typed（wt）peの概念を次のように定義します。
 
-    (i) p ~ | xτ, is wt iff it is standard, and either
-      (a) λxτ, or fix xτ, is active in p ~, or
-      (b) let xσ, is active in p ~, and τ is a generic instance of σ.
-    (ii) p ~ | (e ρ~ e σ'~)_ τ is wt iff p ~ | e ~ and p ~ | e '~ are both wt, and ρ = σ ➙ τ.
-    (iii) p ~ | (if e ρ~ then e ρ'~ else e ρ”~)_ τ' is wt iff p ~ | e ~, p ~ | e ’~ and p ~ | e ”~ are all wt, ρ = ι0 and σ = τ = τ’.
-    (iv) p ~ | (λxρ. e ρ~)_ τ is wt iff p ~.λx ρ | e ~ is wt and 　τ = ρ ➙ σ.
-    (v) p ~ | (fix x ρ e ρ~)_ τ is wt iff p ~.fix x ρ | e ~ is wt and ρ = σ = τ.
-    (vi) p ~ | (let x ρ = e ρ~ in e σ'~)_ τ is wt iff p ~ | e ~ and p ~ . let x ρ | e '~ are both wt, and σ = τ.
+  （i）p〜| xτは、標準であればwtであり、
+       （a）λxτ、またはfixxτがp〜でアクティブである、または
+       （b）xσはp〜で有効であり、τはσの一般的な例であるとする。
+     （ii）p〜| （eρ〜eσ '〜）_τはwtfである。 e〜とp〜| e '〜はwtであり、ρ=σ➙τである。
+     （iii）p〜| （eρ〜theneρ '〜elseeρ' '）_τ'は、 e〜、p〜| e '〜p | e "〜は全てwt、ρ=ι0、σ=τ=τ 'である。
+     （iv）p〜| （λxρ、ρρ）_τはwtfである。 e〜はwtであり、τ=ρ➙σである。
+     （v）p〜| （fixxρeρ〜）_τは、次のようになります。 e〜はwtであり、ρ=σ=τである。
+     （vi）p〜| （xρ=eρ〜eσ '〜）_τはwtfである。 e〜とp〜。 xρ| e '〜は両方ともwtであり、σ=τである。
 
-  Although this recursive definition is useful for some proofs, an alternative characterization
-  of wt is sometimes useful. The proof of the next proposition is fairly straightforward,
-  and we omit it. Note that a wt p ~ | d ~ is necessarily standard, by an easy structural
-  induction.
+  この再帰的な定義はいくつかの証明には有用ですが、wtの別の特徴付けが有用な場合もあります。
+   次の命題の証明はかなり簡単です。それを省略します。
+   wt p〜| 簡単な構造誘導によって、必然的に標準である。
 
-  PROPOSITION 3. p ~ | d ~ a is wt iff the following conditions hold :
+   提案3.p〜| d〜aは、以下の条件が満たされる場合には、wtである。
 
-    (A) It is standard.
+   （A）標準です。
 
-    (B) For every (bound) occurrence xσ, the corresponding binding occurmtce is either
-  λxσ, OY fix xσ, or let xσ, where σ is a generic instance of τ.
+   （B）すべての（バウンド）オカレンスxσについて、対応するバインディング発生は、λxσ、OY fixxσ、またはletxσのいずれかであり、σはτの一般的なインスタンスである。
 
-    (C) The following conditions hold for all subexpressions (with induced typing) of d ~
+   （C）次の条件は、d〜のすべての部分式（誘導型入力）
 
-      (e ρ~ e σ'~)_ τ                       ρ = a ➙ τ,
-      (if e ρ~ then e σ'~ else e τ"~)_ τ'    ρ = τ0 and σ = τ = τ’,
-      (λxρ. e σ~)_ τ                      τ = ρ ➙ σ,
-      (fix xρ. e σ~)_ τ                   ρ = σ = τ,
-      (let x ρ = e ρ~ in e σ'~)_ τ           σ = τ.
+      (eρ~ eσ'~)_τ                       ρ = a ➙ τ,
+      (if eρ~ then eσ'~ else eτ"~)_τ'    ρ = τ0 and σ = τ = τ’,
+      (λxρ . eσ~)_τ                      τ = ρ ➙ σ,
+      (fix xρ . eσ~)_τ                   ρ = σ = τ,
+      (let xρ = eρ~ in eσ'~)_τ           σ = τ. 
 
-<!-- 363 16/28 -->
+  <!-- 363 16/28 -->
+ 
+  したがって、上に示したタイピングは、1つの理由だけでは重くはなりません。
+  部分表現 `（f_（（α➙γ）➙γ）_γ`は、命題3の条件（C）の最初に違反します。
+  別の例を考えてみましょう。
+  以下は（p〜空で）よくタイプされたものです：
 
-  The typing which we illustrated above therefore fails to be wt for only one reason :
-  The subexpression` (f_ ((α➙γ) ➙γ) yα) _γ `violates the first of conditions (C) in Proposition 3.
-  Consider another example. The following (with p ~ empty) is a well typing :
+    let I_(α➙α) = (λxα.xα)_(α➙α) in
+      (I_((ι➙ι)➙(ι➙ι)) I_(ι➙ι))_(ι➙ι) .
 
-    let I_ (α➙α) = (λxα. xα) _ (α➙α) in
-      (I_ ((ι➙ι) ➙(ι➙ι) ) I_ (ι➙ι) )_ (ι➙ι) .
+  αは、Iの宣言のタイプα➙αにおいて一般的であるため、Iの結合された出現のタイプにおいてインスタンス化される（おそらく異なってもよい）ことに留意されたい。
 
-  Note that α is generic in the type α ➙ α of the declaration of I, so may be instantiated
-    (possibly differently) in the types of bound occurrences of I.
+  letによって宣言された変数に対して、generic型変数のみをインスタンス化する必要性を説明するために、λxα.xβでは、命題3の条件（B）によってα=βを持たなければならないことに注意してください。
+  確かに、我々は以下のようにこれを直感的に議論することができます：
 
-  To illustrate the need to instantiate only generic type variables, for variables declared
-  by let, notice first that in λxα. xβ, we must have α = β, by condition (B) of Proposition 3.
-  Indeed, we can argue intuitively for this as follows : if we declare
+    let I = λx . x in ...,
 
-    let I = λx. x in. ..,
+  この宣言の範囲内にある式（Ie）のすべてが、部分式eと同じ型を受け取るようにしたいと考えています。
+  しかし、今では（割り当てられた型で）
 
-  then we wish to have that any expression (Ie) in the scope of this declaration receives the
-  same type as the subexpression e. But now suppose we write (with assigned types)
+    let I_(α➙β) = (λxα . (let yα = xα in yβ)_β)_(α➙β) in ...
 
-    let I_ (α➙β) = (λxα. (let y α = x α in yβ) _β) _ (α➙β) in. ..
+  それは意味的にはより単純な宣言と同等であるから、α=βを再び要求しなければならない。
+  しかし、このことは、型定義の定義に課されています。なぜなら、αは束縛yαの一般的なものではないから、yの束縛された出現ではインスタンス化されない可能性があるからです。
 
-  then - since this is semantically equivalent to the simpler declaration - we should again
-  demand that α = β. But this is imposed in our definition of well typing, just because α
-  is not generic for the binding let yα, so may not be instantiated in a bound occurrence
-  of y.
+## 3.6. 置換
 
-## 3. 6. Substitutions
+   置換 'S'は型変数から型へのマップです。
+   Sは、型から型、型付き型から型付き型などにマップを生成する自然な方法で拡張することができます。
+  Sは、Sα≠αの場合には変数αを、β≠α、α∈Sβの場合には型変数αを含むと言う。
+  （α∈τはτにαが生じることを意味する）
+  この論文の後半では、置換を広範囲に必要としていますが、現在のところ、置換とwtに関連するプロパティは1つだけ必要です。
 
-  A substitution S is a map from type variables to types. S may be extended in a natural
-  way to yield a map from types to types, from typed pe’s to typed pe’s, etc.
-  We say that S involves a type variable α if either S α ≠ α, or for some β ≠ α, α ∈ Sβ.
-    (α ∈ τ means α occurs in τ. )
-  We need substitutions extensively in the second part of this paper, but for the present
-  we need only one property relating substitutions and wt.
+  命題 4.
+  Sがwt p〜|の一般的な変数を含まない場合、 d - とすると、S（p - | d - ）もwtである。
 
-  PROPOSITION 　 4. If S involves no generic variables of a wt p ~ | d ~, then S (p ~ | d ~) is also a wt.
+  証明。
+  まず、Sの仮定は、S（p〜| d〜）の各束縛に対する一般的な変数がp〜| d〜。
+  βが一般的でない場合、Sβは一般変数を含まないので、S（p〜| d〜）は標準である。
 
-  Proof. We use Proposition 3. First, observe that the assumption on S yields that
-  the generic variables for each binding in S (p ~ | d ~) are exactly those for the corresponding
-  binding in p ~ | d ~. Since S β contains no generic variable when β is not generic, S (p ~ | d ~) is
-  standard.
+  第2に、xσがλxσに束縛されている場合、またはxσをp_ | d〜であれば、xsσはλxsσに束縛されるか、またはS（p〜| d〜）にxsσを固定する。
+  xσがletxτであり、σ= [ρ1/α1、...、αn/αn]_τである場合、αiはτの総称変数であり、S（p - | d - ）ではxsσはlet xsτであり、Sσ= [Sρ1/α1、...、Sρn/αn]（Sτ）はSτの一般的な例である。
 
-  Second, if xσ, is bound by λx σ or fix x σ in p ~ | d ~, then xs σ is bound by λxs σ or fix xs σ in
-  S (p ~ | d ~). If x σ is bound by let xτ, and σ = [ρ1/α 1,..., αn/α n] _τ, where αi are the generic
-  variables of τ, then in S (p ~ | d ~) xs σ is bound by let xsτ, and `S σ = [Sρ1/α 1,..., Sρn/α n] (Sτ) `
-  is a generic instance of Sτ.
+  <!-- 364 17/28 -->
 
-  Third, conditions (C) of Proposition 3 are easily verified for S (p ~ | d ~), using identities
-  like S (u ➙ τ) = S σ ➙ Sτ. ■
+## 3.7. よく型付けされた式は間違っていない
 
-<!-- 364 17/28 -->
+  まず、セマンティック環境ηとタイプ環境の間に単純な関係が必要です。
+  私達は言う
 
-## 3. 7. Well - Typed Expressions Do Not Go Wrong
+    ηは、p〜、η[| x |]：ρにおいて、xρ、λxρ、またはfixxρが活性化されるときは常にp〜iffを尊重する。
 
-  First we need a simple relation between semantic environments η and our type environments - which
-  are typed prefixed p ~. We say
+  THEOREM 1（意味的健全性）。 ηがp〜とp〜|を尊重すれば、 τ[| d |]η：τである。
 
-    η respects p ~ iff, whenever let x ρ or λx ρ or
-    fix xρ, is active in p ~, η[|x |] : ρ.
+  証明。かなり単純な構造誘導。 6つの場合をdτ〜とする。
 
-  THEOREM 1 (Semantic Soundness). If η respects p ~ and p ~ | d τ~ is well typed then
-  ε[| d |]η : τ.
+    （i）xτ。
+    次に、λxτまたはfixxτのいずれかがp〜でアクティブであり、η[| x |]：τ、したがってε[| x |]η：τ、またはxσがp〜 σ;しかし、命題Iによると、ε[| x |]η=η[| x |]：τである。
 
-  Proof. A fairly simple structural induction. Take the six cases for d τ~.
+    （ii） `（e_（σ➙ττ）eσ〜）_τ`となる。
+     次にp〜| ε[| x |]η：σ➙τであり、同様にε[| e '|]η：σである。
+    次に意味論的方程式（間違った型がないことを覚えている）から命題2によって、ε[| d |]η：τを得る。
 
-    (i) xτ. Then either λx τ or fix x τ is active in p ~, and η[|x |] : τ, so ε[|x |]η : τ, or let x σ
-    is active in p ~, and η[|x |] : σ; but then T ⩽ σ, so ε[|x |]η = η[|x |] : τ, by Proposition I.
+    （ⅲ）（e0 0〜eσ '〜elseeσ」〜）。ここで必要とされる唯一の詳細は、⊥Vがあらゆるタイプを持つということです。
 
-    (ii) `(e_ (σ➙τ) e σ~)_τ` . Then p ~ | e_ (σ➙τ) ~ is wt, so ε[|x |]η : σ ➙ τ, and similarly ε[|e '|]η : σ. Then
-    from the semantic equation (remembering that wrong has no type) and by Proposition 2
-    we get ε[|d |]η : τ.
+    （iv）（λxρ・eσ〜）_（ρ・σ・σ）である。それからp〜。 λxρ| eσは、wtである。ここで、V（ν[ε|] |η
+ ：ρ➙σ
+    命題2の逆は成り立ちません。すなわち、Vをρ➙σで表すと、v：ρ、fv：σが成り立つときは必ずしも必要ではありません。
+    必要なのは、η➙➙ρ➙σσごとに、V：μ➙νにあることです。
 
-    (iii) (if eι0 ~ then e σ'~ else e σ"~). Straightforward; the only extra detail needed here is that
-    ⊥V has every type.
 
-    (iv) (λxρ. e σ~)_ (ρ➙σ) . Then p ~ . λx ρ | e σ~, is wt. Now we require (λv. ε[|e |]η{v /x }) in V
-    : ρ ➙ σ. Denote this function by f in V. The inverse of Proposition 2 does not hold,
-    that is, to show f in V : ρ ➙ σ it is not sufficient (though it is necessary) that whenever
-    v :ρ, fv : σ. What is required is that for every η ➙ ν ⩽ ρ ➙ σ, f in V : μ ➙ ν.
+  μ➙⩽ρ➙σをμと仮定します。次に、μ➙ν= S（ρ➙σ）のようなρとσの型変数のみを含む置換Sがある。
+  そして、これらの型変数のどれもがp〜・λxρ| eσ〜とすると、S（p〜）・λxμ| S（e〜）_ν "は命題4によって重み付けされる。
+  また、ηは、S（p〜）を尊重する（η[| x |]：σ '、τ'⩽σ '、η[| x |]：τ' {v / x}はS（p〜）を考慮する。 λxμ。
 
+  次に、ε[| e |]η{v / x}：νとなるので、v：μはfv：νを意味することを示しており、これは必要に応じてV：μ➙νでfをもたらす。
 
-  Suppose then that μ ➙ ν ⩽ ρ ➙ σ. Then there is a substitution S, involving only the
-  type variables in ρ and σ, such that μ ➙ ν = S (ρ ➙ σ). Then, since none of these type
-  variables is generic in p ~ ・ λx ρ | e σ~, it follows that S (p ~) ・ λx μ | S (e ~) _ ν” is wt by Proposition 4.
-  Moreover η respects S (p ~) (since by Proposition 1 whenever η[| x |] : σ’ and τ’ ⩽ σ’, η[| x |] : τ’)
-  so for any v : μ we also have η{ v/x } respects S (p ~). λxμ.
+  （v）（fixxρ。eρ〜）_ρ。それからp〜。 xρを修正する| eρ〜はwtである。
+  今、我々はv：ρを必要とする。
 
-  It then follows by induction that ε[| e |]η{ v/x } : ν, so we have shown that v : μ implies
-  fv : ν, and this yields f in V : μ ➙ ν as required.
+    v = Y（λv '、ε[| e |]η（v' / x））。
 
-    (v) (fix xρ. e ρ~) _ρ. Then p ~. fix x ρ | e ρ~ is wt. Now we require that v : ρ, where
+  ここでv0 =∐i、vi、v0 =⊥V、v_（i + 1）=ε[| e |]η{vi / x}、タイプの有向完全性によって、vi：ρそれぞれi。
 
-    v = Y (λv'. ε[|e |] η{v ’/x }).
+  明らかにv0：ρ。
+  vi：ρと仮定する。
+  ηをpとすると、η{vi / x}はp〜fixxρを尊重するので、主帰納仮説v_（i + 1）：ρも同様であり、終了する。
 
-  Now v0 = ∐ i, vi, where v0 = ⊥ V, v_ (i+1) = ε[| e |] η{ vi/x }, and by the directed completeness
-  of types we only have to show vi : ρ for each i.
+  （vi）（x =eρ〜eσ ' - ）_σとする。
+  次にp〜| eρ〜はwtなので、すぐにv：ρを持ちます。ここで、v =ε[| e |]ηです。 ε[| e '|]η（v / x）：σが必要です。
 
-  Clearly v0 : ρ. Assume vi : ρ. Since η respect p ~, we have that η{ vi/x } respects p ~ ・ fix xρ,
-  so by the main induction hypothesis v_ (i+1) : ρ also, and we are done.
+  今すぐp！・letxρ| σ{σ/ x}はρ - ・letxρを尊重している。 残りは誘導仮説に従う。 1
 
-    (vi) (let x = e ρ~ in e σ'~) _σ. Then p ~ | e ρ~ is wt, so we immediately have v : ρ, where
-  v = ε[| e |]η. We require ε[| e '|]η (v/x) : σ.
+  <!-- 365 18/28 -->
 
-  Now p ~ ・ let x ρ | e σ'~ is also wt, and because v : ρ we have that η{σ/x } respects p ~ ・ let xρ;
-  the rest follows by the induction hypothesis. 1
+  結論として、
 
-<!-- 365 18/28 -->
+    ε[|d|]η ≠ wrong,
 
-  As a corollary, under the conditions of the theorem we have
+  が成り立ちます。なぜなら、間違った型はないからです。
 
-    ε[|d |]η ≠ wrong,
+### 4. タイプの良いアルゴリズムとその正確さ
 
-  since wrong has no type.
+## 4.1. アルゴリズム W
+
+  このセクションでは、プレフィックス付きの式の型指定を見つける問題に取り組んでいます。
+  このためにアルゴリズムWを提示する。
+  Wが構文的に健全で（ある意味では）完全であることを証明したいと思います。
+  統語的な健全性によって、Wが成功するたびにwtを生成することを意味します。 完全性によって、Wが存在するときはいつでも、Wは（ある意味では）少なくとも一般的なものを見つけることに成功することを意味する。
+
+  Wはおそらく完成していますが、簡単な証拠を見つけるのは難しいです。
+  だから、健全性に集中し、Wの実装についてコメントし、より豊かな言語に対応するようにWを拡張します。
+  Wをシミュレートするタイプチェックアルゴリズムは、LCFメタ言語ML [2]の文脈でほぼ2年間正常に動作しているため、その完全性のために、その有用性がある程度証明されています。
+
+  WはRobinson [14]の統一アルゴリズムに基づいている。
+  確かに、統一の枠組みのなかに直接入っていない井戸型の唯一の特徴は、xτがletxσに束縛されるときはいつでも、τがσの一般的なインスタンスでなければならないという条件である。
+  Wの完全性（ある意味では）は、統一に関する次の命題の第2部から続くべきであるが、Wが健全であるという証拠の前半だけが必要である。
+
+  命題 5（ロビンソン）。
+  アルゴリズムUがあります。一対の式を（変数のアルファベットを超えて）取って代入を行います。つまり、式σとτの任意の組
+
+  （A）U（σ、τ）が成功してUを生じると、Uはσとτを統合する（すなわち、Uσ=Uτ）。
+
+  （B）Rがσとτを統一するならば、U（σ、τ）は、ある置換Sに対してR = SUとなるようにUを生み出す。
+
+  さらに、Uはσとτの変数のみを含む。
+
+  完全なプログラムfの正しいタイプを見つけるために、letバインディングだけを含む型付き接頭辞p〜を与えて、あらかじめ定義された識別子にバインドされた値の型を与えることが期待されます。
+  次に、Wが、p〜| f〜はwtである。
+
+  しかし、Wを再帰的に宣言するためには、すべての型の束縛を含む接頭辞が出現し、Wは一般にプログラムに課せられた制約を満たすために接頭辞中の非行型変数を変更する必要があります。
+  したがってWはWを必要な変換を表す代用Tにも戻す。
+
+  <!-- 366 19/28 -->
+
+  正確には、W（p〜、f）が成功し、（T、f〜）を返すと、（T p〜）| f〜はwtである。
+
+  我々はまずWを述べる。
+  ある点では、以前に発生しなかった型変数が必要である。 そのような新しいタイプ変数は、βまたはβiによって示される。
+  W（p〜、f）は、fの構造上の誘導によって定義される。 このアルゴリズムは、後で提示するより効率的なアルゴリズムとは対照的に、純粋に応用的なプログラミングスタイルで表現されています。これは、命令プログラミングのスタイルでより多く表現されています。
+
+#### アルゴリズム W
+
+    W(p~,f) = (T,f~), ここで
+
+  (i) f が x のとき:
+
+    もし λxσ, または fix xσ が p~ 内でアクティブならば
+      T = I, f~ = xσ;
+    もし let xσ が p~ 内でアクティブならば
+      T = I, f~ = xτ
+    ここで τ = [Bi/αi] σ, αi がσのジェネリック変数,
+    かつ βi は新しい変数。
+
+  (ii) f が (de), ならば:
+
+    let (R, dρ~) = W(p~,d), かつ (S, eσ~) = W(R p~, e);
+    let U = U(Sρ, σ ➙ β), β が新しい;
+    ならば T = USR, かつ f~ = U(((S d~)e~)_β).
+
+  (iii) f が (if d tha e else e’), ならば:
+
+    let (R, dρ~) = W(p~, d) かつ U0 = U(ρ, ι0);
+    let (S, eσ~) = W(U0 R p~, e), かつ (S’, e_(σ')'~) = W(S U0 R p~, e’);
+    let U = U(S' σ, σ’);
+    ならば T = U S’ S U0 R, かつ
+         f = U((if S' S U0 d~ then S' e~ else e’~)_σ).
+
+  (iv) f が (λx . d) ならば:
+
+    let (R, d~) = W(p~ . λxβ, d), ここで β は新しい;
+    ならば T = R, かつ f~ = (λxRβ . dρ~)_(Rβ➙ρ) .
+
+  (v) f が (fix x . d) ならば:
+
+    let (R, dρ~) = W(p~ . fix xβ, d), β は新しい;
+    let U = U(R　β, ρ);
+    ならば T = U R, かつ f~ = (fix xURβ . U d~)_(URβ) .
+
+  (vi) f が (let x = d in e) ならば:
+
+    let (R, dρ~) = W(p~, d);
+    let (S, eσ~) = W(R p~ . let xρ, e);
+    ならば T = S R, かつ f~ = (let xSρ = S d~ in e~)_σ . ■
+
+  <!-- 367 20/28 -->
+
+## 4.2. Wの健全性
+
+   Wが健全であることを示すために、いくつかの簡単な定義があると便利です。
+   Aが型、型付きの接頭辞、型付きのpeならば
+
+    Vars(A) ≝ {α | α ∈ A, α a type variable}.
+
+  Aが型付きプリフィックスまたは型付きpeの場合
+
+      Gen（A）≝{α| α∈A、αはジェネリック型変数）。
+     Spec（A）≝Vars（A） - Gen（A）。
+
+   Sが代入である場合、
+
+    Inv(S) ≝ {α | S involves α}
+           = {α | ∃β. S β ≠ β and α ∈ {β} ∪ Vars(S β)}.
+
+  以下の単純な性質が必要です。その証明は省略します。
+
+   命題 6.
+
+    (A) Inv(RS) ⊆ Inv(R) ∪ Inv(S)
+    (B) Vars(Sτ) ⊆ Vars(T) ∪ Inv(S).
+
+  理論2（統語的健全性）。
+  p〜を標準接頭語とし、p | f a（閉）pe。
+  そして、W（p、f）=（T、fτ〜）ならば、
+
+     （A）T p〜| f〜はwtであり、
+
+     （B）Inv（T）⊆Spec（p〜）∪New、
+
+   そして
+
+     （C）Vars（τ）⊆Spec（p〜）∪New、
+
+   ここで、NewはWによって使用される新しい型変数の集合です。
+
+  証明。
+   fの構造上の誘導によって、wtの再帰的定義を用いる。
+   条件式と修正式のケースは省略されています。新しい式はありません。最初に他のケースよりも簡単に扱います
+
+   （i）fはXである。そしてT = Iであるので、（B）は即時である。
+   λxσ、またはfixxσがp〜で有効である場合、f〜=xσであり、（A）、（C）は即時です。
+
+   letxσが有効な場合、τ= [βi/αi]σ、{αi}はσで一般的であり、New = {βi}である。
+   そして、T p〜| f〜= p〜| xτは標準であり、（A）、（C）は容易に従う。
+
+   （iv）fは（λx・d）である。 新しい変数New1を使って（R、dρ〜）= W（p〜。λxβ、d）とする。
+
+  <!-- 368 21/28 -->
+
+  誘導により、R（p〜λxβ）| dρ〜はwtであるから、（A）f〜= R p〜| （λxRβ、d〜）_（Rβ➙ρ）はwt（重量％）である。
+  誘導によっても、
+
+     Inv（R）|
+     Var（ρ）| ⊆Spec（p〜λxβ）∪New、
+              = Spec（p）∪{β}∪New、
+              = Spec（i）∪New（New = New1∪{p}以降）
+
+   T = Rであるから（B）が続く。
+   （C）
+
+     命題6によるVars（Rβ➙ρ）⊆Inv（R）∪{@ U Vars（p）
+                   ⊆Spec（p）∪New
+
+   要求に応じ。
+
+  （vi）fは（x = dでeとする）。
+   次に、新しい変数New1を使って、（R、dρ〜）= W（p〜、d）としましょう。
+   その後、誘導によって
+
+    R p~ | d~ is wt                                    (1)
+
+    Inv(R)  |
+    Vars(ρ) | ⊆ Spec(p~) ∪ New1                       (2)
+
+  今（2）から
+
+     Spec（R p〜）⊆Inv（R）∪Spec（p〜）
+                ⊆Spec（p〜）∪New1（3）
+
+  （1）標準から
+
+    Gen(R p~ | d~) ∩ Spec(R p~) = ∅.                   (4)
+
+  また、Gen（R p〜）= Gen（p〜）は、Vars（ρ）と（2）で分かれているため、R p〜・letxρが標準的な接頭辞です。
+
+  よって、新しい変数New2を使ってS、eσ〜= W（R p〜exρ、e）とする。
+  その後、誘導によって
+
+    S(R p~ ・ let xρ) | e~ is wt                         (5)
+
+    Inv(S)  |
+    Vars(σ) | ⊆ Spec(R p~ ・ let xρ) ∪ New2             (6)
+
+  しかし、（6）と（4）をまとめると（New2は新しい変数なので）Spec（R p〜letxρ）= Spec
+
+    Inv(S) n Gen(R p~ | d~) = ∅
+
+  命題4により、S（R p〜| d〜）がwtであり、（5）を用いてwt
+
+    S R p~ | (let xSρ = S d~ in e~)_σ
+
+  wtである。 しかし、これはちょうどT p〜です。 私たちは（A）を証明しました。
+
+  <!-- 369 22/28 -->
+
+  （B）については、
+
+     Inv（T）⊆Inv（S）∪命題6によるInv（R）
+            ⊆Spec（p〜）∪New1∪New2、（6）、（3）、（2）を用いて、
+
+  （C）については、同様の推論によって、
+
+    Vars(σ) ⊆ Spec(p~) ∪ New1 ∪ New2 .
+
+  この場合、New = New1∪New2であるので、これだけで十分です。
+
+  （ii）fは（de）である。
+  新しい変数New2を使用して、新しい変数New1および（S、eσ〜）= W（Rp〜、e）を使用して（R、dρ〜）= W（p〜 ケース（vi）と同様の理由で、我々は
+
+    S R p~ | S(dρ~) is wt                            (7)
+    S R p~ | eσ~    is wt                            (8)
+
+    Inv(S R)          |
+    Vars(Sρ), Vars(σ) | ⊆ Spec(p~) ∪ New1 ∪ New2.  (9)
+
+  ここで、U = U（Sp、σ➙β）、ここでβが新しい場合、命題5により、
+
+    U Sρ = Uσ ➙ Uβ,                                  (10)
+    Inv(U) ⊆ Vars(Sρ) ∪ Vars(σ) ∪ {β}.             (11)
+
+   Uはwt（7）と（8）の一般的な変数を含まず、
+
+    U S R p~ | U(((S d~) e~)_β)
+
+   wtである。 しかし、これはちょうどT p〜です。 私たちは（A）を証明しました。 （B）については、まず
+
+    New = New1 ∪ New2 ∪ {β},
+
+   そう
+
+     Inv（T）⊆命題6によるInv（U）∪Inv（SR）
+            ⊆Spec（p〜）∪New、（9）と（11）から、
+
+   （C）については、
+
+     Vars（τ）= Vars（Uβ）
+             命題6によるInv（U）∪{β}
+             ⊆Spec（p〜）∪New、（9）と（11）から再び。 ■
+
+## 4.3. Wの実装。 簡略化されたアルゴリズムI
+
+  それが立っているので、Wはほとんど効率的なアルゴリズムではありません。 置換はあまりにも頻繁に適用される。
+  健全性を証明するために策定されました。
+  正確な意味でWをシミュレートするより簡単なアルゴリズムIを提示します。
+
+  <!-- 370 23/28 -->
+
+  I は W と2つの点で違います。
+  まず、置換が構成されているが、それが不可欠であるときにのみ適用される、解像度ベースの定理証明システムに関する文献に精通した考え方を採用する。
+  第2に、実際にタイプタイピングアルゴリズムから実際に必要とされるのは、型の代入f全体ではなく、f自身に代入される型だけであるという事実を利用します。
+
+  実際、 `I`は` E`という唯一の代入、すなわち `EE = E`を生成します
+  つまり `β∈Eα`ならば`Eβ=β`となる。
+  この置換はプログラム変数（ `E 'と呼ばれる）でグローバルに' I 'に保持され、` I`は `E'で変換されます。
+  統一関数Uの代わりに、Iは統一手順UNIFYを呼び出し、結果UNICYを出力しますが、変数Eに影響します。
+  `U`と` UNIFY`は、 `E`と` E`の次のような関係があると仮定します：コマンドの前後の `E`の値
+
+    UNIFY(σ, τ)
+
+   かつ、もし
+
+    S(Eσ, Eτ) = U
+
+   ならば
+
+    E’ = U E.
+
+  したがって、Eの存在下でタイプσおよびτにUNIFYを適用することは、タイプEσおよびEτにUを適用することに対応する。 σとτは、「探索」置換Eを適用することによって得られる明示的な型を表す暗黙の型と考えることができる（Eの等式は、さらなる解説が不要であることを意味する）。
+  UNIFY（成功した場合）の効果は、新しい置換置換E 'を生成することです。
+  同様に、暗黙の型付きプレフィックスp〜を扱います。これは、必要に応じてEを適用することで解説できます。
+  私は局所変数ρ、σ、σ 'を持ち、それらの値は暗黙の型であり、その結果を第4の変数τで生成すると仮定する。
+
+  初期冪等元 `E`を仮定すると、` I`は型付き接頭辞 `p〜`と `` e p〜 `が標準で` `p | fは `pe 'である（すなわち、` f'の全ての空き識別子は `p`に束縛されている）。
+   アルゴリズムは次のとおりです。
+
+  アルゴリズムI
+
+    I(p~, f) = τ, ここで
+
+   （i）fがxの場合、
+
+     λxσまたはfixxσがp〜で有効である場合、τ：=σ。
+     letxσがp〜で有効である場合、τ：= [βi/αi]Eσここで、αiはE p〜におけるletxEσの一般的な型変数であり、βiは新しい変数である。
+
+   （ii）fが（de）ならば：
+
+     ρ：= I（p〜、d）。 σ：= I（p、e）。
+     UNIFY（ρ、σ➙β）; （βnew）
+     τ：=β
+
+  <!-- 371 24/28 -->
+
+  （iii）fが（dならばe else e 'なら）ならば、
+
+    ρ := I(p~, d); UNIFY (ρ, ι0);
+    u := I(p~, e); σ’ := I(p~, e’);
+    UNIFY(σ, σ’); τ := σ
+
+  （iv）fが（λx、d）の場合、
+
+    ρ := I(p~ ・ λxβ, d); (β new)
+    τ := β ➙ ρ
+
+  （v）fが（fix x・d）ならば、
+
+    ρ := I(p~ . fix xβ, d); (β new)
+    UNIFY(β, ρ); τ := β
+
+  （vi）fが（eのx == dとする）ならば、
+
+    ρ := I(p~, d); σ := I(p~ . let xρ, e);
+    τ := σ.      ■
+
+  IとWのシミュレーション関係は何ですか？
+  それは、私たちが健全性定理において遭遇したわずかな微妙なものを含む簡単な構造誘導であるため、省略した以下の命題によって単純に表される。
+
+  命題7. pを| fはa peであり、Eは等冪であり、E p〜である。 標準である。
+  W（E p〜、f）が成功すれば（TとfTを生成する）、I（p〜、f）は成功する（τ 'とEの新しい値E'を生成する）。
+
+    (A) E’ = TE,
+    (B) E’T’ = τ.
+
+  したがって、Iによって生成される型は、説明されるとき、WによってFに帰される型である。
+
+  実際には、Eは、これまでに例示された変数を表す変数型対のテーブルINSTによって効率的に表される。
+  UNIFYの効果は、単にインスタンス化されていない変数のインスタンス化を表すINSTにいくつかのエントリを追加することです。
+  INSTによって表される置換Eは、以下のように再帰的に与えられる
+
+        E(ι) = ι      (basic types),
+        E(α) = E(ρ)   if (α, ρ) ∈ INST for some ρ,
+             = α      otherwise,
+    E(σ ➙ τ) = Eσ ➙ Eτ.
+
+  実際、LISPで書かれたML用に実装された拡張バージョンでは、INST自体は型変数の（LISPの意味で）INSTANCEのプロパティで表されます。
+  各型変数αは、あるρに対して（α、ρ）∈INSTならば、そのINSTANCE特性値としてρを持つ。 それ以外の場合、プロパティ値はNILです。
+
+  <!-- 372 25/28 -->
+
+## 5. 拡張言語の型
+
+   私たちは現在、私たちの言語のいくつかの拡張を検討し、その結果をどのように強化してそれらに適用するかを検討します。
+
+  （1）冒頭で述べたように、☓（Cartesian product）、+（disjoint sum）、list（list forming）などの余分な（プリミティブ）型の演算子を追加することは難しくありません。
+   ➙と一緒に、これらは言語MLのプリミティブ型演算子です。
+   ☓については、標準の多形関数
+
+    pair: α ➙ β ➙ (α ☓ β)    (one could add the syntax (e, e’) for pair (e)(e’)),
+    fst: α ☓ β ➙ α,
+    snd: α ☓ β ➙ β.
+
+  + の場合は、
+
+    inl: α ➙ α + β,    inr: β ➙ α + β    (left and right injections),
+    outl: α + β ➙ α,   outr: α + β ➙ β   (left and right projections),
+    isl: α + β ➙ bool, isr: α + β ➙ bool (left and right discriminators)
+
+  自然な解釈で。
+  リストについては、第2章で述べた標準的なリスト処理関数があります。
+  リストのすべてのメンバーは同じタイプでなければならないことに注意してください。
+
+  セマンティック・サウンド定理は、セマンティック・ドメインを適切に調整することで自然に拡張されます。 構文的健全性の定理は事実上変化しない。
+
+  （2）次に、割り当て可能な変数と代入を検討する。
+  これらを追加する1つの方法（MLで使用）は、代入式 "x：= e"（値はeの値）を許可し、式 "letref x = e in e '"を代入可能 eの値に初期化された変数。
+  これらの追加の最初の効果は、セマンティックドメインの大きな変化です。これは、式が副作用を持つ可能性があるためです。
+  セマンティック健全性定理が証明されるかもしれないと我々は信じているが、それは面倒な作業であるようである。
+  難しさの理由は、
+
+    λx.(y := x)
+
+  これは副作用を伴う同一性関数である。
+  タイプα➙αを持っていると言うと、タイプμの引数が与えられると、それはタイプμの結果を与え、yの副作用を考慮しないことを意味する。
+  必要とされるのは、副作用を考慮して、そのような機能型が意味するもののより意味のある定義（意味論的領域の観点から）です。
+
+  これとは対照的に、2つの新しい種類の式に対して適切な型指定規則を与えることは簡単です。
+  wtの定義を次の節で拡張します。
+
+  （i）（c）letrefxτが標準接頭辞p〜で有効であれば、p〜| xτはwtである。 （したがって、xのすべてのletrefバインドされたオカレンスは、同じタイプでなければなりません）。
+
+  <!-- 373 26/28 -->
+
+  （vii）p〜| （xρ：=eσ〜）_τはwtfである。 e〜はwtであり、letrefxρはp〜で有効であり、ρ=σ=τである。
+
+  （viii）p〜| （letrefxρ=eρ〜eσ '〜）_τはwtfである。 e〜とp〜.letrefxρ| e '〜はwtであり、σ=τである。
+
+  アルゴリズムWと構文健全性定理を拡張してこれらの節を扱うのは日常的な問題です。
+  しかし、意味論的考察に再び戻ると、λ抽象（手順）内の非局所的割り当てに関連する問題がある。
+  検討する
+
+    let g = (letref y = nil in λz . y := cons(z, y))
+
+  これは関数gの隠れた（自身の）変数としてyを設定します。
+  私たちのルールでは、gはジェネリックタイプα➙αリストを取得します。
+  代入の値が割り当てられた値であることを思い出すと、gの各呼び出しは隠されたyを増やし、増補されたリストを値として返します。
+  今ではαが一般的なので、式
+
+    g(2),    g(true)
+
+  gのスコープ内で、int型リストとboo1型の両方の型でそれぞれ許容されます。
+  しかし、この順序で評価される場合、2番目の式の値は、2つのメンバーが真で2のリストです。 それはブール値のリストではありません！
+
+  このジレンマには少なくとも2つの解決策があります。
+  1つは、このような状況では、一般的な型の変数ではないということです。
+  MLで採用されている別のものは、λ抽象（手順）内の多形性の割り当て可能変数への非局所的割り当てを禁止することです。
+  ポリモーフィックの代入変数は、例えば、iterations（whileステートメント）自体にシンプルなwtルールを与えることができます。
+
+  私は、第二の解決策が、わずかに緩和さえあっても、セマンティック健全性定理を認めていると信じています。
+  しかし、詳細は魅力的ではなく、私は（特にジョン・レイノルズとの有用な議論の後で）証拠を完成させようとするのはお勧めしません。
+  むしろ必要とされるのは、副作用をより重視する言語設計です。 1つのアプローチは、プロシージャに割り当てられたすべての変数がプロシージャの出力パラメータとしてリストされるように要求することによって、PASCALを変更することです。
+  しかし、これをどのように自分の変数の有益な特性と組み合わせるかは、私が知る限り、言語設計における未解決の問題であり、良い解決策は貴重な一歩となるでしょう。
+  最近の有望な副作用管理の試みとして、Reynolds [13]を参照してください。
+
+  （3）MLに含まれている自明でない拡張のリストを完成させるには、新しい型の演算子を古いものとして宣言（再帰的）することを検討してください。
+   そのような宣言は非グローバルな範囲を持つかもしれない。
+   新しい型の演算子に対する一連の関数の宣言も伴い、型演算子の明示的な定義は、（新しい型の演算子の全範囲内ではなく）関数の集合を定義する場合にのみ利用可能であり、 現在抽象型と呼ばれるもののバージョンを持っています。
+   MLでは、チップ変数の型を表す型変数αを使用して、チップが任意の型のオブジェクトによってラベル付けされたバイナリツリーのクラスを定義します。
+
+    absrectype  α bitree = α ➙ (α bitree ☓ α bitree)
+          with  sons(t) = ...
+           and  maketree(t, t’) = ...
+           and  tiptree(a) = ... 
+
+  <!-- 374 27/28 -->
+
+  省略された定義式だけがビット・ツリーの表現へのアクセスを与えられる。
+  定義された関数は多型であり、ジェネリック型
+
+    α bitree ➙ (α bitree)^2,   (α bitree)^2 ➙ α bitree,   α ➙ α bitree.
+
+  この構成の詳細については、[2]を参照してください。 我々は部分的にロックウッドモリスとジェリーシュワルツとの議論に構造を負う。
+  この場合、wtルールも比較的簡単です。 文法的、意味的な健全性はチェックしていませんが、大きな困難はないと考えています。
+
+ （4）一種の多型に寄与する二つの特徴はこれまで完全に無視されてきた。
+  最初は強制です。 式x：= 42（ここで、xは実際の代入変数です）は、私たちのために型が不正です。
+  しかし、タイプチェッカーがそのような不正な型入力を報告し、コンパイラーがレポートを受け取り、それを修正する強制を挿入できるようにすることに障壁はありません。
+
+  第2の特徴は、特定の手順（標準またはユーザ定義のいずれか）が複数の種類を有することを可能にすることである。
+  勿論、α^ 2➙α（もちろん2つの型を持つ最も一般的なポリタイプ）を持たずに、int ^ 2➙intとreal ^ 2➙realを持つことができます。
+  私たちは質問を調査していませんが、私たちの規律にこの特徴を重ね合わせる良い可能性があるようです。
+
+## 6. 結論
+
+   私たちは、実用的に有用であると思われる多型プログラミングの規律を提示し、かなり単純な型チェックアルゴリズムを与えました。
+   制限された言語では、このアルゴリズムが正しいことが証明できることが示されています（証明は2つの健全性定理に因数分解されました）。
+   まだ多くの作業が残っていますが、タイプ・チェッキングの実践が意味論と証拠によってサポートされるべきであり、そうでなければならないという点を強調したいと考えています。
+
+## 謝辞
+
+   私は、このペーパーの最初のバージョンについて、審査員に謝意を表します。これは、いくつかの不正確さに注意を喚起し、いくつかの点でより明確な説明につながりました
+   場所。
+   Dorothy McKieにも、紙の2つのバージョンを慎重に準備していただき、ありがとうございます。
+
+## REFERENCES
+
+  1. W. H. BURGE, “Recursive Programming Techniques,” Addison-Wesley, Reading, Mass., 1975.
+  2. M. GORDON, R. MILNER, AND C. WADSWORTH, “Edinburgh LCF,” CSR-11-77, Computer Science Dept., Edinburgh University, 1977.
+  3. M. GORDON, R. MILNER, L. MORRIS, M. NEWEY, AND C. WADSWORTH, A metalanguage for interactive proof in LCF, in “Proc. 5th Annual ACM SIGACT-SIGPLAN Symposium on Principles of Programming Languages, Tucson, Arizona, 1978.” 
+
+  <!-- 375 28/28 -->
+
+  4. D. GRIES AND N. GEHANI, Some ideas on data type in high-level lcnguages, Comm. ACM. 20 (1977), 414-420.
+  5. R. HINDLEY, The principal type-scheme of an object in combinatory logic, %zx~. Amer. &ikth. Sot. 146 (1969), 29-60.
+  6. B. W. LAMPSON, J. J. HORNING, R. L. LONDON, J. G. MITCHELL, AND G. L. POPEK, Report on the programming language Euclid, SIGPLAN Notices (ACM) 12, 2 (1977).
+  7. P. J. LANDIN, The next 700 programming languages, Comm. ACM 9 (1966), 157-164.
+  8. B. H. LISKOV AND S. ZrLLEs,Programming with abstract data types, in “Proc. of ACM SIGPLAN conference on Very High Level Languages,” SIGPLAN Notices (ACM) 9 (1974), 50-59.
+  9. R. MILNER, “Models of LCF,” Mathematical Centre, Amsterdam, Tracts, Vol. 82, pp. 49-63, 1976.
+  10. J. H. MORRIS, “Lambda-Calculus Models of Programming Languages,” Ph.D. Thesis, M.4CTR-57, MIT, 1968.
+  11. G. PLOTKIN, A power-domain construction, SIAM J. Comput. 5 (1976), 452-487.
+  12. J. C. REYNOLDS, “Towards a Theory of Type Structure,” Systems and Inform. Sci., Syracuse University, 1974.
+  13. J. C. REYNOLDS, Syntactic control of interference, in “Proc. 5th ACM Symposium on Principles of Programming Languages, Tucson, Arizona, 1978,” pp. 39-46.
+  14. J. A. ROBINSON, A machine-oriented logic based on the resolution principle, J. Assoc. Comput. Much. 12 (1965), 23-41.
+  15. D. SCOTT, Lattice theoretic models for various type-free calculi, in “Proc. 4th International Congress for Logic, Methodology and Philosophy of Science, Bucharest, Rumania, 1972.”
+  16. D. SCOTT AND C. STRACHEY, Towards a mathematical semantics for computer languages, in “Proc. Symposium on Computers and Automata,” Vol. 21, Microwave Res. Inst. Symposia Series, Polytech. Inst. of Brooklyn, 1971.
+  17. D. SCOTT, Data types as lattices, SIAM j. Comput. 5 (1976), 522-587.
+  18. A. SHAMIR AND W. WADGE, Data types as objects, in “Proc. 4th ICALP Conference, Turku, Finland, 1977.”
+  19. C. STRACHEY, Fundamental concepts in programming languages, Notes for the International Summer School in Computer Programming, Copenhagen, 1967.
+  20. R. D. TENNENT, On a new approach to representation-independent data classes, Acta Inform. 8 (1977), 315-324.
+  21. B. WEGBREIT, The treatment of types in ELl, Comm. ACM 17 (1974), 251-264.
+  22. A. VAN WIJNGAARDEN ET AL., Revised report on the algorithmic language ALGOL 68, Acta Informutica 5 (1975), l-236.
+  23. R. A. WULF, R. L. LONDON, AND M. SHAW, “Abstraction and Verification in ALPHARD: Introduction to Language and Methodology,” ISIIRR-76-46, Univ. of California, 1976.

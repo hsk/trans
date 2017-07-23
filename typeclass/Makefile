@@ -1,0 +1,2 @@
+all:
+	meld type_reconstruction_for_type_classes.md type_reconstruction_for_type_classes.ja.md

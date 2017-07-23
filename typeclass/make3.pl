@@ -1,0 +1,167 @@
+/*
+
+type inference for parametric type classes
+
+構文
+
+識別子           X
+式               E ::= X
+                     | E0 $ E1
+                     | λX -> E
+                     | let X = E0 in E1
+                     | over X :: S in E
+                     | inst X :: S = E0 in E1
+型変数           A
+型コンストラクタ C
+型               T ::= (T -> T1) | A | C(T1, ..., Tn)
+述語型            P ::= (X :: T)->P | T
+型スキーム         S ::= ∀ A => S | P
+
+*/
+
+:- op(1, fx, [∀ , λ ]).
+:- op(699, yfx, [ $ ]).
+:- op(700, xfx, [ = ]).
+:- op(878, xfy, [ ∧  ]).
+:- op(879, xfy, [ ->, => ]).
+:- op(881, yfx, [ :: , : ]).
+:- op(882, fx, [let, over, inst ]).
+:- op(883, xfy, [ in ]).
+:- op(901, yfx, [ ⊢ , \ ]).
+:- op(1200, xfx, [ -- ]).
+term_expansion(A -- B, B :- A).
+:- set_prolog_flag(occurs_check,true).
+
+test(let a in b).
+test(let a in let b in c).
+test(inst a in inst a in b).
+
+example1(
+  over eq :: ∀ a => 'Eq'(a) in
+  inst eq :: 'Eq'('Int') = eqInt in
+  inst eq :: 'Eq'('Char') = eqChar in
+  inst eq :: (∀ a => ∀ b => (eq :: 'Eq'(a))->(eq :: 'Eq'(b))-> 'Eq'(a, b))
+           = (λp-> λq-> eq $ (fst $ p) $ (fst $ q) ∧  eq $ (snd $ p) $ (snd $ q)) in
+  eq $ (1, 'a') $ (2, 'b')
+).
+
+example2(
+  over numD :: ∀ a => 'Num'(a) in
+  inst numD :: 'Num'('Int') = (addInt, mulInt, negInt) in
+  inst numD :: 'Num'('Float') = (addFloat, mulFloat, negFloat) in
+  let '+' = fst $ numD in
+  let '*' = snd $ numD in
+  let negate = thd $ numD in
+  let square = λ x -> x * x in
+  square $ 3
+).
+
+assumps([
+  (eq : o(∀ a=> 'Eq'(a))),
+  (eq : i('Eq'('Int' ) \ eq('Eq'('Int' )))),
+  (eq : i('Eq'('Char') \ eq('Eq'('Char')))),
+  (eq : i(∀ a => ∀ b => (eq :: 'Eq'(a))->(eq :: 'Eq'(b))->'Eq'(a, b) \ eq(∀ a=> ∀ b=>(eq::'Eq'(a))->(eq::'Eq'(b))->'Eq'(a,b)) )),
+  (eq :: 'Eq'(a) \ eq('Eq'(a))),
+  (eq :: 'Eq'(b) \ eq('Eq'(b))),
+  (p :: (a, b) \ p),
+  (q :: (a, b) \ q)
+]).
+
+writeln(Γ ⊢ X :: S), fail
+--%----------------- (Dummy)
+Γ ⊢ X :: S \ _.
+
+% 多相型の変数
+atom(X), member(X : p((Γ1,S) \ X_), Γ), copy_term((Γ1,S), (Γ1,S_))
+--%-------------------------------- (TAUT)
+Γ ⊢ X :: S_ \ X_.
+
+% 単相型の変数
+format('tanso ~w\n',[X]),
+atom(X),
+format('tanso2 ~w\n',[X]),
+member((X : m(S \ X_)), Γ)
+--%-------------------------------- (TAUT)
+Γ ⊢ X :: S \ X_.
+
+% オーバーロードの変数
+atom(X),
+member(X : i(S \ X_), Γ)
+--%-------------------------------- (TAUT)
+Γ ⊢ X :: S \ X_.
+
+% 関数適用
+Γ ⊢ E :: (T1 -> T) \ E_,
+Γ ⊢ E1:: T1 \ E1_
+--%-------------------------------- (COMB)
+Γ ⊢ (E $ E1) :: T \ (E_ $ E1_).
+
+% ラムダ抽象
+[X:m(T1 \ X)|Γ] ⊢ E :: T \ E_
+--%-------------------------------- (ABS)
+Γ ⊢ (λ X->E) :: (T1 -> T) \ (λ X->E_).
+
+% let式
+Γ ⊢ E :: S \ E_,
+[X : p((Γ,S) \ X)|Γ] ⊢ E1 :: T \ E1_
+--%----------------------------------------------- (LET)
+Γ ⊢ (let X = E in E1) :: T \ (let X = E_ in E1_).
+
+/*
+% 述語を型に追加します(ラムダ式に変換します)
+
+member(X : ο(_), Γ),
+[X :: T \ XT|Γ] ⊢ E :: P \ E_
+--%----------------------------------------------- (PRED)
+Γ ⊢ E :: ((X :: T)->P) \ (λ XT-> E_).
+
+% 型から述語を削除します(関数適用に変換します)。
+
+member(X : ο(_), Γ),
+Γ ⊢ E :: ((X :: T)->P) \ E_,
+Γ ⊢ X :: T \ E1_
+--%---------------------------------- (REL)
+Γ ⊢ E :: P \ (E_ $ E1_).
+
+この２つの規則も左再帰があって使えない。
+基本的にオーバーロードに対しての規則で、インスタンス化と具体化と似た性質を持っているから、let と 変数の参照時かどこかで、それぞれ適用すればよいはず。
+
+*/
+
+[X : ο(S)|Γ] ⊢ E :: T \ E_
+--%---------------------------------- (OVER)
+Γ  ⊢ (over X :: S in E) :: T \ E_.
+
+member(X : ο(_), Γ),
+format(atom(XS_), '%~w', [_]),
+format("koko3 ~w\n",[XS_]),!,
+[X : i(S1 \ XS_) | Γ] ⊢ E1 :: S1 \ E1_,
+format("koko4 ~w\n",[XS_]),!,
+[X : i(S1 \ XS_) | Γ] ⊢ E  :: T  \ E_,
+format("koko5 ~w\n",[XS_])
+--%------------------------------------------------------ (INST)
+Γ ⊢ (inst X :: S1 = E1 in E) :: T \ (let XS_ = E1_ in E_).
+
+/*
+  OVERルールは、適切な `(::o)` バインディングを環境に追加し、INSTルールは適切な `(::i)` バインディングを環境に追加します。
+  仮定集合に対する妥当性条件は、オーバーロードされた識別子が有効な型でのみインスタンス化されることを保証します。
+
+  いずれの変換も `over` 式または `inst` 式を含んでいないので、オーバーロードは含まれていません。
+
+*/
+
+:- ([] ⊢ (λ x -> x) :: T \ E_), writeln(T \ E_).
+:- ([] ⊢ (let x = (λ x -> x) in x) :: T \ E_), writeln(T \ E_).
+:- ([] ⊢ (let id = (λ x -> x) in (id $ id)):: T \ E_), writeln(T \ E_).
+:- ([] ⊢ (let id = (λ x -> x) in (id $ id)):: T \ E_), writeln(T \ E_).
+
+%:- example1(E), ([] ⊢  E :: T \ E_), writeln(T \ E_).
+:- ([eqInt:m('Int'->'Int'->'Bool' \ eqInt),zero:m('Int' \ zero)] ⊢ eqInt $ zero $ zero :: T \ E_), writeln(T \ E_).
+
+:- ([] ⊢ (over eq :: ∀ a => 'Eq'(a) in (λ x -> x)) :: T \ E_), writeln(T \ E_).
+
+:- ([eqInt:m('Int'->'Int'->'Bool' \ eqInt)] ⊢ (over eq :: ∀ a => 'Eq'(a) in (inst eq :: 'Eq'('Int') = eqInt in (λ x -> x))) :: T \ E_), writeln(T \ E_).
+
+  
+
+:- halt.

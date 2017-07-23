@@ -26,10 +26,10 @@ Remy(2005) が述べたように、 System F の表現力と Hindley-Milner 型�
 残念なことに、 システム F の完全な型推論は決定不能です (Wells 1999)。
 したがって、 私たちの目標を達成するための唯一の方法は、 一流の多相型を使ったプログラミングを楽しい経験にするためにプログラマーに与えられた注釈で、 Hindley-Milner 型推論を強化することです。
 
-この分野にはかなりの研究がなされていますが (Peyton Jones et al. 2007; Remy 2005; Jones 1997; Le Botlan and Remy 2003; Le Botlan 2004; Odersky and Laufer 1996; Garrigue and Remy 1999a; Vytiniotis et al. 2006; Dijkstra 2005)、完全に満足できる解決策はまだ見出されていません。
+この分野にはかなりの研究がなされていますが (Peyton Jones et al. 2007; Remy 2005; Jones 1997; Le Botlan and Remy 2003; Le Botlan 2004; Odersky and Laufer 1996;Garrigue and Remy 1999a; Vytiniotis et al. 2006; Dijkstra 2005) 完全に満足できる解決策はまだ見出されていません。
 提案された多くのシステムは非常に複雑で、 アルゴリズム仕様などを使用したり、 通常のシステムFタイプを超える新しい型を導入したりします。
 
-この記事では、実際に少数の注釈を必要とするファーストクラスの多形性を持つ Hindley-Milner の単純で保守的な拡張である HMF を紹介します。
+この記事では、実際に少数の注釈を必要とするファーストクラスの多相性を持つ Hindley-Milner の単純で保守的な拡張である HMF を紹介します。
 シンプルさと表現力の組み合わせは、 HMF を実際に Hindley-Milner の非常に魅力的な代替物にすることができます。
 特に:
 

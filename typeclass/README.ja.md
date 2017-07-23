@@ -42,3 +42,16 @@
   フィリップ・ワドラー。 1988年2月24日ハスケル作業部会（fplangc）への手紙。
 
   [タイプクラスの元の提案。 決して Publish されていません。]
+
+## 6. [パラメトリック型クラス](parametric_typeclass.md)
+
+  カン・チェン、ポール・フダク、マーティン・オデスキー
+
+  syntax-directedな規則が記述されている論文。実装しやすいはずだけど、パラメータがちょっと変わってある論文
+
+## 7. [FPH: First-class Polymorphism for Haskell](fph.md)
+
+  syntax-directedな規則が記述されている論文。実装しやすそう。
+
+
+

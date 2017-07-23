@@ -1,6 +1,5 @@
 # A Theory of Type Polymorphism in Programming
 
-
     ROBIN MILNER
 
     Computer Science Department, University of Edinburgh, Edinburgh, Scotland
@@ -8,13 +7,20 @@
     Received October 10, 1977; revised April 19, 1978
     <!-- Edinburgh エジンバラ(イギリス北部、スコットランドの東の都市、スコットランドには西にグラスゴーがある。スコットランドはグラスゴーとエジンバラの２つの大きな都市がある) -->
 
+  ----
+
+  0022-0000/78/0173-0348$02.00/0
+  Copyright 8 1978 by Academic Press, Inc.
+  All rights of reproduction in any form reserved.
+
+  ----
+
   The aim of this work is largely a practical one.
   A widely employed style of programming, particularly in structure-processing languages which impose no discipline of types, entails defining procedures which work well on objects of a wide variety.
   We present a formal type discipline for such polymorphic procedures in the context of a simple programming language, and a compile time type-checking algorithm W which enforces the discipline.
   A Semantic Soundness Theorem (based on a formal semantics for the language) states that well-type programs cannot “go wrong” and a Syntactic Soundness Theorem states that if W accepts a program then it is well typed.
   We also discuss extending these results to richer languages; a type-checking algorithm based on W is in fact already implemented and working, for the metalanguage ML in the Edinburgh LCF system.
-  <!-- aim 目標 largely 主に practical 実用 widely 広く employed 採用された particularly 特に impose 課す descipline 規律
-  entails 必然的に variety バラエティー enforce 強制する -->
+  <!-- aim 目標 largely 主に practical 実用 widely 広く employed 採用された particularly 特に impose 課す descipline 規律 entails 必然的に variety バラエティー enforce 強制する -->
 
 ## 1. INTRODUCTION
 
@@ -31,13 +37,7 @@
   An example of the latter is the use of “-|” to denote both integer and real addition (in fact it may be further extended to denote complex addition, vector addition, etc.); this use of an identifier at several distinct types is often now called “overloading,” and we are not doncerned with it in this paper.
   <!-- early 早い probably おそらく denote 意味する -->
 
-<!-- 348 1/28 -->
-
-  0022-0000/78/0173-0348$02.00/0
-  Copyright 8 1978 by Academic Press, Inc.
-  All rights of reproduction in any form reserved.
-
-<!-- 349 2/28 -->
+  <!-- 349 2/28 -->
 
   In this paper then, we present and justify one method of gaining type flexibility, but also retaining a discipline which ensures robust programs.
   We have evidence that this work is not just a theoretical exercise; the polymorphic type discipline which we discuss here has been incorporated in the LCF metalanguage ML [2, 3], and has been in use for nearly 2 years.
@@ -76,7 +76,7 @@
   The remainder of the paper justifies the discipline using a very simple applicative language, Exp.
   The justification factors into two parts.
 
-<!-- 350 3/28 -->
+  <!-- 350 3/28 -->
 
   In Section 3 we define the notion of well typing (correct type assignment) and prove the Semantic Soundness Theorem, which says that a well-typed program is semantically free of type violation.
   If we were to give an operational definition of the language, this would imply that, for example, an integer is never added to a truth value or applied to an argument, and consequently need not carry its type around for run-time checking.
@@ -105,20 +105,19 @@
   We illustrate our notion of polymorphism by means of some simple examples.
   They are written in a fragment of ML which we hope is self-explanatory; this fragment is indeed no more than Landins ISWIM [7], and we refer the reader to Burge’s book [1] in  which he uses this style of programming almost exactly.
 
-<!-- 351 4/28 -->
+  <!-- 351 4/28 -->
 
   We use no imperative constructs here (assignments or jumps).
   The constructs
 
     let x = e in e’,
-    let f(x1,..., xn) = e in e’
+    let f (x1, ..., xn) = e in e’
 
   are used to give `x` the value of `e`, and to givef the value of the abstraction `λ(x1, ..., xn) .e`, throughout `e’`.
-  For recursive functions letrec is used in place of let, and when the part in `e’` is omitted we have a declaration.
+  For recursive functions `letrec` is used in place of `let`, and when the part in `e’` is omitted we have a declaration.
 
   The fully determined types (i.e., the monotypes) of ML are built from a set of basic types (`int`, `bool`, etc.) by the binary infixed operators `☓` (Cartesian product), `+` (disjoint sum) and `➙` (function type), and the unary postfixed operator list.
-  Polymorphic types (polytypes) are obtained by admitting type variables, which here are represented by
-  `α`, `β`, `γ` ... .
+  Polymorphic types (polytypes) are obtained by admitting type variables, which here are represented by `α`, `β`, `γ` ... .
   We represent arbitrary types by `ρ`, `σ`, `τ`.
   For this section we leave the meaning of types to the reader’s intuition; it is made precise in the next section.
 
@@ -136,11 +135,11 @@
   How is this type determined from the bare declaration of map ?
   First, the generic types (we discuss “generic” later) of the identifiers occurring free in the declaration are given by
 
-    null: α list ➙ bool,
-     nil: α list,
-      hd: α list ➙ α,
-      tl: α list ➙ a list,
-    cons: (α ☓ α list) ➙ α list,
+    null : α list ➙ bool,
+     nil : α list,
+      hd : α list ➙ α,
+      tl : α list ➙ a list,
+    cons : (α ☓ α list) ➙ α list,
 
   that is, they are polymorphic, because their types contain one or more type variables, and our rule is: To every occurrence of such an identifier is assigned a type which is a substitution instance (substituting types for type variables) of its generic type.
 
@@ -152,7 +151,7 @@
       σtl = τ4 list ➙ τ4 list,
     σcons = (τ5 ☓ τ5 list) ➙ τ5 list.
 
-<!-- 352 5/28 -->
+  <!-- 352 5/28 -->
 
   The other identifiers (`map`, `f`, `m`) each occur more than once, and our rules demand that each occurrence is assigned the same type. The rules also demand that the following equations are satisfied for some types `ρ1, ρ2 ,...`,
 
@@ -186,7 +185,7 @@
       tokl: tok list    (a variable),
     length: tok ➙ int,
     sqroot: int + real,     two obvious functions.
-    
+
   Then in the expression
 
     map(sqroot, map(length, tokl))
@@ -196,7 +195,7 @@
     ((tok ➙ int) ☓ tok list) ➙ int list,
     ((id ➙ real) ☓ int list) ➙ real list.
 
-<!-- 353 6/28 -->
+  <!-- 353 6/28 -->
 
   Similarly, if `null`, for example, had occurred twice in the definition of `map`, its types could have been different instances of
 
@@ -207,7 +206,7 @@
   In passing, note that the occurrences of map mentioned above can be regarded as uses of two separately declared (and monomorphic!) map functions, which differ only in that different types are explicitly provided for their arguments and results.
   As Gries and Gehani remark, the compiler could be given the task of generating these distinct declarations-or more accurately (since the programmer need not see the replication or even be aware of it), the task of generating different code for the body of the map function for use at distinct types.
   This would indeed be necessary in the above example if, for efficiency, token lists were implemented differently from integer lists (and the primitive polymorphic functions `hd`, `tl` etc., were correspondingly different).
-  We are concerned with a conceptual framework in which these map functions may all be regarded semantically as the same object; then the implementor is left with the freedom to implement as few or many variants as he wishes.
+  We are concerned with a conceptual framework in which these `map` functions may all be regarded semantically as the same object; then the implementor is left with the freedom to implement as few or many variants as he wishes.
 
   It is clear from our example that the rules of typing need to be carefully framed.
   We leave this task until the next section, but here we look at one more example to illustrate what happens when let or letrec is used locally.
@@ -236,7 +235,7 @@
 
     pair: α ➙ (β ➙ (α ☓ β))
 
-<!-- 354 7/28 -->
+  <!-- 354 7/28 -->
 
   such that `pair(a)(b) = (a, b)`.
   We could write
@@ -261,8 +260,7 @@
 
     let tagpair = λa . (pair(a) # pair(a))
 
-  and the reader may be able to obtain (by setting up some equations as in Example 1) the
-  expected type `(*)` in this case.
+  and the reader may be able to obtain (by setting up some equations as in Example 1) the expected type `(*)` in this case.
 
   The solution is fortunately straightforward.
   We decree that in instantiating the type of a variable bound by let or by letrec.
@@ -284,11 +282,11 @@
 
     let I = λx . x in I(I);    (λI . I(l))(λx. x).
 
-<!-- 355 8/28 -->
+  <!-- 355 8/28 -->
 
   A (partial) intuition for this is that a λ-abstraction may often occur without an argument; the second expression above contains a special (and rather unnecessary) use of abstraction, in that an explicit argument-`(λx . x)`-is present.
   Since the let construct (when translated) involves this restricted use of an abstraction, it is not unnatural that its rule for type assignment is less constrained.
-  A compiler could, of course, treat all explicit occurrences of `(λx . e’)e` in the less constrained manner.
+  A compiler could, of course, treat all explicit occurrences of `(λx . e’) e` in the less constrained manner.
 
   The treatment of types in the interaction between λ-bindings (i.e., formal parameter bindings) and let bindings is really the core of our approach.
   It gives a consistent treatment of the nonglobal declaration of a procedure which may contain, as a free variable, a formal parameter of an enclosing procedure.
@@ -317,7 +315,7 @@
 
   cannot be solved by unification (unless we allow infinite type expressions).
 
-<!-- 356 9/28 -->
+  <!-- 356 9/28 -->
 
   But by treating the equation as an isomorphism, and using two functions to convert back and forth between an abstract type and its representation, this difficulty is removed.
   We claim that this solution is in keeping with the notion of abstract type (see [8], for example).
@@ -361,11 +359,11 @@
     e ::= x | (e e’) | if e then e’ else e” |
           λx.e | fix x.e | let x = e in e’.
 
-  Here `(e e’)` means application, `fix x . e` stands for the least fixed point of `λx . e`, and the last clause binds `x` to the value of `e` throughout `e’`.
+  Here `(e e')` means application, `fix x . e` stands for the least fixed point of `λx . e`, and the last clause binds `x` to the value of `e` throughout `e’`.
   We often use `d`, `e`, `f`-with primes and suffixes-to range over `Exp`.
   Constants are omitted; we can imagine instead some standard bindings for certain identifiers in an initial environment.
 
-<!-- 357 10/28 -->
+  <!-- 357 10/28 -->
 
   We give an ordinary denotational semantics for `Exp`, in which we include a value “wrong,” which corresponds to the detection of a failure at run-time.
   In this small language, the only failures are the occurrence of a non-Boolean value as the condition of a conditional, and the occurrence of a nonfunctional value as the operator of an application.
@@ -404,7 +402,7 @@
       v | D == d      if v = d in V, for some d ∈ D,
             == ⊥D    otherwise.
 
-<!-- 358 11/28 -->
+  <!-- 358 11/28 -->
 
   The environment `η’ = η{v/x}` is identical with `η` except that `η’(x) = v`.
   The value `・` in `V (・ ∈ W)` is written “wrong.”
@@ -430,7 +428,9 @@
     ε[|let x = e1 in e2|]η = v1 ⁅ W ➙ wrong, ε[|e2|]η{v1/x}
                          where v1 = ε[|e1|]η.
 
-  Notes. (i) `Y` is the least fixed-point operation.
+#### Notes.
+
+  (i) `Y` is the least fixed-point operation.
   In many languages the `e` in `fix f ・ e` would be restricted to be an abstraction `λy . e’`, and then
 
     let f = fix f . (λy . e’)
@@ -440,13 +440,13 @@
     let rec f(y) = e’
 
   (ii) It is easy to see that `“let x = e1 in e2”` has the same meaning under `ε` as
-  `“(λx * e2)e1“`.
+  `“(λx . e2)e1“`.
   But part of our aim is a type discipline which admits certain expressions in the first form and yet rejects their translations into the second form; this is because λ-abstractions may in general occur without an explicit operand, and need more careful treatment.
 
   (iii) The semantics for`(e1 e2)` corresponds to call-by-value, since the test `“v2 ⁅ W”` ensures that the meaning of `(e1 e2)` is `⊥V` if the meaning of `e2` is `⊥V`.
   The omission of this test gives a call-by-name semantics (a similar test may be omitted in the semantics of the let construct), and the Semantic Soundness Theorem goes through equally in this case.
 
-<!-- 359 12/28 -->
+  <!-- 359 12/28 -->
 
 ## 3.3. Discussion of Types
 
@@ -487,7 +487,7 @@
 
   (ii) `v: μ ➙ ν` iff either `v = ⊥V`, or `v ⁅ F and (v | F) u : ν` whenever `u : μ`. 
 
-<!-- 360 13/28 -->
+  <!-- 360 13/28 -->
 
   It is clear then that many values have no type.
   Examples are
@@ -547,13 +547,13 @@
 
   as types-though we can see they “mean” if the bound variables are taken to range over monotypes-that we avoid the difficulties (and also some of the interest) of Reynolds [12] in his richer notion of type.
 
-<!-- 361 14/28 -->
+  <!-- 361 14/28 -->
 
   We need the following simple properties, which are immediate from our definitions.
 
-  PROPOSITION 1. If `v : σ` and `τ ⩽ σ` then `v : τ`.
+#### PROPOSITION 1. If `v : σ` and `τ ⩽ σ` then `v : τ`.
 
-  PROPOSITION 2. If `v : σ ➙ τ` and `v’ : σ`, then `(v | F)v’ : τ`.
+#### PROPOSITION 2. If `v : σ ➙ τ` and `v’ : σ`, then `(v | F)v’ : τ`.
 
   In each case, a property of monotypes is lifted to polytypes.
 
@@ -576,7 +576,7 @@
     (v)   P | (fix x . e) has sub-pe p . fix x | e,
     (vi)  p | (let x = e in e’) has sub-pe’s p | e and p . let x | e’.
 
-  たとえば、λy| （fy）にf =λx（xy）を代入する）にsub-peを（それ自体のほかに）
+  For example, `λy | (let f = λx . (xy) in (fy))` has sub-pe's (besides itself)
 
     λy | λx . (xy),      λy . λx | (xy),   λy . λx | x,      λy . λx | y,
     λy . let f | (fy),   λy . let f | f,   λy . let f | y
@@ -594,7 +594,7 @@
 
   We denote a typing of p | e by p~ | e~, or by p~ | eσ~ when we want to indicate the type σ assigned to e itself. 
 
-<!-- 362 15/28 -->
+  <!-- 362 15/28 -->
 
   In any p~ | e~, and any binding let xσ in either p~ or e~, a type variable in σ which does not occur in (the type of) any enclosing λyτ or fix yτ, binding is called a generic type variable for the binding let xσ.
   In the example above, β is generic, but α is not, for the binding let f_((α➙β)➙β).
@@ -621,7 +621,7 @@
   The proof of the next proposition is fairly straightforward, and we omit it.
   Note that a wt p~ | d~ is necessarily standard, by an easy structural induction.
 
-  PROPOSITION 3. p~ | d~ a is wt iff the following conditions hold:
+#### PROPOSITION 3. p~ | d~ a is wt iff the following conditions hold:
 
   (A) It is standard.
 
@@ -635,8 +635,8 @@
       (fix xρ . eσ~)_τ                   ρ = σ = τ,
       (let xρ = eρ~ in eσ'~)_τ           σ = τ. 
 
-<!-- 363 16/28 -->
- 
+  <!-- 363 16/28 -->
+
   The typing which we illustrated above therefore fails to be wt for only one reason:
   The subexpression `(f_((α➙γ)➙γ) yα)_γ` violates the first of conditions (C) in Proposition 3.
   Consider another example.
@@ -663,15 +663,17 @@
 ## 3.6. Substitutions
 
   A substitution `S` is a map from type variables to types.
-  S may be extended in a natural way to yield a map from types to types, from typed pe’s to typed pe’s, etc.
+  `S` may be extended in a natural way to yield a map from types to types, from typed pe’s to typed pe’s, etc.
   We say that S involves a type variable α if either Sα ≠ α, or for some β ≠ α, α ∈ Sβ.
   (α ∈ τ means α occurs in τ.)
   We need substitutions extensively in the second part of this paper, but for the present we need only one property relating substitutions and wt.
 
-  PROPOSITION　4.
+#### PROPOSITION　4.
+
   If S involves no generic variables of a wt p~ | d~, then S(p~ | d~) is also a wt.
 
-  Proof.
+#### Proof.
+
   We use Proposition 3. First, observe that the assumption on S yields that the generic variables for each binding in S(p~ | d~) are exactly those for the corresponding binding in p~ | d~.
   Since Sβ contains no generic variable when β is not generic, S(p~ | d~) is standard.
 
@@ -680,7 +682,7 @@
 
   Third, conditions (C) of Proposition 3 are easily verified for S(p~ | d~), using identities like S(u ➙ τ) = Sσ ➙ Sτ. ■
 
-<!-- 364 17/28 -->
+  <!-- 364 17/28 -->
 
 ## 3.7. Well-Typed Expressions Do Not Go Wrong
 
@@ -689,9 +691,11 @@
 
     η respects p~ iff, whenever let xρ or λxρ or fix xρ, is active in p~, η[|x|] : ρ.
 
-  THEOREM 1 (Semantic Soundness). If η respects p~ and p~ | dτ~ is well typed then ε[|d|]η : τ.
+#### THEOREM 1 (Semantic Soundness). If η respects p~ and p~ | dτ~ is well typed then ε[|d|]η : τ.
 
-  Proof. A fairly simple structural induction. Take the six cases for dτ~.
+#### Proof.
+
+  A fairly simple structural induction. Take the six cases for dτ~.
 
     (i) xτ.
     Then either λxτ or fix xτ is active in p~, and η[|x|] : τ, so ε[|x|]η : τ, or let xσ is active in p~, and η[|x|] : σ; but then T ⩽ σ, so ε[|x|]η = η[|x|] : τ, by Proposition I.
@@ -728,9 +732,9 @@
   (vi) (let x = eρ~ in eσ'~)_σ .
   Then p~ | eρ~ is wt, so we immediately have v : ρ, where v = ε[|e|]η. We require ε[|e'|]η(v/x) : σ.
 
-  Now p~ ・ let xρ | eσ'~ is also wt, and because v : ρ we have that η{σ/x} respects p~ ・ let xρ ; the rest follows by the induction hypothesis. 1 
+  Now p~ ・ let xρ | eσ'~ is also wt, and because v : ρ we have that η{σ/x} respects p~ ・ let xρ ; the rest follows by the induction hypothesis. ■
 
-<!-- 365 18/28 -->
+  <!-- 365 18/28 -->
 
   As a corollary, under the conditions of the theorem we have
 
@@ -755,7 +759,8 @@
   Indeed, the only feature of well typing which does not fall directly within the framework of unification is the condition that τ should be a generic instance of σ whenever xτ is bound by let xσ .
   The completeness (in some sense) of W should follow from the second part of the following proposition concerning unification, but we need only the first half for our proof that W is sound.
 
-  PROPOSITION 5 (Robinson).
+#### PROPOSITION 5 (Robinson).
+
   There is an algorithm U, taking a pair of expressions (over some alphabet of variables) and yielding a substitution, such that for any pair of expressions σ and τ
 
   (A) If U(σ, τ) succeeds, yielding U, then U unifies σ and τ (i.e., Uσ = Uτ).
@@ -770,7 +775,7 @@
   To state (and prove) W recursively however, prefixes containing all types of binding occur, and W in general needs to modify the nongeneric type variables in the prefix to meet constraints imposed on the program.
   We therefore make W return also a substitution T, indicating the necessary transformation. 
 
-<!-- 366 19/28 -->
+  <!-- 366 19/28 -->
 
   To be precise, we show that if W(p~, f) succeeds and returns (T, f~), then (T p~) | f~ is a wt.
 
@@ -780,7 +785,7 @@
 
 #### Algorithm W
 
-    W(p~,f) = (T,f~), where
+  `W(p~,f) = (T,f~)`, where
 
   (i) If f is x, then:
 
@@ -822,7 +827,7 @@
     let (S, eσ~) = W(R p~ . let xρ, e);
     then T = S R, and f~ = (let xSρ = S d~ in e~)_σ . ■
 
-<!-- 367 20/28 -->
+  <!-- 367 20/28 -->
 
 ## 4.2. The Soundness of W
 
@@ -843,12 +848,14 @@
 
   We need the following simple properties, whose proof we omit:
 
-  PROPOSITION 6.
+#### PROPOSITION 6.
 
     (A) Inv(RS) ⊆ Inv(R) ∪ Inv(S)
     (B) Vars(Sτ) ⊆ Vars(T) ∪ Inv(S).
 
-  THEOREM 2 (Syntactic Soundness). Let p~ be a standard prefix, and p | f a (closed) pe.
+#### THEOREM 2 (Syntactic Soundness).
+
+  Let `p~` be a standard prefix, and `p | f a (closed) pe`.
   Then, if W(p~,f) = (T,fτ~),
 
     (A) T p~ | f~ is wt,
@@ -861,7 +868,8 @@
 
   where New is the set of new type variables used by W.
 
-  Proof.
+#### Proof.
+
   By induction on the structure of f, using the recursive definition of wt.
   We omit the cases of conditional and fix expressions, since nothing new arises there, and we treat the easier of the other cases first
 
@@ -873,7 +881,7 @@
 
   (iv) f is (λx . d). Let (R, dρ~) = W(p~ . λxβ, d), using new variables New1, say. 
 
-<!-- 368 21/28 -->
+  <!-- 368 21/28 -->
 
   By induction, R(p~ ・ λxβ) | dρ~, is wt, so for (A) f~ = R p~ | (λxRβ . d~)_(Rβ➙ρ) is wt (defn of wt).
   Also by induction,
@@ -927,7 +935,7 @@
 
   is wt; but this is just T p~ | f~, so we have proved (A).
 
-<!-- 369 22/28 -->
+  <!-- 369 22/28 -->
 
   For (B), we have
 
@@ -979,7 +987,7 @@
   It was formulated to aid the proof of soundness.
   We now present a simpler algorithm I which simulates W in a precise sense. 
 
-<!-- 370 23/28 -->
+  <!-- 370 23/28 -->
 
   I differs from W in two ways.
   First, we adopt an idea familiar in the literature on resolution-based theorem-proving systems, in which substitutions are composed, but only applied when it is essential to do so.
@@ -1009,7 +1017,7 @@
   Assuming an initial idempotent `E`, `I` is given a typed prefix `p~` and an expression `f` such that `E p~` is standard and `p | f` is a `pe` (i.e., all free identifiers in `f` are bound in `p`).
   Here is the algorithm:
 
-  Algorithm I
+#### Algorithm I
 
     I(p~, f) = τ, where
 
@@ -1024,7 +1032,7 @@
     UNIFY (ρ, σ ➙ β); (β new)
     τ := β
 
-<!-- 371 24/28 -->
+  <!-- 371 24/28 -->
 
   (iii) If f is (if d then e else e’), then:
 
@@ -1050,7 +1058,7 @@
   What is the simulation relation between I and W?
   It is simply expressed by the following proposition, whose proof we omit, since it is an easy structural induction involving few of the subtleties which we encountered in the soundness theorem.
 
-  PROPOSITION 7. Let p | f be a pe, E be idempotent, and E p~; be standard.
+#### PROPOSITION 7. Let p | f be a pe, E be idempotent, and E p~; be standard.
   Then I(p~, f) succeeds (producing τ’ and a new value E’ for E) iff W(E p~, f) succeeds (producing T and fT), and moreover if both succeed
 
     (A) E’ = TE,
@@ -1070,13 +1078,13 @@
   In fact, in the extended version of I implemented for ML, which is written in LISP, INST itself is represented by a property (in the LISP sense) INSTANCE of type variables.
   Each type variable α has ρ as its INSTANCE property value, if (α, ρ) ∈ INST for some ρ; otherwise the property value is NIL. 
 
-<!-- 372 25/28 -->
+  <!-- 372 25/28 -->
 
 ## 5. TYPES IN EXTENDED LANGUAGES
 
   We now consider some extensions of our language, and how our results may be strengthened to apply to them.
 
-  (1) As we said in the introduction, the addition of extra (primitive) type operators such as ☓ (Cartesian product), + (disjoint sum) and list (list forming), causes no difficulty.
+#### (1) As we said in the introduction, the addition of extra (primitive) type operators such as ☓ (Cartesian product), + (disjoint sum) and list (list forming), causes no difficulty.
   Together with ➙, these are the primitive type operators in the language ML.
   For ☓ one has the standard polymorphic functions
 
@@ -1096,7 +1104,7 @@
 
   With appropriate adjustment to the semantic domains, the Semantic Soundness Theorem extends naturally; the Syntactic Soundness Theorem goes through virtually without change.
 
-  (2) Next, we consider assignable variables and assignments.
+#### (2) Next, we consider assignable variables and assignments.
   One way (used in ML) of adding these is to allow the assignment expression form “x := e” (whose value is the value of e), and the expression form “letref x = e in e’” to declare an assignable variable, initialized to the value of e.
   The first effect of these additions is a major change in the semantic domains, since now expressions may have side effects.
   Although we believe that a Semantic Soundness Theorem may be proved, it appears to be a cumbersome task.
@@ -1113,7 +1121,7 @@
 
   (i) (c) If letref xτ, is active in a standard prefix p~, then p~ | xτ, is wt. (Thus, all letref-bound occurrences of x must have the same type). 
 
-<!-- 373 26/28 -->
+  <!-- 373 26/28 -->
 
   (vii) p~ | (xρ := eσ~)_τ is wt iff p~ | e~ is wt, and letref xρ is active in p~, and ρ = σ = τ.
 
@@ -1146,7 +1154,7 @@
   But how to combine this with the rather useful properties of own variables is, as far as I know, an open problem in language design, and a good solution would be a valuable step forward.
   For a recent promising attempt to control side effects see Reynolds [13].
 
-  (3) To complete the list of nontrivial extensions which we have included in ML, consider the declaration (possibly recursive) of a new type operator in terms of old ones.
+#### (3) To complete the list of nontrivial extensions which we have included in ML, consider the declaration (possibly recursive) of a new type operator in terms of old ones.
   Such a declaration may have nonglobal scope.
   If it is also accompanied by the declaration of a set of functions over the new type operator, and the explicit definition of the type operator is only available in defining the set of functions (not within the whole scope of the new type operator), one has a version of what is currently called abstract type.
   In ML, we would define the class of binary trees whose tips are labeled by objects of arbitrary type as follows, using the type variable α to stand for the type of tip labels:
@@ -1156,7 +1164,7 @@
            and  maketree(t, t’) = ...
            and  tiptree(a) = ... 
 
-<!-- 374 27/28 -->
+  <!-- 374 27/28 -->
 
   in which only the omitted defining expressions are given access to the representation of bitrees.
   The defined functions are polymorphic, with generic types
@@ -1166,7 +1174,7 @@
   For full details of this construct, see [2]; we owe the construct partly to Lockwood Morris and to discussion with Jerry Schwarz.
   In this case the wt rules are also rather easy; we have not checked syntactic and semantic soundness, but suspect that there should be no great difficulty.
 
-  (4) Two features which contribute a kind of polymorphism have been completely ignored so far.
+#### (4) Two features which contribute a kind of polymorphism have been completely ignored so far.
   The first is coercions. The expression x := 42, where x is a real assignable variable, is ill typed for us.
   However, there is no barrier to having the type checker report such instances of ill typing and allowing the compiler to receive the report and insert a coercion to rectify it.
 
@@ -1192,9 +1200,9 @@
   2. M. GORDON, R. MILNER, AND C. WADSWORTH, “Edinburgh LCF,” CSR-11-77, Computer Science Dept., Edinburgh University, 1977.
   3. M. GORDON, R. MILNER, L. MORRIS, M. NEWEY, AND C. WADSWORTH, A metalanguage for interactive proof in LCF, in “Proc. 5th Annual ACM SIGACT-SIGPLAN Symposium on Principles of Programming Languages, Tucson, Arizona, 1978.” 
 
-<!-- 375 28/28 -->
+  <!-- 375 28/28 -->
 
-  4. D. GRIES AND N. GEHANI, Some ideas on data type in high-level lcnguages, Comm. ACM. 20 (1977), 414-420.
+  4. D. GRIES AND N. GEHANI, Some ideas on data type in high-level languages, Comm. ACM. 20 (1977), 414-420.
   5. R. HINDLEY, The principal type-scheme of an object in combinatory logic, %zx~. Amer. &ikth. Sot. 146 (1969), 29-60.
   6. B. W. LAMPSON, J. J. HORNING, R. L. LONDON, J. G. MITCHELL, AND G. L. POPEK, Report on the programming language Euclid, SIGPLAN Notices (ACM) 12, 2 (1977).
   7. P. J. LANDIN, The next 700 programming languages, Comm. ACM 9 (1966), 157-164.
