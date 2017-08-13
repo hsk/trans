@@ -16,10 +16,6 @@
 
   ----
 
-  1 We use Haskell syntax, and will often prefix examples with type signatures for any functions used in the fragment.
-
-  2 The example is equivalent to `(runST (foo 4))`.
-
   Permission to make digital or hard copies of all or part of this work for personal or classroom use is granted without fee provided that copies are not made or distributed for profit or commercial advantage and that copies bear this notice and the full citation on the first page.
   To copy otherwise, to republish, to post on servers or to redistribute to lists, requires prior specific permission and/or a fee.
 
@@ -35,8 +31,10 @@
   Supporting “firstclass” polymorphism, by lifting those restrictions, is obviously desirable, but it is hard to achieve this without sacrificing type inference.
   We present a new type system for higher-rank and impredicative polymorphism that improves on earlier proposals: it is an extension of Damas-Milner; it relies only on System F types; it has a simple, declarative specification; it is robust to program transformations; and it enjoys a complete and decidable type inference algorithm.
 
+  <!--
   restrictions 制限 obviously 明らかに desirable 望ましい achieve 達成する sacrificing 犠牲にする impredicative 批判的な
   improves 改善する earlier proposals 以前の提案 relies on F  Fに依存 robust 堅牢 decidable 決定可能な
+  -->
 
   Categories and Subject Descriptors D.3.3 [PROGRAMMING LANGUAGES]: Language Constructs and Features—abstract data types, polymorphism General Terms Languages, Theory
 
@@ -44,7 +42,7 @@
 
 ## 1. Introduction
 
-  Consider this program fragment `1`:
+  Consider this program fragment 1:
 
       ($) :: forall a b. (a -> b) -> a -> b
     runST :: forall r. (forall s. ST s r) -> r
@@ -52,12 +50,21 @@
 
     ...(runST $ foo 4)...
 
-  Here `($)`, whose type is given, is the apply combinator, often used by Haskell programmers to avoid writing parentheses.2
+  Here `($)`, whose type is given, is the apply combinator, often used by Haskell programmers to avoid writing parentheses. 2
+
+  ----
+
+  1 We use Haskell syntax, and will often prefix examples with type signatures for any functions used in the fragment.
+
+  2 The example is equivalent to `(runST (foo 4))`.
+
+  ----
+
   From a programmer’s point of view there is nothing very complicated about this program, yet it goes well beyond the traditional DamasMilner type system (Damas and Milner 1982), by using two distinct forms of first-class polymorphism:
 
   - `runST` takes an argument of polymorphic type—`runST` has a higher-rank type.
   
-  - The quantified type variable a in the type of `($)` is instantiated to the polymorphic type `∀s.ST` s `Int`.
+  - The quantified type variable a in the type of `($)` is instantiated to the polymorphic type `∀s.ST s Int`.
 
     Allowing the instantiation of quantified type variables with polytypes is called impredicative polymorphism.
 
@@ -68,17 +75,18 @@
   We give a detailed comparison in Section 7, but meanwhile the distinctive feature of our system is this: rather than maximizing expressiveness or minimizing implementation complexity, we focus on programmer accessibility by minimizing the complexity of the specification. More specifically, we make the following contributions:
 
   - We describe and formalize a new type system, FPH, based on System F, capable of expressing impredicative polymorphism (Section 3).
-  We show that FPH can express all of System F (Section 3.4).
+    We show that FPH can express all of System F (Section 3.4).
 
   - FPH is unusually small and simple for its expressive power.
-  It can be explained informally in a few paragraphs (Section 2), and in particular has the following delightfully simple rule for when a type annotation is required:
-  a type annotation may be required only for a let-binding or λ-abstraction that has a non-Damas-Milner type (Section 2.2).
-  For example, a nested function call, such as `(f (g x) (h (t y)))`, may involve lots of impredicative instantiation, but never requires a type annotation.
+    It can be explained informally in a few paragraphs (Section 2), and in particular has the following delightfully simple rule for when a type annotation is required:
+    a type annotation may be required only for a let-binding or λ-abstraction that has a non-Damas-Milner type (Section 2.2).
+    For example, a nested function call, such as `(f (g x) (h (t y)))`, may involve lots of impredicative instantiation, but never requires a type annotation.
 
   - We give a syntax-directed variant of the type system (Section 4), and prove it sound and complete with respect to the earlier declarative rules.
   
   - We have a sound and complete inference algorithm for FPH, which we sketch in Section 5.
-  Internally, this implementation uses type schemes with bounded quantification in the style of MLF (Le Botlan and Remy 2003), but this internal sophistication is never shown to the programmer; it is simply the mechanism used by the implementation to support the simple declarative specification.
+    Internally, this implementation uses type schemes with bounded quantification in the style of MLF (Le Botlan and Remy 2003), but this internal sophistication is never shown to the programmer; it is simply the mechanism used by the implementation to support the simple declarative specification.
+
 
   Our system is fully compatible with the standard idea of propagating annotations via a so-called bidirectional type system.
   We discuss this and other design variants in Section 6.
@@ -93,18 +101,20 @@
 
   Both forms of first-class polymorphism (higher-rank and impredicative) result in a lack of principal types for expressions: a single expression may be typeable with two or more incomparable types, where neither is more general than the other.
   As a consequence, type inference cannot always choose a single type and use it throughout the scope of a `let`-bound definition.
-  
-  1. With higher-rank polymorphism, functions that accept polymorphic arguments may be typed with two or more incomparable System F types. For example, consider the function `f?` below:
 
-    f get = (get 3, get True)
+  1. With higher-rank polymorphism, functions that accept polymorphic arguments may be typed with two or more incomparable System F types.
+    For example, consider the function `f?` below:
 
-  It is clear that get must be assigned a polymorphic type in the environment, since we must be able to apply it to both `3` and True.
-  But what is the exact type of `f?` For example, both `(∀a.a → a) → (Int, Bool)`, and `(∀a.a → Int) → (Int, Int)` are valid types for `f`, but there exists no principal type for `f` such that all others follows from it by a sequence of instantiations and generalizations.
-  Previous work has suggested that the programmer should be required to supply a type annotation for any function argument that must be polymorphic, so that the type of `f` is no longer ambiguous—the above code would fail to type check, but the annotation below would fix the problem:
+      f get = (get 3, get True)
 
-    f (get :: forall a. a->a) = (get 3, get True)
+    It is clear that get must be assigned a polymorphic type in the environment, since we must be able to apply it to both `3` and True.
+    But what is the exact type of `f?` For example, both `(∀a.a → a) → (Int, Bool)`, and `(∀a.a → Int) → (Int, Int)` are valid types for `f`, but there exists no principal type for `f` such that all others follows from it by a sequence of instantiations and generalizations.
+    Previous work has suggested that the programmer should be required to supply a type annotation for any function argument that must be polymorphic, so that the type of `f` is no longer ambiguous—the above code would fail to type check, but the annotation below would fix the problem:
 
-  2. The presence of impredicative instantiation of type variables leads to a second case of incomparable types. For example:
+      f (get :: forall a. a->a) = (get 3, get True)
+
+  2. The presence of impredicative instantiation of type variables leads to a second case of incomparable types.
+    For example:
 
       choose :: forall a. a -> a -> a
       id :: forall b. b -> b
@@ -120,13 +130,15 @@
 
       g = choose id :: (forall b.b->b) -> (forall b.b->b)
 
+
   The focus of this paper is on impredicativity (item (2) above), since earlier work has essentially solved the question of higher-rank types (Peyton Jones et al. 2007).
   The core type system we present in Section 3 therefore does not support λ-abstractions with higherrank types, focusing exclusively on impredicative instantiations.
   A practical system must accommodate higher-rank types as well, and we describe how previous work can be adapted to our setting in Sections 3.4 and 6.1.
 
 ## 2.1 Marking impredicative instantiation
 
-  We present a flavor of FPH in this section, and use several examples to motivate its design principles. Consider this program fragment:
+  We present a flavor of FPH in this section, and use several examples to motivate its design principles.
+  Consider this program fragment:
 
     str :: [Char]
     ids :: [forall a. a->a]
@@ -137,7 +149,7 @@
   First consider type inference for `l1`.
   The polymorphic length returns the `length` of its argument list, where the type `[b]` means “list of `b`”.
   In the standard Damas-Milner type system, one instantiates the type of `length` with `Char`, so that the occurrence of `length` has type `[Char] → Int`, which marries up correctly with `length`’s argument, `str`.
-  In Damas-Milner, a polymorphic function can only be instantiated with monotypes, where a monotype τ is a type containing no quantification (we use `[·]` for lists):
+  In Damas-Milner, a polymorphic function can only be instantiated with monotypes, where a monotype `τ` is a type containing no quantification (we use `[·]` for lists):
 
     τ ::= a | τ1 → τ2 | [τ]
 
@@ -176,8 +188,7 @@
 
     g = choose id :: (forall b.b->b) -> (forall b.b->b)
 
-  Such type annotations use Idea 2—when typing an annotated expression `e::σ`, ignore boxes on e’s type when comparing with
-  `σ` (which is box-free, being a programmer annotation).
+  Such type annotations use Idea 2—when typing an annotated expression `e::σ`, ignore boxes on e’s type when comparing with `σ` (which is box-free, being a programmer annotation).
   Now we may instantiate choose with `~[∀a.a → a]`, because the type annotation is compatible with the type of `(choose id)`, `~[∀a.a → a] → ~[∀a.a → a]`.
 
 ## 2.2 Expressive power
@@ -208,8 +219,7 @@
     g = f (choose id) ids
 
   In particular `choose id` gets type `~[∀a.a → a] → ~[∀a.a → a]`.
-  However, `f`’s arguments types can be married up using Idea 2, and its result type (ignoring boxes) is a Damas-Milner type
-  (`∀a.a → a`), and hence no annotation is required for `g`.
+  However, `f`’s arguments types can be married up using Idea 2, and its result type (ignoring boxes) is a Damas-Milner type (`∀a.a → a`), and hence no annotation is required for `g`.
 
   Since the Annotation Guideline does not require the programmer to think about boxes at all, why does our specification use boxes?
   Because the Annotation Guideline is conservative: it guarantees to make the program typeable, but it adds more annotations than are necessary.
@@ -219,7 +229,8 @@
     g’ = f’ ids
 
   Notice that the rich result type `[forall b. b -> b]` is non-boxy, and hence no annotation is required for `g’`.
-  In general, even if the type of a `let`-bound expression is rich, if that type does not result from impredicative instantiation (which is the common case), then no annotations are required. Boxes precisely specify what “that type does not result from impredicative instantiation” means.
+  In general, even if the type of a `let`-bound expression is rich, if that type does not result from impredicative instantiation (which is the common case), then no annotations are required.
+  Boxes precisely specify what “that type does not result from impredicative instantiation” means.
   Nevertheless, a box-free specification is an attractive alternative design, as we discuss in Section 6.3.
 
     Types
@@ -247,8 +258,7 @@
 
   Here `f` is a function that accepts an element and a list and returns a list (for example, `f` could be `cons`).
   Definition `h1` is not typeable in FPH.
-  We can attempt to instantiate `f` with `~[∀a.a → a]`, but then the right hand side of `h1` has type `[ ~[∀a.a → a] ]`, and that type
-  cannot enter the environment.
+  We can attempt to instantiate `f` with `~[∀a.a → a]`, but then the right hand side of `h1` has type `[~[∀a.a → a]]`, and that type cannot enter the environment.
   The problem can of course be fixed by adding a type annotation, as `h2` shows.
 
   You may think that it is silly to require a type annotation in `h2`; after all, `h1` manifestly has only one possible type!
@@ -285,8 +295,9 @@
   This compatibility check is performed by stripping the boxes from `σ1′` and `σ3′`, then comparing for equality.
   The notation `⌊σ′⌋` denotes the non-boxy type obtained by discarding the boxes in `σ′`:
 
-  **Definition 3.1 (Stripping)** We define the strip function `⌊·⌋` on boxy
-  types as follows:
+#### Definition 3.1 (Stripping)
+
+  We define the strip function `⌊·⌋` on boxy types as follows:
 
     ⌊a⌋ = a
     ⌊~[σ]⌋ = σ
@@ -316,7 +327,9 @@
   However, we need to be a little careful with substitution in INST: since `ρ′` may contain `~(a)` inside boxes, a naive substitution might leave us with nested boxes, which are syntactically ill-formed.
   Hence, we define a form of substitution that preserves the boxy structure of its argument.
 
-  **Definition 3.2 (Monomorphic substitutions)** We use letter `ϕ` for monomorphic substitutions, that is, `ϕ` denotes finite maps of the form `[~(a |→ τ′)]`.
+#### Definition 3.2 (Monomorphic substitutions)
+
+  We use letter `ϕ` for monomorphic substitutions, that is, `ϕ` denotes finite maps of the form `[~(a |→ τ′)]`.
   We let `ftv(ϕ)` be the set of the free variables in the range and domain of `ϕ`.
   We define the operation of applying `ϕ` to a type `σ′` as follows:
 
@@ -331,7 +344,7 @@
 
   The final rule, SUBS, is tricky but important. Consider below:
 
-  **Example 3.1 (Boxy instantiation)**
+#### Example 3.1 (Boxy instantiation)
 
     head :: forall a. [a] -> a
     h = head ids 3
@@ -438,7 +451,7 @@
   is typeable.
   More generally, we have the following lemma.
 
-  **Lemma 3.2** If `Γ ⊢ e : ~[∀~(a).τ]` then `Γ ⊢ e : ∀~(a).τ`.
+#### Lemma 3.2 If `Γ ⊢ e : ~[∀~(a).τ]` then `Γ ⊢ e : ∀~(a).τ`.
 
   Proof: by rule BI we can instantiate `∀~(a).τ` with (monomorphic) fresh `~(a)`, use rule TBOX to strip boxes, and finally use rule GEN.
 
@@ -537,7 +550,9 @@
 
   The following theorem captures the essence of the type-directed translation.
 
-  Theorem 3.6 If `Γ ⊢F e : σ ↝ e1` then `Γ ⊢ e1 : σ′` for some `σ′` such that `⌊σ′⌋ = σ`.
+## Theorem 3.6
+
+  If `Γ ⊢F e : σ ↝ e1` then `Γ ⊢ e1 : σ′` for some `σ′` such that `⌊σ′⌋ = σ`.
 
   In practice, however, we do not recommend adding annotated λ-abstractions as a clunky new syntactic construct.
   Instead, with a bidirectional typing system we can get the same benefits (and more besides) from ordinary type annotations `e::σ`, as we sketch in Section 6.1.
@@ -1006,10 +1021,11 @@
   Additionally, the rules of Rigid MLF require that when instantiating the types of
 
 |            | Specification                          | Implementation  | Placement of annotations / typeable programs |
+| --- | --- | --- | --- |
 | HMF        | Simple, “minimality” restrictions      | Simple          | Annotations may be needed on λ-abstractions with rich types and on arguments that must be kept polymorphic |
 | MLF        | Heavyweight, declarative               | Heavyweight     | Precise, annotations only required for usage of arguments at two or more types |
 | Boxy Types | Complex, syntax-directed, dark corners | Simple          | No clear guidelines, not clear what fragment of System F is typed without annotations |
-| HML        | Constraint-based, declarative          | Heavyweight     | Precise, annotations on polymorphic function arguments
+| HML        | Constraint-based, declarative          | Heavyweight     | Precise, annotations on polymorphic function arguments |
 | FPH        | Simple, declarative                    | Heavyweight     | Precise, annotations on let-bindings and λ-abstractions with rich types, types all applicative System F terms and more without annotations |
 
   Figure 6: Quick summary of most relevant related works
@@ -1041,7 +1057,9 @@
 
   Although some programs are typeable with Boxy Types and are not typeable (without annotation) in FPH, and vice versa, we believe that the simpler specification of FPH is a dramatic improvement.
 
-  HMF Leijen’s HMF system (Leijen 2008a), which is a companion paper in this proceedings, is yet another interesting point in the design space.
+#### HMF
+
+  Leijen’s HMF system (Leijen 2008a), which is a companion paper in this proceedings, is yet another interesting point in the design space.
   The HMF system enjoys a particularly simple inference algorithm (a variant of Algorithm W), and one that is certainly simpler than FPH.
   In exchange, the typing rules are somewhat unconventional in form, and it is somewhat harder to predict exactly where a type annotation is required and where none is needed.
 

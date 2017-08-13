@@ -1,11 +1,11 @@
 # プログラミングにおける多相型の理論 - A Theory of Type Polymorphism in Programming
 
-    ROBIN MILNER
+  ROBIN MILNER
 
-    Computer Science Department, University of Edinburgh, Edinburgh, Scotland
+  Computer Science Department, University of Edinburgh, Edinburgh, Scotland
 
-    Received October 10, 1977; revised April 19, 1978
-    <!-- Edinburgh エジンバラ(イギリス北部、スコットランドの東の都市、スコットランドには西にグラスゴーがある。スコットランドはグラスゴーとエジンバラの２つの大きな都市がある) -->
+  Received October 10, 1977; revised April 19, 1978
+  <!-- Edinburgh エジンバラ(イギリス北部、スコットランドの東の都市、スコットランドには西にグラスゴーがある。スコットランドはグラスゴーとエジンバラの２つの大きな都市がある) -->
 
   ----
 
